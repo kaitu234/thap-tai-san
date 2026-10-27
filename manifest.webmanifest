@@ -1,0 +1,17 @@
+{
+  "name": "Tháp Tài Sản",
+  "short_name": "Tháp Tài Sản",
+  "description": "Sổ tài sản cá nhân đọc từ Google Sheet",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F3ECE2",
+  "theme_color": "#3A2719",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
