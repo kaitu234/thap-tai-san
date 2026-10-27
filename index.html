@@ -17,44 +17,48 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: app di động kiểu ví tiền của quán cà phê. Thanh tab dưới đáy trên điện thoại, tab trên cùng ở máy tính.
-   Thẻ trắng ngà trên nền be, số tiền in chữ hẹp như bảng giá, mỗi tài sản có huy hiệu ngân hàng/ví. */
+/* Layout: app di động theo hệ nhận diện Kai Café (KaiDashboard): nền be, chữ nâu, thẻ trắng viền mảnh bo 8px,
+   bảng có dòng tiêu đề nâu, số liệu chữ hẹp. Tăng = xanh (--good), giảm = đỏ (--bad); màu tầng không dùng xanh lá/đỏ để khỏi lẫn. */
 :root{
-  --bg:#F3ECE2; --surface:#FFFDF9; --surface2:#F1E7D9; --ink:#2E2118; --muted:#7A6654; --line:#E3D6C4;
-  --accent:#6B4429; --accent-ink:#FFFDF9; --accent-soft:#EADBC8;
-  --hero:#3A2719; --hero2:#5A3B25; --hero-ink:#FBF4EA; --hero-mute:#D6C2A8;
-  --good:#2F7A4A; --warn:#A06A0C; --bad:#B23A2B; --info:#2F6390;
-  --good-soft:#E2F0E5; --warn-soft:#F7EBD2; --bad-soft:#F6E0DB; --info-soft:#E0EAF4;
-  --c1:#A0522D; --c2:#C8902A; --c3:#3F8F5A; --c4:#7B4FA8; --c0:#9C8E80;
-  --b-tcb:#E0262E; --b-seab:#E5531A; --b-zalo:#0A68FE; --b-bhxh:#1D5FA8; --b-stock:#3F8F5A; --b-biz:#6B4429; --b-gear:#5B6B7A; --b-loan:#8A5A9E;
-  --shadow:0 1px 2px rgba(58,39,25,.06),0 6px 20px rgba(58,39,25,.07);
+  --bg:#F6EFE3; --surface:#FFFFFF; --surface2:#F6EFE3; --ink:#5E3B25; --muted:#8A6B55; --line:#E2D2BA;
+  --accent:#5E3B25; --accent-ink:#FFFFFF; --accent-soft:#EBDCC3; --caramel:#B7793A;
+  --hero:#4A2E1C; --hero2:#6E4A30; --hero-ink:#FFFFFF; --hero-mute:#EBDCC3;
+  --good:#2F7A4B; --warn:#9A6A10; --bad:#B23A2E; --info:#2A6FB8;
+  --good-soft:#DDEFE2; --warn-soft:#F6E8C7; --bad-soft:#F7DEDA; --info-soft:#DCEAF8;
+  --up-hero:#BFE8CB; --dn-hero:#FFC2B8;
+  /* màu tầng (đã chạy validate_palette dataviz trên nền #FFFFFF / #241911) */
+  --c1:#2a78d6; --c2:#B7793A; --c3:#7B4FA8; --c4:#e87ba4; --c0:#B9A58F;
+  --b-tcb:#E0262E; --b-seab:#E5531A; --b-zalo:#0A68FE; --b-bhxh:#1D5FA8; --b-stock:#2a78d6; --b-biz:#5E3B25; --b-gear:#5B6B7A; --b-loan:#8A5A9E;
+  --shadow:0 1px 2px rgba(94,59,37,.05),0 6px 18px rgba(94,59,37,.06);
   --on-brand:#FFFFFF;
-  --h1:#CC4E52; --h2:#B48C1E; --h3:#2FA37E; --h4:#A27AE0;
-  --b-bank:#6B4429; --b-momo:#A50064; --b-vcb:#0B7A3E; --b-bidv:#1A5CA8; --b-vpb:#0E8A4F; --b-mb:#1E3A8A; --b-acb:#1F4FA0;
+  --h1:#3987e5; --h2:#D49B5C; --h3:#A27AE0; --h4:#d55181;
+  --b-bank:#5E3B25; --b-momo:#A50064; --b-vcb:#0B7A3E; --b-bidv:#1A5CA8; --b-vpb:#0E8A4F; --b-mb:#1E3A8A; --b-acb:#1F4FA0;
   --b-tpb:#5B2C83; --b-vib:#0F5AA6; --b-agri:#A3262E; --b-ctg:#0A58A8; --b-spay:#EE4D2D; --b-vtp:#D61F2C;
-  --f-disp:'Barlow Condensed','Be Vietnam Pro',system-ui,sans-serif;
-  --f-body:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',sans-serif;
-  --r:16px; --nav-h:64px;
+  --f-disp:'Barlow Condensed','Arial Narrow','Be Vietnam Pro',sans-serif;
+  --f-body:'Be Vietnam Pro','Segoe UI',system-ui,-apple-system,sans-serif;
+  --r:8px; --nav-h:64px;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#16110D; --surface:#211912; --surface2:#2B2119; --ink:#F4EADC; --muted:#B3A08A; --line:#3A2E24;
-    --accent:#E0B98A; --accent-ink:#1E150E; --accent-soft:#3A2C20;
-    --hero:#2A1E15; --hero2:#3E2C1E; --hero-ink:#FBF4EA; --hero-mute:#C9B497;
-    --good:#7CC892; --warn:#E4B456; --bad:#EE8A78; --info:#8DB8E8;
-    --good-soft:#1F3326; --warn-soft:#3A2D14; --bad-soft:#3D1F1A; --info-soft:#1C2A3A;
-    --c1:#CC4E52; --c2:#B48C1E; --c3:#2FA37E; --c4:#A27AE0; --c0:#7D7064;
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark;
+    --bg:#17100B; --surface:#241911; --surface2:#2C2016; --ink:#F2E6D5; --muted:#B39E89; --line:#3D2E22;
+    --accent:#E3C39A; --accent-ink:#241911; --accent-soft:#3A2B1E; --caramel:#D49B5C;
+    --hero:#0F0A06; --hero2:#2C2016; --hero-ink:#F2E6D5; --hero-mute:#B39E89;
+    --good:#7DCB98; --warn:#E3B95B; --bad:#F08A7C; --info:#8DB8E8;
+    --good-soft:#17301F; --warn-soft:#3A2E14; --bad-soft:#3B1F1A; --info-soft:#1C2A3A;
+    --up-hero:#7DCB98; --dn-hero:#F08A7C;
+    --c1:#3987e5; --c2:#B07A3C; --c3:#A27AE0; --c4:#d55181; --c0:#6F5D4D;
+    --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-    --bg:#16110D; --surface:#211912; --surface2:#2B2119; --ink:#F4EADC; --muted:#B3A08A; --line:#3A2E24;
-    --accent:#E0B98A; --accent-ink:#1E150E; --accent-soft:#3A2C20;
-    --hero:#2A1E15; --hero2:#3E2C1E; --hero-ink:#FBF4EA; --hero-mute:#C9B497;
-    --good:#7CC892; --warn:#E4B456; --bad:#EE8A78; --info:#8DB8E8;
-    --good-soft:#1F3326; --warn-soft:#3A2D14; --bad-soft:#3D1F1A; --info-soft:#1C2A3A;
-    --c1:#CC4E52; --c2:#B48C1E; --c3:#2FA37E; --c4:#A27AE0; --c0:#7D7064;
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark;
+    --bg:#17100B; --surface:#241911; --surface2:#2C2016; --ink:#F2E6D5; --muted:#B39E89; --line:#3D2E22;
+    --accent:#E3C39A; --accent-ink:#241911; --accent-soft:#3A2B1E; --caramel:#D49B5C;
+    --hero:#0F0A06; --hero2:#2C2016; --hero-ink:#F2E6D5; --hero-mute:#B39E89;
+    --good:#7DCB98; --warn:#E3B95B; --bad:#F08A7C; --info:#8DB8E8;
+    --good-soft:#17301F; --warn-soft:#3A2E14; --bad-soft:#3B1F1A; --info-soft:#1C2A3A;
+    --up-hero:#7DCB98; --dn-hero:#F08A7C;
+    --c1:#3987e5; --c2:#B07A3C; --c3:#A27AE0; --c4:#d55181; --c0:#6F5D4D;
+    --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:400 14px/1.5 var(--f-body);-webkit-font-smoothing:antialiased;
@@ -82,7 +86,7 @@ svg.i.sm{width:16px;height:16px} svg.i.lg{width:24px;height:24px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* tabs: top on wide screens, bottom bar on phones */
-nav.tabs{display:flex;gap:6px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px;margin:4px 0 0;overflow-x:auto}
+nav.tabs{display:flex;gap:6px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:4px 0 0;overflow-x:auto}
 nav.tabs button{appearance:none;border:0;background:none;color:var(--muted);font:600 13.5px var(--f-body);padding:9px 14px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;flex:1;justify-content:center}
 nav.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 @media (max-width:760px){
@@ -111,11 +115,12 @@ main{padding-top:16px;display:grid;gap:16px}
 .dotlive{width:8px;height:8px;border-radius:50%;background:var(--c0)}
 .dotlive.ok{background:var(--good)} .dotlive.bad{background:var(--bad)}
 
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0;box-shadow:var(--shadow)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;min-width:0;box-shadow:var(--shadow)}
 .card.flat{box-shadow:none}
 .card-h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.card-h h2{font:700 19px/1.15 var(--f-disp);letter-spacing:.03em;text-transform:uppercase;flex:1;min-width:0}
-.card-h .ico{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.card-h h2{font:700 18px/1.15 var(--f-disp);letter-spacing:.04em;text-transform:uppercase;flex:1;min-width:0;color:var(--ink)}
+.card-h .ico{width:30px;height:30px;border-radius:6px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.card-h .ico svg.i{width:17px;height:17px}
 .card-h .aside{font-size:12px;color:var(--muted)}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:16px}
 .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px}
@@ -125,13 +130,14 @@ main{padding-top:16px;display:grid;gap:16px}
 .note{font-size:12.5px;color:var(--muted);margin:10px 0 0}
 
 /* hero */
-.hero{background:radial-gradient(120% 130% at 90% 0%,var(--hero2),var(--hero) 62%);color:var(--hero-ink);border-radius:22px;padding:20px;
+.hero{background:linear-gradient(135deg,var(--hero) 0%,var(--hero2) 100%);color:var(--hero-ink);border-radius:10px;padding:20px;
   display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px 24px;position:relative;overflow:hidden;min-width:0;box-shadow:var(--shadow)}
 .hero .label{color:var(--hero-mute)}
 .hero .l{display:grid;gap:16px;align-content:center;min-width:0}
-.chip-chg{display:inline-flex;align-items:center;gap:6px;font:600 13px var(--f-body);padding:4px 10px;border-radius:999px;background:rgba(251,244,234,.12);width:fit-content}
+.chip-chg{display:inline-flex;align-items:center;gap:6px;font:700 13px var(--f-body);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.12);width:fit-content}
+.chip-chg.up,.hero .up{color:var(--up-hero)} .chip-chg.dn,.hero .dn{color:var(--dn-hero)}
 .hero .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.hero .stat{background:rgba(251,244,234,.08);border:1px solid rgba(251,244,234,.14);border-radius:14px;padding:10px 12px;min-width:0}
+.hero .stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:10px 12px;min-width:0}
 .hero .stat .v{font:700 22px/1.15 var(--f-disp);font-variant-numeric:tabular-nums}
 .hero .stat .s{font-size:11.5px;color:var(--hero-mute)}
 .hero svg.hp{width:100%;max-width:400px;height:auto;display:block;margin:0 auto}
@@ -142,7 +148,7 @@ main{padding-top:16px;display:grid;gap:16px}
 .layer{cursor:pointer}
 
 /* logos & lists */
-.logo{--lc:var(--accent);width:42px;height:42px;border-radius:12px;background:var(--lc);color:var(--on-brand);display:grid;place-items:center;flex:none;
+.logo{--lc:var(--accent);width:42px;height:42px;border-radius:9px;background:var(--lc);color:var(--on-brand);display:grid;place-items:center;flex:none;
   font:800 13px/1 var(--f-disp);letter-spacing:.02em;position:relative;overflow:hidden}
 .logo::after{content:"";position:absolute;inset:0;background:linear-gradient(140deg,rgba(255,255,255,.28),rgba(255,255,255,0) 55%)}
 .logo svg.i{width:22px;height:22px;stroke:var(--on-brand)}
@@ -156,7 +162,7 @@ main{padding-top:16px;display:grid;gap:16px}
 .arow .val{font:700 18px/1.1 var(--f-disp);font-variant-numeric:tabular-nums}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
 .chip{display:inline-flex;align-items:center;gap:4px;font:600 11px var(--f-body);padding:2px 8px;border-radius:999px;background:var(--surface2);color:var(--muted);white-space:nowrap}
-.chip.good{background:var(--good-soft);color:var(--good)} .chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.good,.chip.up{background:var(--good-soft);color:var(--good)} .chip.dn{background:var(--bad-soft);color:var(--bad)} .chip.warn{background:var(--warn-soft);color:var(--warn)}
 .chip.bad{background:var(--bad-soft);color:var(--bad)} .chip.info{background:var(--info-soft);color:var(--info)}
 .tdot{width:9px;height:9px;border-radius:3px;display:inline-block;flex:none}
 .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
@@ -212,7 +218,7 @@ svg.chart text.h{fill:var(--ink);font:700 14px var(--f-disp);letter-spacing:.03e
 .slot{display:grid;gap:2px;padding:10px 12px;border-radius:12px;border:1px dashed var(--line);font-size:12.5px}
 .slot.on{border-style:solid;background:var(--surface2)}
 .slot b{font:700 15px var(--f-disp);letter-spacing:.03em}
-.empty{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;padding:14px;border-radius:14px;border:1px dashed var(--line);color:var(--muted)}
+.empty{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;padding:14px;border-radius:8px;border:1px dashed var(--line);color:var(--muted)}
 .empty b{color:var(--ink)} .empty p{margin:2px 0 0;font-size:13px}
 .tiers{display:grid;gap:12px}
 .tierdef{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start}
@@ -226,7 +232,8 @@ svg.chart text.h{fill:var(--ink);font:700 14px var(--f-disp);letter-spacing:.03e
 
 /* insights */
 .insights{display:grid;gap:10px}
-.ins{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:14px;border-radius:14px;background:var(--surface2);border:1px solid var(--line)}
+.ins{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:12px 14px;border-radius:8px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--line)}
+.ins.good{border-left-color:var(--good)} .ins.warn{border-left-color:var(--warn)} .ins.bad{border-left-color:var(--bad)} .ins.info{border-left-color:var(--info)}
 .ins .ii{width:38px;height:38px;border-radius:11px;display:grid;place-items:center}
 .ins.good .ii{background:var(--good-soft);color:var(--good)} .ins.warn .ii{background:var(--warn-soft);color:var(--warn)}
 .ins.bad .ii{background:var(--bad-soft);color:var(--bad)} .ins.info .ii{background:var(--info-soft);color:var(--info)}
@@ -241,10 +248,11 @@ svg.chart text.h{fill:var(--ink);font:700 14px var(--f-disp);letter-spacing:.03e
 .disclaimer{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:flex-start;padding:12px;border-radius:12px;border:1px dashed var(--line)}
 
 /* tables */
-.tablewrap{overflow-x:auto;margin:0 -4px;padding:0 4px}
-table{border-collapse:collapse;width:100%;font-size:13px}
-th{font:600 11px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:right;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-td{padding:9px 8px;border-bottom:1px dashed var(--line);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:6px;max-height:460px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th{position:sticky;top:0;z-index:1;background:var(--accent);color:var(--accent-ink);font:700 10.5px var(--f-body);letter-spacing:.06em;text-transform:uppercase;text-align:right;padding:7px 9px;white-space:nowrap}
+td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tbody tr:nth-child(even) td,tr:nth-child(even) td{background:color-mix(in srgb,var(--surface2) 55%,transparent)}
 th:first-child,td:first-child{text-align:left}
 td.wrap{white-space:normal;min-width:160px}
 tr:last-child td{border-bottom:0}
@@ -254,10 +262,12 @@ tr.clickable{cursor:pointer} tr.clickable:hover td,tr.sel td{background:var(--su
 .sim{display:grid;gap:10px}
 .sim input[type=range]{width:100%;accent-color:var(--accent)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,128px),1fr));gap:10px}
-.kpi{background:var(--surface2);border-radius:14px;padding:12px;min-width:0}
-.kpi .v{font:700 24px/1.1 var(--f-disp);font-variant-numeric:tabular-nums}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0;display:grid;gap:2px;align-content:start}
+.kpi .label{font-size:10.5px;font-weight:700;letter-spacing:.07em}
+.kpi .v{font:700 clamp(22px,2.4vw,28px)/1.05 var(--f-disp);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .kpi .s{font-size:11.5px;color:var(--muted)}
-.btn{appearance:none;border:0;background:var(--accent);color:var(--accent-ink);font:600 13px var(--f-body);padding:9px 14px;border-radius:11px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;text-decoration:none}
+.kpi .v.pos,.v.pos{color:var(--good)} .kpi .v.neg,.v.neg{color:var(--bad)}
+.btn{appearance:none;border:0;background:var(--accent);color:var(--accent-ink);font:600 13px var(--f-body);padding:9px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;text-decoration:none}
 .btn.ghost{background:var(--surface2);color:var(--ink)}
 .ladder{display:grid;gap:14px}
 .ladder .t{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px;margin-bottom:6px}
@@ -686,15 +696,15 @@ function cfChart(){
   return `<div class="label" style="margin:16px 0 6px">Theo tháng (sheet Dòng tiền)</div><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Thu chi theo tháng">
     <line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" stroke="var(--line)"/>
     ${ms.map((m,i)=>{const cx=L+slot*(i+.5);return `<g data-tip="${lab(m.m)}: thu ${tr2(m.inc)}, chi ${tr2(m.exp)}, dư ${trs(m.inc-m.exp)}${m.inc?' ('+pct((m.inc-m.exp)/m.inc,0)+')':''}">
-      <rect x="${cx-bw-1}" y="${y(m.inc)}" width="${bw}" height="${H-B-y(m.inc)}" rx="3" fill="var(--c3)"/>
-      <rect x="${cx+1}" y="${y(m.exp)}" width="${bw}" height="${H-B-y(m.exp)}" rx="3" fill="var(--c1)"/>
+      <rect x="${cx-bw-1}" y="${y(m.inc)}" width="${bw}" height="${H-B-y(m.inc)}" rx="3" fill="var(--good)"/>
+      <rect x="${cx+1}" y="${y(m.exp)}" width="${bw}" height="${H-B-y(m.exp)}" rx="3" fill="var(--bad)" fill-opacity=".8"/>
       <rect x="${cx-slot/2}" y="${T}" width="${slot}" height="${H-T-B}" fill="transparent"/>
       <text x="${cx}" y="${H-8}" text-anchor="middle">${lab(m.m)}</text></g>`;}).join('')}
-  </svg><div class="legend"><span><i class="tdot" style="background:var(--c3)"></i>Thu</span><span><i class="tdot" style="background:var(--c1)"></i>Chi</span></div>`;
+  </svg><div class="legend"><span><i class="tdot" style="background:var(--good)"></i>Thu</span><span><i class="tdot" style="background:var(--bad)"></i>Chi</span></div>`;
 }
 function cashflow(){
   const inc=Math.max(INCOME,1), net=INCOME-S.expense;
-  const parts=[['Chi cố định',S.exp.fixed,'var(--c1)'],['Chi cá nhân',S.exp.personal,'var(--c2)'],['Chi khác',S.exp.other,'var(--c4)'],['Còn dư',Math.max(0,net),'var(--c3)']].filter(p=>p[1]>0);
+  const parts=[['Chi cố định',S.exp.fixed,'var(--c1)'],['Chi cá nhân',S.exp.personal,'var(--c2)'],['Chi khác',S.exp.other,'var(--c4)'],['Còn dư',Math.max(0,net),'var(--good)']].filter(p=>p[1]>0);
   const base=Math.max(inc,S.expense);
   return `<div class="stack" role="img" aria-label="Thu nhập chia theo khoản chi">${parts.map(p=>`<i style="width:${p[1]/base*100}%;background:${p[2]}" data-tip="${p[0]}: ${tr2(p[1])} · ${pct(p[1]/inc,0)} thu nhập"></i>`).join('')}</div>
     <div class="legend">${parts.map(p=>`<span><i class="tdot" style="background:${p[2]}"></i>${p[0]} <b class="num" style="color:var(--ink)">${tr2(p[1])}</b></span>`).join('')}</div>
@@ -705,7 +715,7 @@ function cashflow(){
     </div>${net<0?'<p class="note neg">Chi đang vượt thu.</p>':''}
     <p class="note">${S.cf?'Trung bình '+S.cf.n+' tháng gần nhất ở sheet Dòng tiền.':'Lấy từ sheet Cấu hình. Ghi thu chi từng tháng ở sheet Dòng tiền để app tính trung bình thật.'}</p>${cfChart()}`;
 }
-const LAYERS=[['now','Dùng ngay','var(--c3)','Ví, tiền mặt, sổ đã đáo hạn'],['soon','Rút sớm sổ tiết kiệm','var(--c2)','Chỉ tính tiền gốc vì rút trước hạn mất lãi'],['market','Bán cổ phiếu','var(--c4)','Tính theo hệ số trong sheet Cấu hình']];
+const LAYERS=[['now','Dùng ngay','var(--good)','Ví, tiền mặt, sổ đã đáo hạn'],['soon','Rút sớm sổ tiết kiệm','var(--c1)','Chỉ tính tiền gốc vì rút trước hạn mất lãi'],['market','Bán cổ phiếu','var(--c4)','Tính theo hệ số trong sheet Cấu hình']];
 function emergency(C){
   const cfg=DATA.cfg, tm=C.targetM, mx=Math.max(C.runway,tm)*1.15, p=v=>Math.min(100,v/mx*100), E=C.essential;
   const n=S.gap||tm, g=gapSim(C,n);
@@ -772,18 +782,18 @@ function histChart(C){
     ${ticks.map(t=>`<line x1="${L}" x2="${W-R+4}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${W-R+8}" y="${y(t)+4}">${trn(t)} Tr</text>`).join('')}
     <path d="${path('nw')}L${x(last.d)},${H-B}L${x(first.d)},${H-B}Z" fill="var(--accent)" fill-opacity=".10"/>
     <path d="${path('nw')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
-    <path d="${path('av')}" fill="none" stroke="var(--c3)" stroke-width="2" stroke-dasharray="5 3" stroke-linejoin="round"/>
+    <path d="${path('av')}" fill="none" stroke="var(--c1)" stroke-width="2" stroke-dasharray="5 3" stroke-linejoin="round"/>
     <circle cx="${x(last.d)}" cy="${y(last.nw)}" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>
     <text x="${x(first.d)}" y="${H-8}">${dl(first.d)}</text><text x="${x(last.d)}" y="${H-8}" text-anchor="end">Hôm nay</text>
     ${pts.filter((_,i)=>i%step===0||i===pts.length-1).map(p=>`<rect x="${x(p.d)-6}" y="${T}" width="12" height="${H-T-B}" fill="transparent" data-tip="${dl(p.d)}: ${tr(p.nw)} · khả dụng ${tr(p.av)}"/>`).join('')}
   </svg>
-  <div class="legend"><span><i class="tdot" style="background:var(--accent)"></i>Tài sản ròng ${trs(last.nw-first.nw)} từ ${dl(first.d)}</span><span><i class="tdot" style="background:var(--c3)"></i>Khả dụng (trừ khoản chờ nhận)</span></div>`;
+  <div class="legend"><span><i class="tdot" style="background:var(--accent)"></i>Tài sản ròng ${trs(last.nw-first.nw)} từ ${dl(first.d)}</span><span><i class="tdot" style="background:var(--c1)"></i>Khả dụng (trừ khoản chờ nhận)</span></div>`;
 }
 function divBars(items,fmt){
   const mx=Math.max(1e-9,...items.map(i=>Math.abs(i.v)));
   return `<div class="dbars">${items.map(i=>{const w=Math.abs(i.v)/mx*50;
     return `<div class="db" data-tip="${esc(i.tip||i.label)}"><span class="db-l">${i.dot?`<i class="tdot" style="background:${i.dot}"></i>`:''}${esc(i.label)}</span>
-      <span class="db-t"><i style="${i.v>=0?'left:50%':'right:50%'};width:${w}%;background:${i.col||(i.v>=0?'var(--good)':'var(--bad)')}"></i></span>
+      <span class="db-t"><i style="${i.v>=0?'left:50%':'right:50%'};width:${w}%;background:${i.v>=0?'var(--good)':'var(--bad)'}"></i></span>
       <span class="db-v num ${cls(i.v*1e7)}">${fmt(i.v)}</span></div>`;}).join('')}</div>`;
 }
 function ring(score){
@@ -866,10 +876,10 @@ function vOverview(C){
     <div class="l">
       <div><div class="label">Tài sản ròng</div><div class="big">${vnd(C.nw)}</div>
         ${C.entV+C.recV>0?`<div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:6px">Khả dụng <b style="color:var(--hero-ink)">${tr(C.nwAvail)}</b>${C.entV?' · chờ nhận '+tr(C.entV):''}${C.recV?' · cho vay '+tr(C.recV):''}${C.payable?' · nợ '+tr(C.payable):''}</div>`:''}</div>
-      <span class="chip-chg">${ic(C.chg30>=0?'up':'down','sm')} ${trs(C.chg30)} · ${pcts(C.chgPct,2)} trong 30 ngày</span>
+      <span class="chip-chg ${C.chg30>=0?'up':'dn'}">${ic(C.chg30>=0?'up':'down','sm')} ${trs(C.chg30)} · ${pcts(C.chgPct,2)} trong 30 ngày</span>
       <div class="stats">
         <div class="stat"><div class="label">Thanh khoản</div><div class="v">${tr(C.liquid)}</div><div class="s">Đủ ${nf(C.runway,1)} tháng chi thiết yếu</div></div>
-        <div class="stat"><div class="label">Dư mỗi tháng</div><div class="v">${trs(net)}</div><div class="s">Để dành ${INCOME>0?pct(net/INCOME,0):'–'} thu nhập</div></div>
+        <div class="stat"><div class="label">Dư mỗi tháng</div><div class="v ${net>=0?'up':'dn'}">${trs(net)}</div><div class="s">Để dành ${INCOME>0?pct(net/INCOME,0):'–'} thu nhập</div></div>
       </div>
     </div>
     <div>${heroPyramid(C.rows)}</div>
@@ -917,7 +927,7 @@ function assetRow(a){
   const p=a.cost>0?(a.value-a.cost)/a.cost:null;
   const chips=[];
   chips.push(`<span class="chip"><i class="tdot" style="background:${a.tier?tcol(a.tier):'var(--c0)'}"></i>${a.sim?'T'+a.tier:esc(tierName(a.tier))}</span>`);
-  if(a.chgAuto)chips.push(`<span class="chip info" title="Tính từ lịch sử chụp hằng ngày">30 ngày ${trs(a.chg30)}</span>`);
+  if(a.chgAuto)chips.push(`<span class="chip ${a.chg30>=0?'up':'dn'}" title="Tính từ lịch sử chụp hằng ngày">30 ngày ${trs(a.chg30)}</span>`);
   if(a.kind==='durable')chips.push('<span class="chip">Khấu hao</span>');
   else if(a.sim)chips.push('<span class="chip info">Mô phỏng</span>');
   else if(a.kind==='savings'&&a.sv.done)chips.push('<span class="chip warn">Đã đáo hạn</span>');
@@ -926,7 +936,7 @@ function assetRow(a){
   else if(a.receivable)chips.push(a.loan&&a.loan.due&&a.loan.due<serialOf(Date.now())?'<span class="chip bad">Quá hạn</span>':'<span class="chip warn">Cho vay</span>');
   else chips.push(isLiquid(a)?'<span class="chip good">Rút được</span>':'<span class="chip warn">Khóa</span>');
   return `<div class="arow">${logo(a)}<div style="min-width:0"><div class="nm">${esc(a.name)}</div><div class="sb">${esc(a.sub)}</div><div class="chips">${chips.join('')}</div></div>
-    <div class="rt"><div class="val">${tr2(a.value)}</div><div class="sb num ${p==null?'':cls(p*1e7)}">${p==null?'không có vốn':pcts(p)}</div></div></div>`;
+    <div class="rt"><div class="val">${tr2(a.value)}</div>${p==null?'<div class="sb">không có vốn</div>':`<span class="chip ${p>=0.00005?'up':p<=-0.00005?'dn':''} num">${pcts(p)}</span>`}</div></div>`;
 }
 const sdate=n=>fmtD(flexCalc(0,0,n,0).start);
 function loanStatus(l,today){
@@ -1016,10 +1026,10 @@ function kaiDays(k){
   const line=ma.map((v,i)=>`${i?'L':'M'}${(L+slot*(i+.5)).toFixed(1)},${y(v).toFixed(1)}`).join('');
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Doanh thu theo ngày">
     <line x1="${L}" x2="${W-R+2}" y1="${y(avg)}" y2="${y(avg)}" stroke="var(--muted)" stroke-dasharray="3 4"/><text x="${W-R+6}" y="${y(avg)+4}">TB ${PRIV?HIDE:nf(avg/1e3,0)+'k'}</text>
-    ${ds.map((x,i)=>`<rect x="${L+slot*i+(slot-bw)/2}" y="${y(x.rev)}" width="${bw}" height="${H-B-y(x.rev)}" rx="2" fill="var(--c2)" data-tip="${kd(x.d)}: ${vnd(x.rev)}"/>`).join('')}
-    <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
+    ${ds.map((x,i)=>`<rect x="${L+slot*i+(slot-bw)/2}" y="${y(x.rev)}" width="${bw}" height="${H-B-y(x.rev)}" rx="2" fill="var(--accent)" data-tip="${kd(x.d)}: ${vnd(x.rev)}"/>`).join('')}
+    <path d="${line}" fill="none" stroke="var(--caramel)" stroke-width="2.5" stroke-linejoin="round"/>
     <text x="${L}" y="${H-8}">${kd(ds[0].d)}</text><text x="${W-R}" y="${H-8}" text-anchor="end">${kd(ds[ds.length-1].d)}</text>
-  </svg><div class="legend"><span><i class="tdot" style="background:var(--c2)"></i>Doanh thu thực thu</span><span><i class="tdot" style="background:var(--accent)"></i>Trung bình 7 ngày</span></div>`;
+  </svg><div class="legend"><span><i class="tdot" style="background:var(--accent)"></i>Doanh thu thực thu</span><span><i class="tdot" style="background:var(--caramel)"></i>Trung bình 7 ngày</span></div>`;
 }
 function kaiInsights(k){
   const L=[], ds=k.days;
