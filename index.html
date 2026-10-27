@@ -214,6 +214,14 @@ svg.chart text.h{fill:var(--ink);font:700 14px var(--f-disp);letter-spacing:.03e
 .db-v{min-width:64px;text-align:right;font-weight:600}
 .pwform{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .pwform input{flex:1;min-width:0;font:500 15px var(--f-body);padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.todo{display:grid;gap:8px}
+.todo-i{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-left:4px solid var(--line);border-radius:8px;background:var(--surface)}
+.todo-i.bad{border-left-color:var(--bad)} .todo-i.warn{border-left-color:var(--warn)} .todo-i.info{border-left-color:var(--info)}
+.todo-i .ii{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;background:var(--surface2);color:var(--ink)}
+.todo-i.bad .ii{background:var(--bad-soft);color:var(--bad)} .todo-i.warn .ii{background:var(--warn-soft);color:var(--warn)} .todo-i.info .ii{background:var(--info-soft);color:var(--info)}
+.todo-i b{display:block;font-weight:600;font-size:13.5px;line-height:1.3}
+.todo-i span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+details.more{margin-top:8px} details.more summary{cursor:pointer;font-size:12.5px;font-weight:600;color:var(--accent);padding:4px 0} details.more .todo{margin-top:8px}
 .slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:8px}
 .slot{display:grid;gap:2px;padding:10px 12px;border-radius:12px;border:1px dashed var(--line);font-size:12.5px}
 .slot.on{border-style:solid;background:var(--surface2)}
@@ -798,7 +806,7 @@ function divBars(items,fmt){
 }
 function ring(score){
   const r=46,c=2*Math.PI*r,o=c*(1-score/100);
-  const col=score>=80?'var(--good)':score>=60?'var(--c3)':score>=40?'var(--warn)':'var(--bad)';
+  const col=score>=60?'var(--good)':score>=40?'var(--warn)':'var(--bad)';
   return `<svg class="ring" viewBox="0 0 110 110" role="img" aria-label="Điểm sức khỏe ${Math.round(score)}"><circle cx="55" cy="55" r="${r}" fill="none" stroke="var(--surface2)" stroke-width="10"/><circle cx="55" cy="55" r="${r}" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${o}" transform="rotate(-90 55 55)"/><text x="55" y="62" text-anchor="middle" style="font:800 30px var(--f-disp);fill:var(--ink)">${Math.round(score)}</text><text x="55" y="78" text-anchor="middle" style="font:600 9px var(--f-body);fill:var(--muted)">/ 100</text></svg>`;
 }
 
@@ -869,8 +877,81 @@ const SEV={bad:['Ưu tiên','alert'],warn:['Cần chú ý','alert'],info:['Gợi
 const insCard=i=>`<div class="ins ${i.sev}"><span class="ii">${ic(i.icon||SEV[i.sev][1])}</span><div><div class="chips" style="margin:0 0 4px"><span class="chip ${i.sev}">${SEV[i.sev][0]}</span></div><b>${i.t}</b><p>${i.d}</p>${i.a?`<div class="act">${ic('bulb','sm')}<span>${i.a}</span></div>`:''}</div></div>`;
 
 // ---- các tab
+// Tài sản nhập tay lâu không đổi (>35 ngày): ví tính từ ngày cập nhật số dư; còn lại theo lần đổi giá trị cuối trong sheet Lịch sử
+const STALE=35;
+function staleAssets(C){
+  const today=serialOf(C.now), out=[];
+  for(const a of C.inNW){
+    if(a.sim||a.receivable||a.kaiSync||a.entitled||/^(savings|durable|stock)$/.test(a.kind))continue;   // tự tính, không cần nhập lại
+    let since=null;
+    if(a.fx)since=today-serialOf(a.fx.start);
+    else{
+      const pts=HIST.filter(h=>h.a&&h.a[a.name]!=null).sort((x,y)=>x.d-y.d);
+      if(pts.length<2||today-pts[0].d<STALE)continue;
+      let last=pts[0].d;for(let i=1;i<pts.length;i++)if(pts[i].a[a.name]!==pts[i-1].a[a.name])last=pts[i].d;
+      since=today-last;
+    }
+    if(since!=null&&since>STALE)out.push({a,since});
+  }
+  return out;
+}
+// Chốt tháng: thu nhập tháng N về đến ngày 5–10 tháng N+1 → đầu tháng nhắc báo thu nhập tháng trước; chưa có chi dự kiến tháng này thì nhắc
+const mSerial=(y,m)=>Date.UTC(y,m,1)/DAY+25569;
+function monthTasks(C){
+  const t=new Date(C.now+7*36e5), y=t.getUTCFullYear(), m=t.getUTCMonth(), day=t.getUTCDate(), out=[];
+  const prev=mSerial(y,m-1), cur=mSerial(y,m), lab=s=>{const d=new Date((s-25569)*DAY);return (d.getUTCMonth()+1)+'/'+d.getUTCFullYear();};
+  const has=(s,f)=>CF.some(x=>Math.abs(x.m-s)<3&&f(x));
+  if(day<=12&&!has(prev,x=>x.inc>0))out.push({sev:'warn',icon:'flow',t:'Báo thu nhập tháng '+lab(prev),a:'Nhắn chat ghi tài sản: "tháng '+lab(prev)+' lương …, freelance …, Shopee …, chi …"'});
+  if(!has(cur,x=>x.plan>0||x.exp>0))out.push({sev:'info',icon:'calendar',t:'Đặt chi tiêu dự kiến tháng '+lab(cur),a:'Để app tính tiền dư chuyển vào ví tích lũy và dự phóng mục tiêu.'});
+  return out;
+}
+function todoList(C){
+  const L=[];
+  insights(C).filter(i=>i.a&&(i.sev==='bad'||i.sev==='warn')).forEach(i=>L.push({sev:i.sev,icon:i.icon,t:i.t,a:i.a,prio:i.prio}));
+  staleAssets(C).forEach(x=>L.push({sev:'warn',icon:'clock',prio:3,t:esc(x.a.name)+' chưa cập nhật '+x.since+' ngày',a:'Báo số dư mới qua chat ghi tài sản'+(x.a.fx?' (lãi sẽ tính lại từ hôm nay)':'')+'.'}));
+  monthTasks(C).forEach(x=>L.push({...x,prio:x.sev==='warn'?3:6}));
+  const rank={bad:0,warn:1,info:2};
+  return L.sort((x,y)=>rank[x.sev]-rank[y.sev]||(x.prio||9)-(y.prio||9));
+}
+function vTodo(C){
+  const L=todoList(C), top=L.slice(0,5), row=i=>`<div class="todo-i ${i.sev}"><span class="ii">${ic(i.icon||'alert','sm')}</span><div><b>${i.t}</b><span>${i.a}</span></div></div>`;
+  return card('Việc cần làm','check',top.length?`<div class="todo">${top.map(row).join('')}</div>
+    ${L.length>top.length?`<details class="more"><summary>Còn ${L.length-top.length} việc khác</summary><div class="todo">${L.slice(5).map(row).join('')}</div></details>`:''}
+    <p style="margin:10px 0 0"><button class="btn ghost" data-goto="analysis">${ic('pulse','sm')} Xem phân tích đầy đủ</button></p>`
+    :`<div class="empty">${ic('check','lg')}<div><b>Không có việc gì cần làm</b><p>Số liệu mới, không có hạn hay cảnh báo nào.</p></div></div>`,L.length?L.length+' việc':'');
+}
+// Mục tiêu tài sản ròng lớn nhất (2 tỷ) theo 3 kịch bản thu nhập; lãi tiết kiệm giữ nguyên mỗi tháng
+function goalScenarios(C){
+  const g=[...C.goals.list].filter(x=>x.due&&x.need>0).sort((a,b)=>b.need-a.need)[0];
+  if(!g)return null;
+  const today=serialOf(C.now), months=Math.max(1,Math.round((g.due-today)/30.44)), E=S.expense, it=C.interestMonthly;
+  const side=CF.filter(m=>m.inc>0).slice(-3), sideAvg=side.length?sum(side,'inc2')/side.length:0;
+  const sc=[['Như trung bình gần đây',INCOME-E,'var(--good)'],['Chỉ freelance + affiliate',sideAvg-E,'var(--caramel)'],['Không có thu nhập',-E,'var(--bad)']]
+    .map(([n,save,col])=>{const step=save+it, pts=[];for(let m=0;m<=months;m++)pts.push(C.nw+step*m);
+      const eta=step>0?Math.ceil(Math.max(0,g.need-C.nw)/step):null;return {n,save,step,col,pts,end:pts[months],eta};});
+  return {g,months,sc,need:g.need,needMonthly:(g.need-C.nw)/months-it};
+}
+function vScenarios(C){
+  const R=goalScenarios(C);
+  if(!R)return '';
+  const {g,months,sc}=R, W=360,H=180,L=8,Rt=70,T=14,B=26;
+  const all=[...sc.flatMap(s=>s.pts),g.need,0], hi=Math.max(...all)*1.05, lo=Math.min(...all,0);
+  const x=m=>L+m/months*(W-L-Rt), y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B);
+  const dl=m=>{const t=new Date(C.now+7*36e5);t.setUTCMonth(t.getUTCMonth()+m);return (t.getUTCMonth()+1)+'/'+String(t.getUTCFullYear()).slice(2);};
+  const svg=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Dự phóng tới mục tiêu">
+    <line x1="${L}" x2="${W-Rt+4}" y1="${y(g.need)}" y2="${y(g.need)}" stroke="var(--ink)" stroke-dasharray="4 4" stroke-opacity=".6"/>
+    <text x="${W-Rt+8}" y="${y(g.need)+4}" class="v">${trn(g.need)} Tr</text>
+    ${lo<0?`<line x1="${L}" x2="${W-Rt+4}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)"/>`:''}
+    ${sc.map(s=>`<path d="${s.pts.map((v,m)=>(m?'L':'M')+x(m).toFixed(1)+','+y(v).toFixed(1)).join('')}" fill="none" stroke="${s.col}" stroke-width="2.2" stroke-linejoin="round"/>
+      <circle cx="${x(months)}" cy="${y(s.end)}" r="4" fill="${s.col}"/><text x="${W-Rt+8}" y="${y(s.end)+4}">${trn(s.end)} Tr</text>`).join('')}
+    <text x="${L}" y="${H-8}">Hôm nay</text><text x="${x(months/2)}" y="${H-8}" text-anchor="middle">${dl(Math.round(months/2))}</text><text x="${x(months)}" y="${H-8}" text-anchor="end">${dl(months)}</text>
+  </svg>`;
+  return card(esc(g.name)+' · '+sdate(g.due),'flag',svg+`<div class="tablewrap" style="margin-top:10px"><table><tr><th>Kịch bản</th><th>Dư/tháng</th><th>Tới hạn</th><th>Đạt mục tiêu</th></tr>
+    ${sc.map(s=>`<tr><td><i class="tdot" style="background:${s.col}"></i> ${s.n}</td><td class="${cls(s.save)}">${trs(s.save)}</td><td class="${s.end>=g.need?'pos':'neg'}">${tr(s.end)}</td><td>${s.eta==null?'Không đạt':s.eta<=months?'Sau '+s.eta+' tháng':'Trễ '+(s.eta-months)+' tháng'}</td></tr>`).join('')}</table></div>
+    <p class="note">Còn ${months} tháng. Để kịp hạn cần để dành khoảng <b>${tr(Math.max(0,R.needMonthly))}/tháng</b> (đã tính lãi tiết kiệm ${tr(C.interestMonthly)}/tháng). Không tính biến động giá cổ phiếu, khấu hao.</p>`,months+' tháng');
+}
 function vOverview(C){
-  const net=INCOME-S.expense, ins=insights(C).filter(i=>i.sev!=='good').slice(0,3);
+  const net=INCOME-S.expense;
   return `
   <section class="hero">
     <div class="l">
@@ -884,16 +965,14 @@ function vOverview(C){
     </div>
     <div>${heroPyramid(C.rows)}</div>
   </section>
+  ${vTodo(C)}
+  ${C.acc?card('Tích lũy vào '+esc(C.acc.w.name),'bank',accCard(C),C.acc.ready?'đủ mở sổ':'mục tiêu '+tr(C.acc.goal)):''}
   <div class="grid2">
     ${card('Phân bổ so với mục tiêu','target',allocBars(C)+'<p class="note">Tính trên '+tr(C.tw)+' trong tháp. Bấm một tầng trên tháp để xem tài sản của tầng đó.</p>')}
     ${card('Cơ cấu tài sản','pie',composition(C))}
   </div>
-  ${C.acc?card('Tích lũy vào '+esc(C.acc.w.name),'bank',accCard(C),C.acc.ready?'đủ mở sổ':'mục tiêu '+tr(C.acc.goal)):''}
   ${card('Tài sản ròng theo thời gian','up',histChart(C),HIST.length?HIST.length+' ngày đã lưu':'')}
-  <div class="grid2">
-    ${card('Dòng tiền tháng','flow',cashflow())}
-    ${card('Cần chú ý','alert',`<div class="insights">${ins.map(insCard).join('')||'<p class="muted">Không có gì cần xử lý.</p>'}</div><p style="margin:12px 0 0"><button class="btn ghost" data-goto="analysis">${ic('pulse','sm')} Xem phân tích đầy đủ</button></p>`)}
-  </div>`;
+  ${card('Dòng tiền tháng','flow',cashflow())}`;
 }
 function vTower(C){
   const max=C.maxSim, simTr=Math.round(C.X/1e6), w=C.simW, dk=Object.keys(w);
@@ -1119,6 +1198,7 @@ function vAnalysis(C){
       <div class="kpi"><div class="label">Tỷ lệ để dành</div><div class="v ${cls(net)}">${INCOME>0?pct(net/INCOME,0):'–'}</div><div class="s">${trs(net)}/tháng</div></div>
       <div class="kpi"><div class="label">Quỹ khẩn cấp</div><div class="v">${nf(C.runway,1)} th</div><div class="s">Mục tiêu ${C.targetM} tháng</div></div>
       <div class="kpi"><div class="label">Tài sản ròng khả dụng</div><div class="v">${tr(C.nwAvail)}</div><div class="s">${pct(C.nwAvail/(C.nw||1),0)} tổng · trừ khoản chờ nhận</div></div>
+      <div class="kpi"><div class="label">Tự do tài chính</div><div class="v">${pct(C.nwAvail/(C.essential*12*25),0)}</div><div class="s">Cần ${tr(C.essential*12*25)} (chi thiết yếu × 12 × 25)</div></div>
       <div class="kpi"><div class="label">Tỷ trọng lớn nhất</div><div class="v">${top?pct(top.value/(C.nwAvail||1),0):'–'}</div><div class="s">${top?esc(top.name):''}</div></div>
       <div class="kpi"><div class="label">Lãi/lỗ trên vốn</div><div class="v ${cls(C.pnlTrue)}">${pcts(C.pnlTrue/(C.costBase||1),1)}</div><div class="s">${trs(C.pnlTrue)}</div></div>
       <div class="kpi"><div class="label">Tầng Tăng trưởng</div><div class="v">${t3.items.length} mã</div><div class="s">${pct(t3.share,0)} tháp · mục tiêu ${t3.target}%</div></div>
@@ -1126,7 +1206,7 @@ function vAnalysis(C){
   </div>
   <div class="grid2">
     ${card('Quỹ khẩn cấp','shield',emergency(C))}
-    ${card('Tài sản ròng 12 tháng tới','up',projection(C),'ước tính')}
+    ${vScenarios(C)||card('Tài sản ròng 12 tháng tới','up',projection(C),'ước tính')}
   </div>
   ${vGoals(C)}
   ${vRules(C)}
