@@ -32,7 +32,7 @@
   --shadow:0 1px 2px rgba(94,59,37,.05),0 6px 18px rgba(94,59,37,.06);
   --on-brand:#FFFFFF;
   --h1:#3987e5; --h2:#D49B5C; --h3:#A27AE0; --h4:#d55181;
-  --b-bank:#5E3B25; --b-cash:#2F7A4B; --b-momo:#A50064; --b-vcb:#0B7A3E; --b-bidv:#1A5CA8; --b-vpb:#0E8A4F; --b-mb:#1E3A8A; --b-acb:#1F4FA0;
+  --b-bank:#5E3B25; --b-cash:#2F7A4B; --b-m:#2F6DB5; --b-f:#C2537A; --b-momo:#A50064; --b-vcb:#0B7A3E; --b-bidv:#1A5CA8; --b-vpb:#0E8A4F; --b-mb:#1E3A8A; --b-acb:#1F4FA0;
   --b-tpb:#5B2C83; --b-vib:#0F5AA6; --b-agri:#A3262E; --b-ctg:#0A58A8; --b-spay:#EE4D2D; --b-vtp:#D61F2C;
   --f-disp:'Barlow Condensed','Arial Narrow','Be Vietnam Pro',sans-serif;
   --f-body:'Be Vietnam Pro','Segoe UI',system-ui,-apple-system,sans-serif;
@@ -156,6 +156,13 @@ main{padding-top:16px;display:grid;gap:16px}
 .hp .tv{font:500 11.5px var(--f-body);fill:var(--hero-mute)}
 .hp .gl{font:800 15px var(--f-disp);fill:var(--hero)}
 .layer{cursor:pointer}
+@media (prefers-reduced-motion:no-preference){
+  .layer{transform-box:fill-box;transition:transform .22s cubic-bezier(.3,.9,.3,1),filter .22s}
+  #view[class*=in-] .layer{animation:tierDrop .5s cubic-bezier(.2,.9,.25,1.15) both;animation-delay:calc(.12s + var(--i,0)*.08s)}
+  #view[class*=in-] .hp .flag{animation:inUp .3s ease-out .5s both}
+}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){.layer:hover,.layer:focus-visible{transform:translateY(-4px);filter:brightness(1.08)}}
+@keyframes tierDrop{from{opacity:0;transform:translateY(-22px)}}
 
 /* logos & lists */
 .logo{--lc:var(--accent);width:42px;height:42px;border-radius:9px;background:var(--lc);color:var(--on-brand);display:grid;place-items:center;flex:none;
@@ -607,7 +614,7 @@ function buildAssets(S,now){
   // Khoản cho vay đang mở (sheet Sổ nợ): tài sản phải thu, xếp T4 (Kai chọn: khó đòi), không tính thanh khoản và tài sản khả dụng
   LOANS.filter(l=>l.dir==='lend'&&l.left>0).forEach((l,i)=>list.push({id:'l'+i,name:l.who,note:l.note,type:'Cho vay',kind:'loan',value:l.left,cost:l.left,chg30:0,
     nw:true,tierSheet:4,autoTier:4,liq:false,receivable:true,loan:l,sub:'Cho vay'+(l.due?' · hạn '+fmtD(flexCalc(0,0,l.due,0).start):'')+(l.paid>0?' · đã thu '+tr(l.paid):''),
-    brand:{color:'var(--b-loan)',icon:'handshake'}}));
+    brand:personOf(l.who,l.note)}));
   return list;
 }
 // Phần của Kai ở Kai Café: vốn góp + tỷ lệ vốn × lãi hoạt động lũy kế (giá trị sổ sách; chi đầu tư không trừ vào lãi)
@@ -764,6 +771,9 @@ const fmtD=ms=>new Date(ms).toLocaleDateString('vi-VN',{timeZone:'Asia/Ho_Chi_Mi
 
 // ---- icon (nét 24px, phong cách Lucide)
 const ICONS={
+  male:'<circle cx="12" cy="7.5" r="3.4"/><path d="M8.7 6.6c.5-2 1.7-3 3.3-3 1.9 0 3.1 1.2 3.3 3.2-1.7-.1-3.3-.7-4.6-1.8"/><path d="M6 20.5v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3"/><path d="M10 13.6l2 2.6 2-2.6"/>',
+  female:'<circle cx="12" cy="9" r="3.3"/><circle cx="12" cy="4" r="1.4"/><path d="M5.5 20.5 8.6 14.6h6.8l3.1 5.9z"/>',
+  person:'<circle cx="12" cy="8" r="3.5"/><path d="M5 20.5a7 7 0 0 1 14 0"/>',
   phone:'<rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/>',
   tablet:'<rect x="4" y="3" width="16" height="18" rx="2.2"/><path d="M11 18h2"/>',
   cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/>',
@@ -810,19 +820,28 @@ const TIER_ICON={1:'shield',2:'gem',3:'up',4:'rocket',0:'laptop'};
 const BRANDS=[[/techcom/,'tcb','TCB'],[/seabank|seab/,'seab','SeA'],[/zalo/,'zalo','Zalo'],[/momo/,'momo','MoMo'],[/vietcom|\bvcb\b/,'vcb','VCB'],
   [/bidv/,'bidv','BIDV'],[/vpbank/,'vpb','VPB'],[/\bmb\b|mbbank/,'mb','MB'],[/\bacb\b/,'acb','ACB'],[/tpbank/,'tpb','TPB'],[/\bvib\b/,'vib','VIB'],
   [/agribank/,'agri','Agri'],[/vietinbank/,'ctg','CTG'],[/shopee|spay/,'spay','SPay'],[/viettel/,'vtp','VTP']];
+// Người trong Sổ nợ: nam/nữ theo cách xưng hô ở đầu tên (Cô, Chú…) hoặc chữ "nam"/"nữ" trong Ghi chú; không đoán theo tên riêng
+function personOf(who,note){
+  const w=String(who||'').trim().toLowerCase(), n=String(note||'').toLowerCase();
+  if(/(^|[\s(,])nữ([\s),.]|$)/.test(n)||/^(cô|dì|bà|chị|mẹ|má|thím|mợ|em gái)(\s|$)/.test(w))return {icon:'female',color:'var(--b-f)'};
+  if(/(^|[\s(,])nam([\s),.]|$)/.test(n)||/^(chú|ông|anh|cậu|bố|ba|dượng|em trai)(\s|$)/.test(w))return {icon:'male',color:'var(--b-m)'};
+  return {icon:'person',color:'var(--b-loan)'};
+}
 // Logo đồ dùng vẽ bằng SVG đơn giản theo màu nhận diện hãng (không tải ảnh): [nền, hình 24×24]
 const mkT=(t,fs,fw,c)=>'<text x="12" y="'+(12+fs*.36).toFixed(1)+'" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="'+fs+'" font-weight="'+fw+'" fill="'+c+'">'+t+'</text>';
 const MARKS={
-  honda:['#CC0000','<path d="M3.2 8.6c3.6-1 7-.7 9.7.9l8-3.2c-1.6 3.5-4.5 5.9-8.2 6.7-3.8.8-7.2-.8-9.5-4.4z" fill="#fff"/><path d="M7.5 16.5h9" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>'],
+  honda:['#FFFFFF','<g transform="scale(.24)" fill="#E8192C"><path d="M90 15c-1.5 7.5-5.5 12-14 15L18 50.5l-3-4.2c26-11 50-21 75-31.3z"/><path d="M84 30.5c-1.6 6-5 9.6-12 11.4L21 55.5l-2.4-4.1z"/><path d="M77 44.5c-1.5 4.8-4.6 7.4-10.4 8.6L24 61l-2.2-3.8z"/><path d="M69 55c-1.4 4-4 6-9 6.7L27 66.5l-2-3.7z"/><path d="M48 64.5 61 72H31l-2.4-3.6z"/><path d="M16 45.5c-8 3.2-8.8 9.6-3.6 14.8L25 72" fill="none" stroke="#E8192C" stroke-width="3.6"/>'+
+    '<text x="50" y="92" text-anchor="middle" font-family="Georgia,\'Times New Roman\',serif" font-weight="900" font-size="17" letter-spacing=".5">HONDA</text></g>'],
+  zalopay:['#FFFFFF','<text x="3.4" y="11" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="8" fill="#1A3FD8">Zalo</text><text x="3.4" y="19.2" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="8" fill="#00C569">pay</text>'],
   acer:['#83B81A',mkT('acer',8.4,700,'#fff')],
   huawei:['#FFFFFF','<g fill="#CF0A2C">'+[-78,-55,-32,-10,10,32,55,78].map(d=>'<ellipse cx="12" cy="10.6" rx="1.75" ry="5.3" transform="rotate('+d+' 12 18)"/>').join('')+'</g>'],
   xiaomi:['#FF6900','<path d="M5.4 8h7.4a3.2 3.2 0 0 1 3.2 3.2V16h-2.3v-4.6a1.2 1.2 0 0 0-1.2-1.2H7.7V16H5.4zM9.6 11.6h2.3V16H9.6zM17.9 8h2.3v8h-2.3z" fill="#fff"/>'],
   poco:['#FFD60A',mkT('POCO',6.8,900,'#111')]};
-const DEV_BRANDS=[[/honda|airblade|vision|\bwave\b|\bsh\b|\blead\b|winner/,'honda'],[/acer|nitro|predator|aspire/,'acer'],[/huawei|matepad/,'huawei'],[/poco/,'poco'],[/xiaomi|redmi|\bmi\b/,'xiaomi']];
+const DEV_BRANDS=[[/zalo/,'zalopay'],[/honda|airblade|vision|\bwave\b|\bsh\b|\blead\b|winner/,'honda'],[/acer|nitro|predator|aspire/,'acer'],[/huawei|matepad/,'huawei'],[/poco/,'poco'],[/xiaomi|redmi|\bmi\b/,'xiaomi']];
 function brandOf(a){
   const n=a.name.toLowerCase();
-  for(const [re,k,t] of BRANDS) if(re.test(n)) return {color:'var(--b-'+k+',var(--b-bank))',text:t,logo:k};
   for(const [re,k] of DEV_BRANDS) if(re.test(n)) return {color:MARKS[k][0],mark:k};
+  for(const [re,k,t] of BRANDS) if(re.test(n)) return {color:'var(--b-'+k+',var(--b-bank))',text:t,logo:k};
   switch(a.kind){
     case 'stock':return {color:'var(--b-stock)',text:(a.sym||a.name).slice(0,4).toUpperCase(),logo:(a.sym||'').toLowerCase()};
     case 'pension':return {color:'var(--b-bhxh)',icon:'shield'};
@@ -852,45 +871,61 @@ const tierName=t=>t===0?'Ngoài tháp':'T'+t+' '+((TIERS0[t-1]||{}).short||'');
 const card=(title,icon,body,aside='',extra='')=>`<section class="card ${extra}"><div class="card-h"><span class="ico">${ic(icon)}</span><h2>${title}</h2>${aside?`<span class="aside">${aside}</span>`:''}</div>${body}</section>`;
 
 // ---- biểu đồ
+// Tháp 3D nhìn chéo từ trên-phải: mỗi tầng là một khối có mặt trước, mặt bên (tối), mặt trên (sáng).
+// Mức đạt mục tiêu là "mực nước" trong khối kính: chưa đủ thì thấy mặt nước, đủ thì cả khối đặc màu.
+const P3=a=>a.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+function tier3d(o){
+  const xl=y=>o.cx-o.hw(y), xr=y=>o.cx+o.hw(y), {y0,y1,dx,dy}=o, f=Math.max(0,Math.min(o.f,1)), fy=y1-f*(y1-y0);
+  const front=P3([[xl(y0),y0],[xr(y0),y0],[xr(y1),y1],[xl(y1),y1]]),
+    side=P3([[xr(y0),y0],[xr(y0)+dx,y0-dy],[xr(y1)+dx,y1-dy],[xr(y1),y1]]),
+    top=P3([[xl(y0),y0],[xr(y0),y0],[xr(y0)+dx,y0-dy],[xl(y0)+dx,y0-dy]]),
+    surf=P3([[xl(fy),fy],[xr(fy),fy],[xr(fy)+dx,fy-dy],[xl(fy)+dx,fy-dy]]);
+  // vùng cắt theo mặt nước: dưới fy ở mặt trước, dưới đường chéo fy → fy−dy ở mặt bên
+  const clip=`<clipPath id="${o.id}"><polygon points="${P3([[0,fy],[xr(fy),fy],[xr(fy)+dx,fy-dy],[o.W,fy-dy],[o.W,o.H],[0,o.H]])}"/></clipPath>`;
+  const g=o.ghost, go=o.ghostOp;
+  return {clip,svg:`<polygon points="${top}" fill="${g}" fill-opacity="${go*1.4}"/><polygon points="${side}" fill="${g}" fill-opacity="${go*.7}"/><polygon points="${front}" fill="${g}" fill-opacity="${go}"/>
+    ${f>0?`<g clip-path="url(#${o.id})"><polygon points="${side}" fill="${o.col}"/><polygon points="${side}" fill="#000" fill-opacity=".3"/><polygon points="${front}" fill="${o.col}"/><polygon points="${front}" fill="url(#${o.sheen})"/></g>`:''}
+    ${f>=1?`<polygon points="${top}" fill="${o.col}"/><polygon points="${top}" fill="#fff" fill-opacity=".34"/>`:f>0?`<polygon points="${surf}" fill="${o.col}"/><polygon points="${surf}" fill="#fff" fill-opacity=".4"/>`:''}`};
+}
+const defs3d=(k,shadow)=>`<linearGradient id="${k}s" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".26"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <radialGradient id="${k}g"><stop offset="0" stop-color="${shadow}" stop-opacity=".45"/><stop offset="1" stop-color="${shadow}" stop-opacity="0"/></radialGradient>`;
 function heroPyramid(rows){
-  const top=30,H=208,lh=H/4,cx=110,hb=100,gap=4, hw=y=>hb*(y-top+6)/(H+6);
-  let defs='',out='';
+  const top=34,H=204,lh=H/4,cx=104,hb=98,gap=5,dx=16,dy=9, hw=y=>hb*(y-top+6)/(H+6), W=400,VH=256;
+  let defs=defs3d('hp','#000'),out='';
   [4,3,2,1].forEach((id,i)=>{
-    const r=rows.find(x=>x.id===id), y0=top+i*lh+gap/2, y1=top+(i+1)*lh-gap/2;
-    const pts=`${cx-hw(y0)},${y0} ${cx+hw(y0)},${y0} ${cx+hw(y1)},${y1} ${cx-hw(y1)},${y1}`;
-    const f=Math.min(r.ratio,1), fy=y1-f*(y1-y0);
-    defs+=`<clipPath id="hc${id}"><rect x="0" y="${fy}" width="230" height="${f*(y1-y0)+.5}"/></clipPath>`;
-    const yc=(y0+y1)/2;
-    out+=`<g class="layer" data-tier="${id}" tabindex="0" role="button" aria-label="Xem tài sản tầng ${id} ${esc(r.name)}" data-tip="T${id} ${esc(r.name)}: ${tr(r.value)} · ${pct(r.share,0)} (mục tiêu ${r.target}%)">
-      <polygon points="${pts}" fill="var(--hero-ink)" fill-opacity=".10"/>
-      <polygon points="${pts}" clip-path="url(#hc${id})" fill="var(--h${id})"/>
-      <text class="gl" x="${cx}" y="${yc+5}" text-anchor="middle">T${id}</text>
-      <line x1="${cx+hw(yc)+6}" y1="${yc}" x2="252" y2="${yc}" stroke="var(--hero-mute)" stroke-opacity=".45" stroke-dasharray="2 3"/>
-      <text class="tn" x="260" y="${yc-2}">${esc(r.short)}</text>
-      <text class="tv" x="260" y="${yc+14}">${pct(r.share,0)} · mục tiêu ${r.target}%</text>
+    const r=rows.find(x=>x.id===id), y0=top+i*lh+gap/2, y1=top+(i+1)*lh-gap/2, yc=(y0+y1)/2;
+    const t=tier3d({id:'hc'+id,cx,hw,y0,y1,dx,dy,f:r.ratio,col:'var(--h'+id+')',ghost:'var(--hero-ink)',ghostOp:.1,sheen:'hps',W,H:VH});
+    defs+=t.clip;
+    out+=`<g class="layer" data-tier="${id}" style="--i:${4-id}" tabindex="0" role="button" aria-label="Xem tài sản tầng ${id} ${esc(r.name)}" data-tip="T${id} ${esc(r.name)}: ${tr(r.value)} · ${pct(r.share,0)} (mục tiêu ${r.target}%)">
+      ${t.svg}
+      <text class="gl" x="${cx}" y="${yc+5}" text-anchor="middle"${r.ratio<.55?' style="fill:var(--hero-ink)"':''}>T${id}</text>
+      <line x1="${cx+hw(yc)+dx+4}" y1="${yc-dy/2}" x2="252" y2="${yc-dy/2}" stroke="var(--hero-mute)" stroke-opacity=".45" stroke-dasharray="2 3"/>
+      <text class="tn" x="260" y="${yc-dy/2-2}">${esc(r.short)}</text>
+      <text class="tv" x="260" y="${yc-dy/2+14}">${pct(r.share,0)} · mục tiêu ${r.target}%</text>
     </g>`;
   });
-  const flag=`<line x1="${cx}" y1="${top-4}" x2="${cx}" y2="8" stroke="var(--hero-ink)" stroke-opacity=".7" stroke-width="2"/><polygon points="${cx},8 ${cx+20},14 ${cx},20" fill="var(--h2)"/>`;
-  const ground=`<line x1="4" y1="${top+H+8}" x2="236" y2="${top+H+8}" stroke="var(--hero-mute)" stroke-opacity=".5" stroke-width="2"/>`;
-  return `<svg class="hp" viewBox="0 0 400 252" role="group" aria-label="Tháp tài sản 4 tầng">${'<defs>'+defs+'</defs>'}${ground}${flag}${out}</svg>`;
+  const ax=cx+dx/2, ay=top-dy/2+2;
+  const flag=`<g class="flag"><line x1="${ax}" y1="${ay}" x2="${ax}" y2="6" stroke="var(--hero-ink)" stroke-opacity=".75" stroke-width="2" stroke-linecap="round"/><polygon points="${ax},6 ${ax+20},12 ${ax},18" fill="var(--h2)"/></g>`;
+  const ground=`<ellipse cx="${cx+dx/2}" cy="${top+H+4}" rx="${hb+26}" ry="9" fill="url(#hpg)"/>`;
+  return `<svg class="hp" viewBox="0 0 ${W} ${VH}" role="group" aria-label="Tháp tài sản 4 tầng"><defs>${defs}</defs>${ground}${out}${flag}</svg>`;
 }
 function pyramid(rows){
-  const top=10,H=250,lh=H/4,cx=150,hb=140,gap=4, hw=y=>hb*(y-top+4)/(H+4);
-  let defs='',out='';
+  const top=18,H=246,lh=H/4,cx=146,hb=136,gap=5,dx=18,dy=10, hw=y=>hb*(y-top+4)/(H+4), W=380,VH=276;
+  let defs=defs3d('py','var(--ink)'),out='';
   [4,3,2,1].forEach((id,i)=>{
-    const r=rows.find(x=>x.id===id), y0=top+i*lh+gap/2, y1=top+(i+1)*lh-gap/2;
-    const pts=`${cx-hw(y0)},${y0} ${cx+hw(y0)},${y0} ${cx+hw(y1)},${y1} ${cx-hw(y1)},${y1}`;
-    const f=Math.min(r.ratio,1), fy=y1-f*(y1-y0), yc=(y0+y1)/2, dv=r.share*100-r.target;
-    defs+=`<clipPath id="pc${id}"><rect x="0" y="${fy}" width="300" height="${f*(y1-y0)+.5}"/></clipPath>`;
-    out+=`<g class="layer" data-tier="${id}" tabindex="0" role="button" aria-label="Xem tài sản tầng ${id}" data-tip="T${id} ${esc(r.name)}: ${tr(r.value)} · đạt ${nf(r.ratio,1)} lần mục tiêu">
-      <polygon points="${pts}" fill="${tcol(id)}" fill-opacity=".16"/>
-      <polygon points="${pts}" clip-path="url(#pc${id})" fill="${tcol(id)}"/>
-      <text x="${cx}" y="${yc+5}" text-anchor="middle" class="v" style="font:700 14px var(--f-disp);fill:var(--surface)">${id===4?'T4':`T${id} · ${pct(r.share,0)}`}</text>
-      <text x="${cx+hw(yc)+8}" y="${yc-1}" class="dv ${dv>0.5?'pos':dv<-0.5?'neg':''}">${dv>=0?'+':'−'}${nf(Math.abs(dv),0)} điểm</text>
-      <text x="${cx+hw(yc)+8}" y="${yc+13}">${id===4?pct(r.share,0)+' · ':''}mục tiêu ${r.target}%</text>
+    const r=rows.find(x=>x.id===id), y0=top+i*lh+gap/2, y1=top+(i+1)*lh-gap/2, yc=(y0+y1)/2, dv=r.share*100-r.target;
+    const t=tier3d({id:'pc'+id,cx,hw,y0,y1,dx,dy,f:r.ratio,col:tcol(id),ghost:tcol(id),ghostOp:.16,sheen:'pys',W,H:VH});
+    defs+=t.clip;
+    const lx=cx+hw(y1)+dx+6, solid=r.ratio>=.55;
+    out+=`<g class="layer" data-tier="${id}" style="--i:${4-id}" tabindex="0" role="button" aria-label="Xem tài sản tầng ${id}" data-tip="T${id} ${esc(r.name)}: ${tr(r.value)} · đạt ${nf(r.ratio,1)} lần mục tiêu">
+      ${t.svg}
+      <text x="${cx}" y="${yc+5}" text-anchor="middle" class="v" style="font:700 14px var(--f-disp);fill:var(${solid?'--surface':'--ink'})">${id===4?'T4':`T${id} · ${pct(r.share,0)}`}</text>
+      <text x="${lx}" y="${yc-dy/2-1}" class="dv ${dv>0.5?'pos':dv<-0.5?'neg':''}">${dv>=0?'+':'−'}${nf(Math.abs(dv),0)} điểm</text>
+      <text x="${lx}" y="${yc-dy/2+13}">${id===4?pct(r.share,0)+' · ':''}mục tiêu ${r.target}%</text>
     </g>`;
   });
-  return `<svg class="chart" viewBox="0 0 380 264" style="max-width:440px;margin:0 auto" role="group" aria-label="Tháp so với mục tiêu"><defs>${defs}</defs>${out}</svg>`;
+  const ground=`<ellipse cx="${cx+dx/2}" cy="${top+H+4}" rx="${hb+24}" ry="9" fill="url(#pyg)"/>`;
+  return `<svg class="chart pyr3" viewBox="0 0 ${W} ${VH}" style="max-width:440px;margin:0 auto" role="group" aria-label="Tháp so với mục tiêu"><defs>${defs}</defs>${ground}${out}</svg>`;
 }
 function allocBars(C){
   const mx=Math.max(...C.rows.map(r=>Math.max(r.share,r.target/100)))*1.08||1;
@@ -1452,7 +1487,8 @@ function vLoans(C){
   const lend=sum(open.filter(l=>l.dir==='lend'),'left'), borrow=sum(open.filter(l=>l.dir==='borrow'),'left');
   const late=open.filter(l=>l.due&&l.due<today).length;
   const rows=[...LOANS].sort((a,b)=>(b.left>0)-(a.left>0)||(a.due||9e9)-(b.due||9e9)).map(l=>{const st=loanStatus(l,today);
-    return `<div class="arow"><span class="logo" style="--lc:${l.dir==='lend'?'var(--b-loan)':'var(--bad)'}">${ic(l.dir==='lend'?'handshake':'coins')}</span>
+    const pp=personOf(l.who,l.note);
+    return `<div class="arow"><span class="logo" style="--lc:${pp.color}" title="${esc(l.who)}">${ic(pp.icon)}</span>
       <div style="min-width:0"><div class="nm">${esc(l.who)}</div><div class="sb">${l.dir==='lend'?'Bạn cho vay':'Bạn vay'} ${tr(l.amt)}${l.start?' · từ '+sdate(l.start):''}${l.due?' · hạn '+sdate(l.due):''}${l.rate?' · '+nf(l.rate*100,1)+'%/năm':''}${l.note?' · '+esc(l.note):''}</div>
       <div class="bar" style="margin-top:6px"><i style="width:${l.amt?Math.min(100,l.paid/l.amt*100):0}%;background:var(--good)"></i></div>
       <div class="chips"><span class="chip ${st[0]}">${st[1]}</span>${l.paid>0?`<span class="chip">${l.dir==='lend'?'Đã thu':'Đã trả'} ${tr(l.paid)}</span>`:''}</div></div>
@@ -1901,8 +1937,9 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=21, SEEN_KEY='thaptaisan.seen';
+const APP_VER=22, SEEN_KEY='thaptaisan.seen';
 const CHANGES=[
+  [22,'28/10/2026',['Tháp <b>3D</b>: mỗi tầng là một khối có mặt bên, mặt trên và bóng đổ; mức đạt mục tiêu như mực nước trong khối; các tầng xếp lần lượt khi chuyển tab','Logo <b>Honda</b> và <b>Zalopay</b> mới theo ảnh bạn gửi','Sổ nợ: biểu tượng nam/nữ theo cách xưng hô (Cô, Chú…); tên riêng thì ghi "nam" hoặc "nữ" ở cột Ghi chú']],
   [21,'28/10/2026',['Nút <b>Có gì mới</b> (ngôi sao trên thanh trên): xem thay đổi của từng bản và cách dùng app','Có bản mới thì bảng này tự mở một lần, nút có chấm đỏ','Biểu tượng và logo thương hiệu cho từng tài sản (Honda, Acer, Xiaomi, Huawei…)']],
   [20,'28/10/2026',['Mở app có logo tháp chuyển động khoảng 0,9 giây','Chuyển tab trượt mượt, các thẻ hiện lần lượt; ô sáng trượt trên thanh tab','Thanh trên và thanh tab dạng kính mờ; nút nhún khi bấm; "Để sau" thu gọn mượt']],
   [19,'28/10/2026',['Thẻ <b>Lương tự trả</b> ở Tổng quan: 15 Tr/tháng từ 10/2026, quỹ lương còn đủ mấy tháng','Chip <b>Khả dụng</b> nổi bật trên thẻ đầu','Kiểm tra gửi sổ giữ lại 2 tháng lương tự trả']],
