@@ -189,6 +189,12 @@ svg.chart text.h{fill:var(--ink);font:700 14px var(--f-disp);letter-spacing:.03e
 #tip{position:fixed;z-index:60;pointer-events:none;background:var(--ink);color:var(--bg);font:500 12px/1.35 var(--f-body);padding:7px 10px;border-radius:9px;max-width:240px;box-shadow:var(--shadow)}
 .bar{height:8px;border-radius:999px;background:var(--surface2);overflow:hidden}
 .bar>i{display:block;height:100%;border-radius:999px;background:var(--accent)}
+.bar.rk{position:relative;overflow:visible}
+.bar.rk>em{position:absolute;top:-4px;bottom:-4px;width:3px;margin-left:-1.5px;border-radius:2px;background:var(--ink)}
+.chk{display:grid;gap:4px;margin-top:12px;padding:10px 12px;border-radius:10px;border-left:4px solid var(--good);background:var(--surface2);font-size:13px;line-height:1.45}
+.chk.bad{border-left-color:var(--bad)}
+.chk>b{display:flex;gap:6px;align-items:center;color:var(--ink)}
+.chk.ok>b .i{color:var(--good)}.chk.bad>b .i{color:var(--bad)}
 
 .logo.img{background:var(--on-brand);box-shadow:inset 0 0 0 1px var(--line)}
 .logo.img::after{display:none}
@@ -537,6 +543,8 @@ function goalsCalc(now,net){
 }
 function compute(S){
   const now=S.now||Date.now();
+  // số liệu chụp sẵn hoặc lưu trên máy từ trước khi có Cấu hình B19–B21: dùng mặc định
+  const cf=DATA.cfg;cf.riskCap=cf.riskCap||0.15;cf.keepM=cf.keepM||2;cf.matWarn=cf.matWarn||15;
   const assets=buildAssets(S,now).map(a=>({...a,tier:tierOf(S,a)}));
   const essential=Math.max(1,(S.exp.fixed+S.exp.personal)||S.expense);
   const targetM=Math.max(DATA.cfg.emin||6,DATA.cfg.gap||0), emTarget=targetM*essential;
@@ -577,7 +585,15 @@ function compute(S){
   const h=health(rows,runway,debt,nw,targetM,sr,DATA.cfg.insured);
   const goals=goalsCalc(now,net);
   const acc=accCalc(inNW,net);
-  return {S,now,debt,payable,assets,inNW,tower,outside,entitled,entV,receivables,recV,nw,nwAvail,tw,L,liquid,essential,targetM,emTarget,costBase,pnlTrue,invBase,pnlInv,depr,chg30,chgPct:chg30/((nw-chg30)||1),rows,runway,h,X,maxSim,simW,
+  // Trước khi gửi sổ: tiền dùng ngay (ví, tiền mặt) còn lại sau khi chuyển ngưỡng B16 vào sổ phải đủ B20 tháng chi thiết yếu + nợ phải trả trong 60 ngày
+  if(acc){const lock=acc.w.liq?Math.min(acc.have,acc.goal):0, today=serialOf(now),
+    dueSoon=sum(LOANS.filter(l=>l.dir==='borrow'&&l.left>0&&l.due&&l.due-today<=60),'left'), keep=DATA.cfg.keepM*essential+dueSoon, after=L.now-lock;
+    // số nên gửi tính tại lúc ví vừa đủ ngưỡng (chưa đủ thì giả định ví lên tới ngưỡng, các khoản khác giữ nguyên)
+    const atGoal=acc.w.liq?after+acc.goal:L.now;
+    acc.chk={lock,after,keep,dueSoon,months:after/essential,ok:after>=keep,safe:Math.min(acc.goal,Math.max(0,Math.floor((atGoal-keep)/1e7)*1e7))};}
+  // Trần cổ phiếu + crypto (Cấu hình B19, Kai chọn 15% tài sản ròng)
+  const risky=sum(inNW.filter(a=>MARKET.test(a.kind)),'value'), riskShare=risky/Math.max(nw,1);
+  return {S,now,risky,riskShare,debt,payable,assets,inNW,tower,outside,entitled,entV,receivables,recV,nw,nwAvail,tw,L,liquid,essential,targetM,emTarget,costBase,pnlTrue,invBase,pnlInv,depr,chg30,chgPct:chg30/((nw-chg30)||1),rows,runway,h,X,maxSim,simW,
     cashIdle,interestMonthly,net,sr,goals,acc,targetSum:sum(rows,'target')};
 }
 // Quy tắc của Kai: tiền dư mỗi tháng chuyển vào ví tích lũy (Cấu hình B17), đủ ngưỡng (B16) thì mở sổ tiết kiệm
@@ -765,7 +781,16 @@ function accCard(C){
       ${cash.length?`<div class="kpi"><div class="label">Tiền mặt chi tiêu</div><div class="v">${tr(sum(cash,'value'))}</div><div class="s">Trích ra sau khi nhận lương</div></div>`:''}
     </div>
     <div class="bar" style="height:12px"><i style="width:${p*100}%;background:${a.ready?'var(--good)':'var(--c2)'}"></i></div>
+    ${openCheck(C)}
     <p class="note">Quy tắc: nhận lương → trích tiền mặt chi tiêu → phần dư chuyển vào ${esc(a.w.name)} → đủ ${tr(a.goal)} thì mở sổ tiết kiệm. Ngưỡng và tên ví sửa ở Cấu hình B16, B17.</p>`;
+}
+// Kiểm tra trước khi gửi sổ: sau khi chuyển ngưỡng vào sổ, ví + tiền mặt còn lại có đủ sống không
+function openCheck(C){
+  const a=C.acc, k=a&&a.chk;if(!k)return '';
+  const need=`${nf(DATA.cfg.keepM,0)} tháng chi thiết yếu (${tr(DATA.cfg.keepM*C.essential)})${k.dueSoon?' + nợ phải trả trong 60 ngày '+tr(k.dueSoon):''}`;
+  return `<div class="chk ${k.ok?'ok':'bad'}"><b>${ic(k.ok?'check':'alert','sm')} ${a.ready?'Gửi '+tr(k.lock)+' vào sổ':'Khi ví đủ '+tr(a.goal)+' mà gửi hết vào sổ'}: ${k.ok?'vẫn đủ sống':'tiền dùng ngay sẽ thiếu'}</b>
+    <span>Ví, tiền mặt còn lại khoảng ${tr(Math.max(0,k.after))}, đủ ${nf(Math.max(0,k.months),1)} tháng chi thiết yếu. Cần giữ ${need}.</span>
+    ${k.ok?'':`<span>${k.safe>0?'Nên gửi khoảng '+tr(k.safe)+', phần còn lại để trong ví':'Chưa nên gửi'}, chờ thêm thu nhập rồi gửi tiếp. Sổ vẫn rút sớm được nhưng mất lãi.</span>`}</div>`;
 }
 function cfChart(){
   const ms=CF.filter(m=>m.inc>0||m.exp>0).slice(-12);
@@ -912,7 +937,12 @@ function insights(C){
   for(const a of C.inNW.filter(a=>a.kind==='stock'&&a.sym)){const p=(DATA.prices||{})[a.sym.toUpperCase()];if(!p||!p.sell||!p.price)continue;
     if(p.price>=p.sell) L.push({sev:'warn',prio:2,icon:'up',t:`${esc(a.sym)} đạt ${nf(p.price,0)}đ, chạm giá cân nhắc bán ${nf(p.sell,0)}đ`,d:`Giá trị hiện tại ${tr(a.value)}, ${a.cost>0?pcts((a.value-a.cost)/a.cost)+' so với vốn':''}.`,a:'Theo kế hoạch của bạn: cân nhắc bán. Quyết định là của bạn; đổi mức giá ở sheet Giá CP cột G.'});
     else L.push({sev:'info',prio:9,icon:'target',t:`${esc(a.sym)} ${nf(p.price,0)}đ, còn ${pct(p.sell/p.price-1,1)} tới giá cân nhắc bán ${nf(p.sell,0)}đ`,d:'App và email sẽ báo khi giá chạm mức này (sheet Giá CP cột G).'});}
-  if(C.acc&&C.acc.ready) L.push({sev:'warn',prio:2,icon:'bank',t:`${esc(C.acc.w.name)} đã có ${tr(C.acc.have)}: đủ mở sổ tiết kiệm`,d:`Theo quy tắc của bạn, ví tích lũy đủ ${tr(C.acc.goal)} thì mở sổ.`,a:'Mở sổ kỳ hạn, chừa lại trong ví một ít để xoay, rồi nhắn chat ghi tài sản: "mở sổ … triệu, lãi …%, kỳ hạn … tháng".'});
+  if(C.acc&&C.acc.ready){const k=C.acc.chk, left=`ví, tiền mặt còn ${tr(Math.max(0,k.after))} (${nf(Math.max(0,k.months),1)} tháng chi thiết yếu)`;
+    if(k.ok) L.push({sev:'warn',prio:2,icon:'bank',t:`${esc(C.acc.w.name)} đã có ${tr(C.acc.have)}: đủ mở sổ tiết kiệm`,d:`Theo quy tắc của bạn, ví tích lũy đủ ${tr(C.acc.goal)} thì mở sổ. Gửi xong ${left}, vẫn đủ sống.`,a:'Mở sổ kỳ hạn, rồi nhắn chat ghi tài sản: "mở sổ … triệu, lãi …%, kỳ hạn … tháng".'});
+    else L.push({sev:'bad',prio:1,icon:'bank',t:`Gửi ${tr(k.lock)} vào sổ thì tiền dùng ngay chỉ còn ${tr(Math.max(0,k.after))}`,d:`Gửi xong ${left}, dưới mức cần giữ ${tr(k.keep)} (${nf(cfg.keepM,0)} tháng chi thiết yếu${k.dueSoon?' + nợ sắp trả':''}, Cấu hình B20).`,a:k.safe>0?`Chỉ gửi khoảng ${tr(k.safe)}, phần còn lại để trong ví; đủ thu nhập thêm thì gửi tiếp.`:'Chưa gửi sổ, để tiền trong ví cho đến khi có thêm thu nhập.'});}
+  if(C.risky>0){const cap=cfg.riskCap, rk=C.riskShare;
+    if(rk>cap) L.push({sev:'warn',prio:2,icon:'shield',t:`Cổ phiếu + crypto ${pct(rk,1)} tài sản ròng, vượt trần ${pct(cap,0)}`,d:`Đang có ${tr(C.risky)}, trần ${pct(cap,0)} là ${tr(cap*C.nw)}. Giá giảm mạnh thì phần này kéo tài sản ròng xuống nhiều nhất.`,a:`Không mua thêm. Tài sản ròng tăng tới ${tr(C.risky/cap)} thì tự về dưới trần; bán hay không là quyết định của bạn.`});
+    else L.push({sev:'good',prio:24,icon:'shield',t:`Cổ phiếu + crypto ${pct(rk,1)} tài sản ròng, dưới trần ${pct(cap,0)}`,d:`Còn cách trần ${tr(cap*C.nw-C.risky)}. Trần đặt ở Cấu hình B19.`});}
   for(const a of C.inNW.filter(a=>a.kind==='flex'&&a.rate<REF_RATE&&a.value>2*E&&!(C.acc&&C.acc.w===a))){const extra=a.value-2*E;
     L.push({sev:'info',prio:5,icon:'wallet',t:`${esc(a.name)} đang giữ ${tr(a.value)}, khoảng ${nf(a.value/E,1)} tháng chi tiêu`,
       d:`Lãi ${nf(a.rate,2)}%/năm, thấp hơn mức tiết kiệm tham chiếu ${nf(REF_RATE,2)}%. Phần trên 2 tháng chi tiêu (${tr(extra)}) gửi kỳ hạn sẽ thêm khoảng ${tr(extra*(REF_RATE-a.rate)/100)}/năm.`,
@@ -920,8 +950,10 @@ function insights(C){
   if(C.cashIdle>C.essential) L.push({sev:'warn',prio:4,icon:'coins',t:`Tiền mặt không sinh lãi ${tr(C.cashIdle)}, hơn 1 tháng chi`,d:`Mất khoảng ${tr(C.cashIdle*REF_RATE/100)}/năm so với lãi ${nf(REF_RATE,2)}%.`,a:'Chuyển sang ví sinh lời hoặc tiết kiệm, chỉ giữ tiền mặt đủ chi tiêu.'});
 
   const near=C.inNW.filter(a=>a.kind==='savings'&&!a.sv.done&&a.daysLeft<=365).sort((a,b)=>a.daysLeft-b.daysLeft);
-  if(near.length) L.push({sev:near[0].daysLeft<=90?'warn':'info',prio:near[0].daysLeft<=90?3:7,icon:'calendar',t:`${near.length} sổ đáo hạn trong 12 tháng`,
-    d:near.map(a=>`${esc(a.name)} ${fmtD(a.sv.mat)} (còn ${a.daysLeft} ngày, ${tr(a.value)})`).join('; ')+'.',a:'Đặt lịch nhắc trước 7 ngày và quyết định trước: gia hạn ở T1 hay chuyển sang tầng đang thiếu.'});
+  if(near.length) L.push({sev:'info',prio:7,icon:'calendar',t:`${near.length} sổ đáo hạn trong 12 tháng`,
+    d:near.map(a=>`${esc(a.name)} ${fmtD(a.sv.mat)} (còn ${a.daysLeft} ngày, ${tr(a.value)})`).join('; ')+`. App và email nhắc trước ${cfg.matWarn} ngày (Cấu hình B21).`});
+  for(const a of near.filter(a=>a.daysLeft<=cfg.matWarn)) L.push({sev:'warn',prio:2,icon:'calendar',t:`${esc(a.name)} đáo hạn ${fmtD(a.sv.mat)}, còn ${a.daysLeft} ngày`,
+    d:`Nhận về khoảng ${tr(a.principal+a.sv.full)} (gốc ${tr(a.principal)} + lãi ${tr(a.sv.full)}).`,a:`Quyết định trước ngày đáo hạn: gửi lại ${tr(a.principal)} (so lãi vài ngân hàng), hoặc để một phần ở ví nếu tiền dùng ngay đang thiếu.`});
   const done=C.inNW.filter(a=>a.kind==='savings'&&a.sv.done);
   if(done.length) L.push({sev:'warn',prio:2,icon:'calendar',t:`${done.length} sổ đã đáo hạn`,d:done.map(a=>esc(a.name)).join(', ')+' đã hết kỳ hạn, lãi sau hạn thường rất thấp.',a:'Cập nhật lại sổ mới (ngày gửi, kỳ hạn) trong sheet.'});
 
@@ -1111,7 +1143,13 @@ function stockCard(C){
         ${sell?`<em class="sell" style="left:${X(sell)}%" title="Giá cân nhắc bán"></em>`:''}<b style="left:${X(price)}%"></b></div>
         <div class="pg-l">${cost?`<span style="left:${X(cost)}%">Vốn ${K(cost)}</span>`:''}${sell?`<span class="sell" style="left:${X(sell)}%">Bán ${K(sell)}</span>`:''}</div></div>
       ${line}
-      <p class="note">${sell?(price>=sell?'Đã chạm giá cân nhắc bán.':'Còn '+pct(sell/price-1,1)+' tới giá cân nhắc bán.')+(cost&&sell<cost?` Lưu ý: giá này thấp hơn giá vốn ${K(cost)}, bán ở đó vẫn lỗ khoảng ${tr((cost-sell)*a.qty)}.`:''):'Đặt giá cân nhắc bán ở sheet Giá CP cột G.'} Giá cập nhật mỗi giờ trong phiên.</p></div>`;}).join(''));
+      <p class="note">${sell?(price>=sell?'Đã chạm giá cân nhắc bán.':'Còn '+pct(sell/price-1,1)+' tới giá cân nhắc bán.')+(cost&&sell<cost?` Lưu ý: giá này thấp hơn giá vốn ${K(cost)}, bán ở đó vẫn lỗ khoảng ${tr((cost-sell)*a.qty)}.`:''):'Đặt giá cân nhắc bán ở sheet Giá CP cột G.'} Giá cập nhật mỗi giờ trong phiên.</p></div>`;}).join('')+riskBar(C));
+}
+function riskBar(C){
+  const cap=DATA.cfg.riskCap, rk=C.riskShare, mx=Math.max(cap*1.6,rk*1.1), X=v=>Math.min(100,v/mx*100), over=rk>cap;
+  return `<div class="label" style="margin:14px 0 6px">Cổ phiếu + crypto so với tài sản ròng</div>
+    <div class="bar rk" style="height:12px" data-tip="${tr(C.risky)} ÷ tài sản ròng ${tr(C.nw)}"><i style="width:${X(rk)}%;background:${over?'var(--bad)':'var(--c3)'}"></i><em style="left:${X(cap)}%"></em></div>
+    <p class="note"><b class="${over?'neg':''}">${pct(rk,1)}</b> · trần ${pct(cap,0)} (${tr(cap*C.nw)}) ở Cấu hình B19. ${over?'Đang vượt trần: không mua thêm.':'Còn cách trần '+tr(cap*C.nw-C.risky)+'.'}</p>`;
 }
 // Ô tỷ lệ (treemap, chia ô vuông dần): mỗi ô một tài sản, diện tích theo giá trị, màu theo tầng
 function squarify(items,W,H){
@@ -1376,12 +1414,13 @@ function rulesCheck(C){
   out.push(['05','Nhiều sổ khoảng '+tr(goal)+' thay vì một sổ lớn',big.length?['warn','Cần chú ý']:['good','Đạt'],big.length?'Sổ lớn: '+big.map(x=>esc(x.name)+' '+tr(x.principal)).join(', '):so.length+' sổ, sổ lớn nhất '+(so.length?tr(Math.max(...so.map(x=>x.principal))):'–')]);
   const r3=C.rows.find(r=>r.id===3), r4=C.rows.find(r=>r.id===4), risk=(r3?r3.share:0)+(r4?r4.share:0), lim=((r3?r3.target:0)+(r4?r4.target:0))/100;
   out.push(['06','Ổn định hơn tăng trưởng, không FOMO',risk<=lim+0.05?['good','Đạt']:['warn','Cần chú ý'],'T3 + T4 đang '+pct(risk,0)+', mục tiêu '+pct(lim,0)]);
+  out.push(['07','Cổ phiếu + crypto không quá '+pct(cfg.riskCap,0)+' tài sản ròng',C.riskShare<=cfg.riskCap?['good','Đạt']:['warn','Vượt trần'],'Đang '+pct(C.riskShare,1)+' · '+tr(C.risky)]);
   return out;
 }
 function vRules(C){
   const rs=rulesCheck(C), ok=rs.filter(r=>r[2][0]==='good').length;
   return card('Nguyên tắc vàng','shield',`<div class="alist">${rs.map(r=>`<div class="arow" style="grid-template-columns:auto minmax(0,1fr) auto"><span class="logo sm" style="--lc:var(--accent)">${r[0]}</span><div style="min-width:0"><div class="nm">${r[1]}</div><div class="sb">${r[3]}</div></div><span class="chip ${r[2][0]}">${r[2][1]}</span></div>`).join('')}</div>
-    <p class="note">Theo plan tài chính 16/06/2026. Nguyên tắc 02 (chia lương 15/35) không theo dõi vì bạn tự quy tài sản.</p>`,ok+'/'+rs.length+' đạt');
+    <p class="note">Theo plan tài chính 16/06/2026. Nguyên tắc 02 (chia lương 15/35) không theo dõi vì bạn tự quy tài sản. Nguyên tắc 07 bạn thêm ngày 28/10/2026.</p>`,ok+'/'+rs.length+' đạt');
 }
 function vAnalysis(C){
   const ins=insights(C), plan=ins.filter(i=>i.a&&i.sev!=='good').slice(0,3), net=INCOME-S.expense;
@@ -1488,7 +1527,8 @@ function parseSheet(res){
     rows.push({name:String(g(0)),type:g(1)||'',tier:g(2)||'',value:n(g(3)),cost:n(g(4)),rate:n(g(5)),start:n(g(6)),term:n(g(7)),chg30:n(g(8)),nw:g(9)||'',note:g(10)||'',buy:n(g(11)),dep:n(g(12)),sym:g(13)||'',qty:n(g(14)),autoV:typeof g(18)==='number'?g(18):null,autoC:typeof g(21)==='number'?g(21):null});}
   const gc=r=>G[r+',1'];
   const cfg={personal:n(gc(2)),fixed:n(gc(3)),other:n(gc(4)),income:n(gc(6)),ref:n(gc(7)),emin:n(gc(8))||6,emax:n(gc(9))||12,longd:n(gc(10))||365,debt:n(gc(11)),
-    haircut:gc(12)===undefined?0.7:n(gc(12)),gap:n(gc(13)),insured:gc(14)?String(gc(14)):'',saveGoal:n(gc(15))||100000000,saveWallet:String(gc(16)||'Zalopay'),saveCount:n(gc(17))||5};
+    haircut:gc(12)===undefined?0.7:n(gc(12)),gap:n(gc(13)),insured:gc(14)?String(gc(14)):'',saveGoal:n(gc(15))||100000000,saveWallet:String(gc(16)||'Zalopay'),saveCount:n(gc(17))||5,
+    riskCap:n(gc(18))||0.15,keepM:n(gc(19))||2,matWarn:n(gc(20))||15};
   const tiers=[];for(let r=2;r<6;r++){if(T[r+',0']===undefined)continue;tiers.push({id:n(T[r+',0']),name:String(T[r+',1']||''),def:String(T[r+',2']||''),target:Math.round(n(T[r+',3'])*100)});}
   const types=[];for(let r=9;r<19;r++){if(!T[r+',0'])continue;types.push({name:String(T[r+',0']),tier:n(T[r+',1']),liq:T[r+',2']==='Có'});}
   if(tiers.length!==4) throw new Error('Sheet Tầng cần đủ 4 tầng');
@@ -1498,7 +1538,7 @@ function parseSheet(res){
   return {rows,cfg,tiers,types,prices};
 }
 // Hai nguồn dữ liệu: artifact trên claude.ai đọc qua connector; bản website đọc Sheets API bằng token đăng nhập Google (chỉ đọc)
-const RANGES=["'Tài sản'!A5:O54","'Tài sản'!S5:V54","'Cấu hình'!A3:B18","'Tầng'!A3:D6","'Tầng'!A10:C19","'Giá CP'!A3:G12"];
+const RANGES=["'Tài sản'!A5:O54","'Tài sản'!S5:V54","'Cấu hình'!A3:B21","'Tầng'!A3:D6","'Tầng'!A10:C19","'Giá CP'!A3:G12"];
 const HIST_RANGE="'Lịch sử'!A2:J2000", CF_RANGE="'Dòng tiền'!A3:L62", GOAL_RANGE="'Mục tiêu'!A3:F22", LOAN_RANGE="'Sổ nợ'!A3:J40";
 function rowsOf(res,title,r0,r1,read){const M=cellMap(res)[title]||{},out=[];for(let r=r0;r<r1;r++){const g=c=>M[r+','+c];const x=read(g);if(x)out.push(x);}return out;}
 const num=v=>typeof v==='number'?v:0;
