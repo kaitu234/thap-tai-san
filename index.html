@@ -247,6 +247,8 @@ details.more{margin-top:8px} details.more summary{cursor:pointer;font-size:12.5p
 .hg-t{height:8px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden} .hg-t i{display:block;height:100%;border-radius:99px;background:var(--up-hero)}
 .hg-s{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--hero-mute)} .hg-s span{min-width:0}
 .hg-v{font-size:11.5px;font-weight:600;color:var(--hero-ink);line-height:1.4}
+.avail{display:inline-flex;align-items:baseline;gap:5px;margin-right:6px;padding:3px 10px;border-radius:999px;background:var(--hero-ink);color:var(--hero);font-weight:600;font-size:12.5px}
+.avail b{font-size:14px;font-weight:800}
 .spark{width:96px;height:28px;flex:none;opacity:.9}
 /* thác nước 30 ngày */
 .wf{display:grid;gap:6px}
@@ -588,15 +590,16 @@ function compute(S){
   const acc=accCalc(inNW,net);
   // Trước khi gửi sổ: tiền dùng ngay (ví, tiền mặt) còn lại sau khi chuyển ngưỡng B16 vào sổ phải đủ B20 tháng chi thiết yếu + nợ phải trả trong 60 ngày
   if(acc){const lock=acc.w.liq?Math.min(acc.have,acc.goal):0, today=serialOf(now),
-    dueSoon=sum(LOANS.filter(l=>l.dir==='borrow'&&l.left>0&&l.due&&l.due-today<=60),'left'), keep=DATA.cfg.keepM*essential+dueSoon, after=L.now-lock;
+    dueSoon=sum(LOANS.filter(l=>l.dir==='borrow'&&l.left>0&&l.due&&l.due-today<=60),'left'), base=Math.max(essential,DATA.cfg.salary||0), keep=DATA.cfg.keepM*base+dueSoon, after=L.now-lock;
     // số nên gửi tính tại lúc ví vừa đủ ngưỡng (chưa đủ thì giả định ví lên tới ngưỡng, các khoản khác giữ nguyên)
     const atGoal=acc.w.liq?after+acc.goal:L.now;
-    acc.chk={lock,after,keep,dueSoon,months:after/essential,ok:after>=keep,safe:Math.min(acc.goal,Math.max(0,Math.floor((atGoal-keep)/1e7)*1e7))};}
+    acc.chk={lock,after,keep,dueSoon,base,bySal:base>essential,months:after/essential,ok:after>=keep,safe:Math.min(acc.goal,Math.max(0,Math.floor((atGoal-keep)/1e7)*1e7))};}
   // Trần cổ phiếu + crypto (Cấu hình B19, Kai chọn 15% tài sản ròng)
   const risky=sum(inNW.filter(a=>MARKET.test(a.kind)),'value'), riskShare=risky/Math.max(nw,1);
   // Trần cho vay (B22) và tiền góp Kai Café (B23): tiền góp lấy vốn góp đồng bộ từ sheet Kai Café, chưa đọc được thì cột Vốn ở Tài sản
   const kaiA=inNW.find(a=>a.kind==='biz'&&/kai/i.test(a.name)), kaiPut=kaiA?kaiA.cost:0, kaiVal=kaiA?kaiA.value:0;
-  return {S,now,risky,riskShare,kaiA,kaiPut,kaiVal,debt,payable,assets,inNW,tower,outside,entitled,entV,receivables,recV,nw,nwAvail,tw,L,liquid,essential,targetM,emTarget,costBase,pnlTrue,invBase,pnlInv,depr,chg30,chgPct:chg30/((nw-chg30)||1),rows,runway,h,X,maxSim,simW,
+  const pay=payroll(now);
+  return {S,now,risky,riskShare,kaiA,kaiPut,kaiVal,pay,debt,payable,assets,inNW,tower,outside,entitled,entV,receivables,recV,nw,nwAvail,tw,L,liquid,essential,targetM,emTarget,costBase,pnlTrue,invBase,pnlInv,depr,chg30,chgPct:chg30/((nw-chg30)||1),rows,runway,h,X,maxSim,simW,
     cashIdle,interestMonthly,net,sr,goals,acc,targetSum:sum(rows,'target')};
 }
 // Quy tắc của Kai: tiền dư mỗi tháng chuyển vào ví tích lũy (Cấu hình B17), đủ ngưỡng (B16) thì mở sổ tiết kiệm
@@ -790,10 +793,34 @@ function accCard(C){
 // Kiểm tra trước khi gửi sổ: sau khi chuyển ngưỡng vào sổ, ví + tiền mặt còn lại có đủ sống không
 function openCheck(C){
   const a=C.acc, k=a&&a.chk;if(!k)return '';
-  const need=`${nf(DATA.cfg.keepM,0)} tháng chi thiết yếu (${tr(DATA.cfg.keepM*C.essential)})${k.dueSoon?' + nợ phải trả trong 60 ngày '+tr(k.dueSoon):''}`;
+  const need=`${nf(DATA.cfg.keepM,0)} tháng ${k.bySal?'lương tự trả':'chi thiết yếu'} (${tr(DATA.cfg.keepM*k.base)})${k.dueSoon?' + nợ phải trả trong 60 ngày '+tr(k.dueSoon):''}`;
   return `<div class="chk ${k.ok?'ok':'bad'}"><b>${ic(k.ok?'check':'alert','sm')} ${a.ready?'Gửi '+tr(k.lock)+' vào sổ':'Khi ví đủ '+tr(a.goal)+' mà gửi hết vào sổ'}: ${k.ok?'vẫn đủ sống':'tiền dùng ngay sẽ thiếu'}</b>
     <span>Ví, tiền mặt còn lại khoảng ${tr(Math.max(0,k.after))}, đủ ${nf(Math.max(0,k.months),1)} tháng chi thiết yếu. Cần giữ ${need}.</span>
     ${k.ok?'':`<span>${k.safe>0?'Nên gửi khoảng '+tr(k.safe)+', phần còn lại để trong ví':'Chưa nên gửi'}, chờ thêm thu nhập rồi gửi tiếp. Sổ vẫn rút sớm được nhưng mất lãi.</span>`}</div>`;
+}
+// Lương tự trả (Cấu hình B24 từ tháng B25): mọi thu nhập vào quỹ lương, mỗi tháng rút đúng mức lương.
+// Thu nhập tháng N về 5–10 tháng N+1 nên lương tháng M lấy từ thu nhập các tháng ≤ M−1.
+const mIdx=s=>{const t=new Date((s-25569)*DAY);return t.getUTCFullYear()*12+t.getUTCMonth();}, mName=i=>(i%12+1)+'/'+Math.floor(i/12);
+function payroll(now){
+  const sal=DATA.cfg.salary, st=DATA.cfg.salStart;if(!sal||!st)return null;
+  const t=new Date(now+7*36e5), cur=t.getUTCFullYear()*12+t.getUTCMonth(), s0=mIdx(st), inc=i=>{const x=CF.find(c=>mIdx(c.m)===i);return x?x.inc:0;};
+  const rows=[];let bal=0;
+  for(let m=s0;m<=cur;m++){const v=inc(m-1);bal+=v-sal;rows.push({m,src:m-1,inc:v,bal});}
+  return {sal,s0,cur,rows,bal,months:bal/sal,next:inc(cur),nextOk:CF.some(c=>mIdx(c.m)===cur&&c.inc>0)};
+}
+function payCard(C){
+  const P=C.pay;if(!P)return '';
+  const st=P.months<1?'bad':P.months<3?'warn':'good', W=v=>Math.max(0,Math.min(100,v/6*100));
+  return card('Lương tự trả','wallet',`<div class="kpis" style="margin-bottom:12px">
+      <div class="kpi"><div class="label">Lương mỗi tháng</div><div class="v">${tr(P.sal)}</div><div class="s">Từ tháng ${mName(P.s0)}</div></div>
+      <div class="kpi"><div class="label">Quỹ lương còn</div><div class="v ${P.bal<0?'neg':''}">${tr(P.bal)}</div><div class="s">Đủ ${nf(Math.max(0,P.months),1)} tháng lương</div></div>
+      <div class="kpi"><div class="label">Tháng sau vào quỹ</div><div class="v">${P.nextOk?tr(P.next):'chưa có'}</div><div class="s">Thu nhập tháng ${mName(P.cur)}, về 5–10/${(P.cur+1)%12+1}</div></div>
+    </div>
+    <div class="bar rk" style="height:12px" data-tip="Quỹ lương ${tr(P.bal)} ÷ lương ${tr(P.sal)}"><i style="width:${W(P.months)}%;background:var(--${st==='good'?'good':st==='warn'?'warn':'bad'})"></i><em style="left:50%"></em></div>
+    <div class="g-l" style="position:relative;height:16px;font-size:11px;color:var(--muted)"><span style="position:absolute;left:0">0</span><span style="position:absolute;left:50%;transform:translateX(-50%)">3 tháng</span><span style="position:absolute;right:0">6 tháng</span></div>
+    <div class="tablewrap" style="margin-top:10px"><table><tr><th>Tháng</th><th>Vào</th><th>Lương</th><th>Còn</th></tr>
+      ${P.rows.map(r=>`<tr><td>${mName(r.m)}</td><td class="${r.inc?'pos':'muted'}">${r.inc?'+'+tr(r.inc):'chưa có'}</td><td class="neg">−${tr(P.sal)}</td><td class="${r.bal<0?'neg':''}">${tr(r.bal)}</td></tr>`).join('')}</table></div>
+    <p class="note">Cột Vào là thu nhập tháng trước (về 5–10 tháng này). Mọi thu nhập (lương cũ, freelance, Shopee) cộng vào quỹ; mỗi tháng chỉ rút đúng ${tr(P.sal)} để chi. Tháng kiếm nhiều thì quỹ dày lên, tháng ít vẫn có lương. Quỹ là số app tính, tiền thật nằm trong ví. Sửa mức lương ở Cấu hình B24, B25.</p>`,'đủ '+nf(Math.max(0,P.months),1)+' tháng');
 }
 function cfChart(){
   const ms=CF.filter(m=>m.inc>0||m.exp>0).slice(-12);
@@ -942,7 +969,11 @@ function insights(C){
     else L.push({sev:'info',prio:9,icon:'target',t:`${esc(a.sym)} ${nf(p.price,0)}đ, còn ${pct(p.sell/p.price-1,1)} tới giá cân nhắc bán ${nf(p.sell,0)}đ`,d:'App và email sẽ báo khi giá chạm mức này (sheet Giá CP cột G).'});}
   if(C.acc&&C.acc.ready){const k=C.acc.chk, left=`ví, tiền mặt còn ${tr(Math.max(0,k.after))} (${nf(Math.max(0,k.months),1)} tháng chi thiết yếu)`;
     if(k.ok) L.push({sev:'warn',prio:2,icon:'bank',t:`${esc(C.acc.w.name)} đã có ${tr(C.acc.have)}: đủ mở sổ tiết kiệm`,d:`Theo quy tắc của bạn, ví tích lũy đủ ${tr(C.acc.goal)} thì mở sổ. Gửi xong ${left}, vẫn đủ sống.`,a:'Mở sổ kỳ hạn, rồi nhắn chat ghi tài sản: "mở sổ … triệu, lãi …%, kỳ hạn … tháng".'});
-    else L.push({sev:'bad',prio:1,icon:'bank',t:`Gửi ${tr(k.lock)} vào sổ thì tiền dùng ngay chỉ còn ${tr(Math.max(0,k.after))}`,d:`Gửi xong ${left}, dưới mức cần giữ ${tr(k.keep)} (${nf(cfg.keepM,0)} tháng chi thiết yếu${k.dueSoon?' + nợ sắp trả':''}, Cấu hình B20).`,a:k.safe>0?`Chỉ gửi khoảng ${tr(k.safe)}, phần còn lại để trong ví; đủ thu nhập thêm thì gửi tiếp.`:'Chưa gửi sổ, để tiền trong ví cho đến khi có thêm thu nhập.'});}
+    else L.push({sev:'bad',prio:1,icon:'bank',t:`Gửi ${tr(k.lock)} vào sổ thì tiền dùng ngay chỉ còn ${tr(Math.max(0,k.after))}`,d:`Gửi xong ${left}, dưới mức cần giữ ${tr(k.keep)} (${nf(cfg.keepM,0)} tháng ${k.bySal?'lương tự trả':'chi thiết yếu'}${k.dueSoon?' + nợ sắp trả':''}, Cấu hình B20).`,a:k.safe>0?`Chỉ gửi khoảng ${tr(k.safe)}, phần còn lại để trong ví; đủ thu nhập thêm thì gửi tiếp.`:'Chưa gửi sổ, để tiền trong ví cho đến khi có thêm thu nhập.'});}
+  if(C.pay){const P=C.pay, n=nf(Math.max(0,P.months),1);
+    if(P.months<1) L.push({sev:'bad',prio:1,icon:'wallet',t:`Quỹ lương chỉ đủ ${n} tháng`,d:`Quỹ còn ${tr(P.bal)}, lương tự trả ${tr(P.sal)}/tháng.`,a:'Tạm giảm lương tự trả (Cấu hình B24) hoặc lấy từ ví tích lũy; không rút sổ trước hạn nếu chưa cần.'});
+    else if(P.months<3) L.push({sev:'warn',prio:3,icon:'wallet',t:`Quỹ lương còn ${n} tháng`,d:`Quỹ còn ${tr(P.bal)}, lương tự trả ${tr(P.sal)}/tháng.`,a:'Ưu tiên tìm thêm việc freelance; cân nhắc tạm giảm lương tự trả.'});
+    else L.push({sev:'good',prio:21,icon:'wallet',t:`Quỹ lương đủ ${n} tháng`,d:`Quỹ còn ${tr(P.bal)}, lương tự trả ${tr(P.sal)}/tháng.`});}
   if(C.risky>0){const cap=cfg.riskCap, rk=C.riskShare;
     if(rk>cap) L.push({sev:'warn',prio:2,icon:'shield',t:`Cổ phiếu + crypto ${pct(rk,1)} tài sản ròng, vượt trần ${pct(cap,0)}`,d:`Đang có ${tr(C.risky)}, trần ${pct(cap,0)} là ${tr(cap*C.nw)}. Giá giảm mạnh thì phần này kéo tài sản ròng xuống nhiều nhất.`,a:`Không mua thêm. Tài sản ròng tăng tới ${tr(C.risky/cap)} thì tự về dưới trần; bán hay không là quyết định của bạn.`});
     else L.push({sev:'good',prio:24,icon:'shield',t:`Cổ phiếu + crypto ${pct(rk,1)} tài sản ròng, dưới trần ${pct(cap,0)}`,d:`Còn cách trần ${tr(cap*C.nw-C.risky)}. Trần đặt ở Cấu hình B19.`});}
@@ -1209,7 +1240,7 @@ function vOverview(C){
   <section class="hero">
     <div class="l">
       <div><div class="label">Tài sản ròng</div><div class="big" data-n="${PRIV?'':Math.round(C.nw)}">${vnd(C.nw)}</div>
-        ${C.entV+C.recV>0?`<div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:6px">Khả dụng <b style="color:var(--hero-ink)">${tr(C.nwAvail)}</b>${C.entV?' · chờ nhận '+tr(C.entV):''}${C.recV?' · cho vay '+tr(C.recV):''}${C.payable?' · nợ '+tr(C.payable):''}</div>`:''}</div>
+        ${C.entV+C.recV>0?`<div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:8px"><span class="avail">Khả dụng <b>${tr(C.nwAvail)}</b></span>${C.entV?' chờ nhận '+tr(C.entV):''}${C.recV?' · cho vay '+tr(C.recV):''}${C.payable?' · nợ '+tr(C.payable):''}</div>`:''}</div>
       <span class="chip-chg ${C.chg30>=0?'up':'dn'}">${ic(C.chg30>=0?'up':'down','sm')} ${trs(C.chg30)} · ${pcts(C.chgPct,2)} trong 30 ngày</span>
       ${heroGoal(C)}
       <div class="stats">
@@ -1222,6 +1253,7 @@ function vOverview(C){
   ${vTodo(C)}
   ${timeline(C)}
   ${C.acc?card('Tích lũy vào '+esc(C.acc.w.name),'bank',accCard(C),C.acc.ready?'đủ mở sổ':'mục tiêu '+tr(C.acc.goal)):''}
+  ${payCard(C)}
   <div class="grid2">
     ${card('Phân bổ so với mục tiêu','target',allocBars(C)+'<p class="note">Tính trên '+tr(C.tw)+' trong tháp. Bấm một tầng trên tháp để xem tài sản của tầng đó.</p>')}
     ${card('Cơ cấu tài sản','pie',composition(C),tr(sum(C.inNW.filter(a=>a.value>0&&!a.sim),'value')))}
@@ -1559,6 +1591,8 @@ function cellMap(res){
       (d.rowData||[]).forEach((row,i)=>(row.values||[]).forEach((v,j)=>{const e=v&&v.effectiveValue;if(e)out[t][(r0+i)+','+(c0+j)]=e.numberValue!==undefined?e.numberValue:e.stringValue!==undefined?e.stringValue:e.boolValue;}));}}
   return out;
 }
+// ô ngày: số serial, hoặc chữ "dd/mm/yyyy" nếu sheet lưu dạng văn bản
+const dateCell=v=>{if(typeof v==='number')return v;const m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(String(v||'').trim());return m?Date.UTC(+m[3],m[2]-1,+m[1])/DAY+25569:0;};
 function parseSheet(res){
   const M=cellMap(res), A=M['Tài sản']||{}, G=M['Cấu hình']||{}, T=M['Tầng']||{};
   const n=v=>typeof v==='number'?v:(v===undefined||v===''?0:+v||0);
@@ -1569,7 +1603,7 @@ function parseSheet(res){
   const gc=r=>G[r+',1'];
   const cfg={personal:n(gc(2)),fixed:n(gc(3)),other:n(gc(4)),income:n(gc(6)),ref:n(gc(7)),emin:n(gc(8))||6,emax:n(gc(9))||12,longd:n(gc(10))||365,debt:n(gc(11)),
     haircut:gc(12)===undefined?0.7:n(gc(12)),gap:n(gc(13)),insured:gc(14)?String(gc(14)):'',saveGoal:n(gc(15))||100000000,saveWallet:String(gc(16)||'Zalopay'),saveCount:n(gc(17))||5,
-    riskCap:n(gc(18))||0.15,keepM:n(gc(19))||2,matWarn:n(gc(20))||15,lendCap:n(gc(21))||3e7,kaiCap:n(gc(22))||2.5e7};
+    riskCap:n(gc(18))||0.15,keepM:n(gc(19))||2,matWarn:n(gc(20))||15,lendCap:n(gc(21))||3e7,kaiCap:n(gc(22))||2.5e7,salary:n(gc(23)),salStart:dateCell(gc(24))};
   const tiers=[];for(let r=2;r<6;r++){if(T[r+',0']===undefined)continue;tiers.push({id:n(T[r+',0']),name:String(T[r+',1']||''),def:String(T[r+',2']||''),target:Math.round(n(T[r+',3'])*100)});}
   const types=[];for(let r=9;r<19;r++){if(!T[r+',0'])continue;types.push({name:String(T[r+',0']),tier:n(T[r+',1']),liq:T[r+',2']==='Có'});}
   if(tiers.length!==4) throw new Error('Sheet Tầng cần đủ 4 tầng');
@@ -1579,7 +1613,7 @@ function parseSheet(res){
   return {rows,cfg,tiers,types,prices};
 }
 // Hai nguồn dữ liệu: artifact trên claude.ai đọc qua connector; bản website đọc Sheets API bằng token đăng nhập Google (chỉ đọc)
-const RANGES=["'Tài sản'!A5:O54","'Tài sản'!S5:V54","'Cấu hình'!A3:B23","'Tầng'!A3:D6","'Tầng'!A10:C19","'Giá CP'!A3:G12"];
+const RANGES=["'Tài sản'!A5:O54","'Tài sản'!S5:V54","'Cấu hình'!A3:B25","'Tầng'!A3:D6","'Tầng'!A10:C19","'Giá CP'!A3:G12"];
 const HIST_RANGE="'Lịch sử'!A2:J2000", CF_RANGE="'Dòng tiền'!A3:L62", GOAL_RANGE="'Mục tiêu'!A3:F22", LOAN_RANGE="'Sổ nợ'!A3:J40";
 function rowsOf(res,title,r0,r1,read){const M=cellMap(res)[title]||{},out=[];for(let r=r0;r<r1;r++){const g=c=>M[r+','+c];const x=read(g);if(x)out.push(x);}return out;}
 const num=v=>typeof v==='number'?v:0;
