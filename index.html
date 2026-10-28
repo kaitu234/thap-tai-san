@@ -246,6 +246,7 @@ details.more{margin-top:8px} details.more summary{cursor:pointer;font-size:12.5p
 .hg-h{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--hero-mute)} .hg-h b{font:700 16px var(--f-disp);color:var(--hero-ink)}
 .hg-t{height:8px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden} .hg-t i{display:block;height:100%;border-radius:99px;background:var(--up-hero)}
 .hg-s{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--hero-mute)} .hg-s span{min-width:0}
+.hg-v{font-size:11.5px;font-weight:600;color:var(--hero-ink);line-height:1.4}
 .spark{width:96px;height:28px;flex:none;opacity:.9}
 /* thác nước 30 ngày */
 .wf{display:grid;gap:6px}
@@ -544,7 +545,7 @@ function goalsCalc(now,net){
 function compute(S){
   const now=S.now||Date.now();
   // số liệu chụp sẵn hoặc lưu trên máy từ trước khi có Cấu hình B19–B21: dùng mặc định
-  const cf=DATA.cfg;cf.riskCap=cf.riskCap||0.15;cf.keepM=cf.keepM||2;cf.matWarn=cf.matWarn||15;
+  const cf=DATA.cfg;cf.riskCap=cf.riskCap||0.15;cf.keepM=cf.keepM||2;cf.matWarn=cf.matWarn||15;cf.lendCap=cf.lendCap||3e7;cf.kaiCap=cf.kaiCap||2.5e7;
   const assets=buildAssets(S,now).map(a=>({...a,tier:tierOf(S,a)}));
   const essential=Math.max(1,(S.exp.fixed+S.exp.personal)||S.expense);
   const targetM=Math.max(DATA.cfg.emin||6,DATA.cfg.gap||0), emTarget=targetM*essential;
@@ -593,7 +594,9 @@ function compute(S){
     acc.chk={lock,after,keep,dueSoon,months:after/essential,ok:after>=keep,safe:Math.min(acc.goal,Math.max(0,Math.floor((atGoal-keep)/1e7)*1e7))};}
   // Trần cổ phiếu + crypto (Cấu hình B19, Kai chọn 15% tài sản ròng)
   const risky=sum(inNW.filter(a=>MARKET.test(a.kind)),'value'), riskShare=risky/Math.max(nw,1);
-  return {S,now,risky,riskShare,debt,payable,assets,inNW,tower,outside,entitled,entV,receivables,recV,nw,nwAvail,tw,L,liquid,essential,targetM,emTarget,costBase,pnlTrue,invBase,pnlInv,depr,chg30,chgPct:chg30/((nw-chg30)||1),rows,runway,h,X,maxSim,simW,
+  // Trần cho vay (B22) và tiền góp Kai Café (B23): tiền góp lấy vốn góp đồng bộ từ sheet Kai Café, chưa đọc được thì cột Vốn ở Tài sản
+  const kaiA=inNW.find(a=>a.kind==='biz'&&/kai/i.test(a.name)), kaiPut=kaiA?kaiA.cost:0, kaiVal=kaiA?kaiA.value:0;
+  return {S,now,risky,riskShare,kaiA,kaiPut,kaiVal,debt,payable,assets,inNW,tower,outside,entitled,entV,receivables,recV,nw,nwAvail,tw,L,liquid,essential,targetM,emTarget,costBase,pnlTrue,invBase,pnlInv,depr,chg30,chgPct:chg30/((nw-chg30)||1),rows,runway,h,X,maxSim,simW,
     cashIdle,interestMonthly,net,sr,goals,acc,targetSum:sum(rows,'target')};
 }
 // Quy tắc của Kai: tiền dư mỗi tháng chuyển vào ví tích lũy (Cấu hình B17), đủ ngưỡng (B16) thì mở sổ tiết kiệm
@@ -943,6 +946,12 @@ function insights(C){
   if(C.risky>0){const cap=cfg.riskCap, rk=C.riskShare;
     if(rk>cap) L.push({sev:'warn',prio:2,icon:'shield',t:`Cổ phiếu + crypto ${pct(rk,1)} tài sản ròng, vượt trần ${pct(cap,0)}`,d:`Đang có ${tr(C.risky)}, trần ${pct(cap,0)} là ${tr(cap*C.nw)}. Giá giảm mạnh thì phần này kéo tài sản ròng xuống nhiều nhất.`,a:`Không mua thêm. Tài sản ròng tăng tới ${tr(C.risky/cap)} thì tự về dưới trần; bán hay không là quyết định của bạn.`});
     else L.push({sev:'good',prio:24,icon:'shield',t:`Cổ phiếu + crypto ${pct(rk,1)} tài sản ròng, dưới trần ${pct(cap,0)}`,d:`Còn cách trần ${tr(cap*C.nw-C.risky)}. Trần đặt ở Cấu hình B19.`});}
+  {const cap=cfg.lendCap, v=C.recV;
+    if(v>cap) L.push({sev:'warn',prio:2,icon:'handshake',t:`Đang cho vay ${tr(v)}, vượt trần ${tr(cap)}`,d:`Khoản cho vay cá nhân không có tài sản đảm bảo. Trần đặt ở Cấu hình B22.`,a:`Không cho vay thêm cho tới khi thu về ít nhất ${tr(v-cap)}.`});
+    else if(v>0) L.push({sev:'good',prio:25,icon:'handshake',t:`Cho vay ${tr(v)}, dưới trần ${tr(cap)}`,d:`Còn cho vay được tối đa ${tr(cap-v)}. Trần đặt ở Cấu hình B22.`});}
+  if(C.kaiA){const cap=cfg.kaiCap, put=C.kaiPut;
+    if(put>cap) L.push({sev:'warn',prio:2,icon:'coffee',t:`Đã góp ${tr(put)} vào Kai Café, vượt trần ${tr(cap)}`,d:`Phần của bạn hiện còn ${tr(C.kaiVal)}. Trần đặt ở Cấu hình B23.`,a:'Không góp thêm. Nếu quán cần vốn, bàn với đối tác cách khác trước (giảm chi, tạm dừng đầu tư).'});
+    else L.push({sev:put>=cap*0.8?'info':'good',prio:put>=cap*0.8?8:26,icon:'coffee',t:`Đã góp ${tr(put)} vào Kai Café, trần ${tr(cap)}`,d:`Còn góp thêm được tối đa ${tr(cap-put)}. Phần của bạn hiện còn ${tr(C.kaiVal)} (${trs(C.kaiVal-put)} so với tiền góp).`});}
   for(const a of C.inNW.filter(a=>a.kind==='flex'&&a.rate<REF_RATE&&a.value>2*E&&!(C.acc&&C.acc.w===a))){const extra=a.value-2*E;
     L.push({sev:'info',prio:5,icon:'wallet',t:`${esc(a.name)} đang giữ ${tr(a.value)}, khoảng ${nf(a.value/E,1)} tháng chi tiêu`,
       d:`Lãi ${nf(a.rate,2)}%/năm, thấp hơn mức tiết kiệm tham chiếu ${nf(REF_RATE,2)}%. Phần trên 2 tháng chi tiêu (${tr(extra)}) gửi kỳ hạn sẽ thêm khoảng ${tr(extra*(REF_RATE-a.rate)/100)}/năm.`,
@@ -1005,6 +1014,8 @@ function monthTasks(C){
   const prev=mSerial(y,m-1), cur=mSerial(y,m), lab=s=>{const d=new Date((s-25569)*DAY);return (d.getUTCMonth()+1)+'/'+d.getUTCFullYear();};
   const has=(s,f)=>CF.some(x=>Math.abs(x.m-s)<3&&f(x));
   if(day<=12&&!has(prev,x=>x.inc>0))out.push({sev:'warn',icon:'flow',t:'Báo thu nhập tháng '+lab(prev),a:'Nhắn chat ghi tài sản: "tháng '+lab(prev)+' lương …, freelance …, Shopee …, chi …"'});
+  // quyết toán thuế TNCN năm trước: tự quyết toán hạn 30/4 (nghỉ việc trong năm; freelance, Shopee bị khấu trừ 10% có thể được hoàn)
+  if(m<=3)out.push({sev:'info',icon:'calendar',t:'Quyết toán thuế TNCN năm '+(y-1)+', hạn 30/4/'+y,a:'Nghỉ việc trong năm thì tự quyết toán trên eTax hoặc eTax Mobile. Thu nhập freelance, Shopee đã bị khấu trừ 10% có thể được hoàn một phần.'});
   if(!has(cur,x=>x.plan>0||x.exp>0))out.push({sev:'info',icon:'calendar',t:'Đặt chi tiêu dự kiến tháng '+lab(cur),a:'Để app tính tiền dư chuyển vào ví tích lũy và dự phóng mục tiêu.'});
   return out;
 }
@@ -1040,7 +1051,16 @@ function goalScenarios(C){
   const sc=[['Như trung bình gần đây',INCOME-E,'var(--good)'],['Chỉ freelance + affiliate',sideAvg-E,'var(--caramel)'],['Không có thu nhập',-E,'var(--bad)']]
     .map(([n,save,col])=>{const step=save+it, pts=[];for(let m=0;m<=months;m++)pts.push(C.nw+step*m);
       const eta=step>0?Math.ceil(Math.max(0,g.need-C.nw)/step):null;return {n,save,step,col,pts,end:pts[months],eta};});
-  return {g,months,sc,need:g.need,needMonthly:(g.need-C.nw)/months-it};
+  const base=sc[0], eta=base.eta==null?null:mLab(C,base.eta);
+  return {g,months,sc,need:g.need,needMonthly:(g.need-C.nw)/months-it,late:base.end<g.need,base,eta};
+}
+const mLab=(C,m)=>{const t=new Date(C.now+7*36e5);t.setUTCMonth(t.getUTCMonth()+m);return (t.getUTCMonth()+1)+'/'+t.getUTCFullYear();};
+// Câu nói thẳng: theo mức dư hiện tại có kịp mục tiêu không, nếu không thì tới hạn đạt bao nhiêu, bao giờ đủ
+function goalVerdict(R){
+  if(!R)return '';
+  if(!R.late)return R.base.eta?`Theo mức dư hiện tại: <b>kịp hạn</b>, sau khoảng ${R.base.eta} tháng.`:'Đã đạt mục tiêu.';
+  const x=R.base.save>0?R.needMonthly/R.base.save:null;
+  return `Theo mức dư hiện tại: <b>không kịp</b>. Tới hạn đạt khoảng ${tr(R.base.end)} (${pct(R.base.end/R.need,0)} mục tiêu)${R.eta?', đủ '+tr(R.need)+' vào khoảng '+R.eta:''}.${x&&x>=1.5?' Số cần để dành gấp khoảng '+nf(x,0)+' lần mức dư hiện tại.':''}`;
 }
 function vScenarios(C){
   const R=goalScenarios(C);
@@ -1059,6 +1079,7 @@ function vScenarios(C){
   </svg>`;
   return card(esc(g.name)+' · '+sdate(g.due),'flag',svg+`<div class="tablewrap" style="margin-top:10px"><table><tr><th>Kịch bản</th><th>Dư/tháng</th><th>Tới hạn</th><th>Đạt mục tiêu</th></tr>
     ${sc.map(s=>`<tr><td><i class="tdot" style="background:${s.col}"></i> ${s.n}</td><td class="${cls(s.save)}">${trs(s.save)}</td><td class="${s.end>=g.need?'pos':'neg'}">${tr(s.end)}</td><td>${s.eta==null?'Không đạt':s.eta<=months?'Sau '+s.eta+' tháng':'Trễ '+(s.eta-months)+' tháng'}</td></tr>`).join('')}</table></div>
+    <p class="note">${goalVerdict(R)}</p>
     <p class="note">Còn ${months} tháng. Để kịp hạn cần để dành khoảng <b>${tr(Math.max(0,R.needMonthly))}/tháng</b> (đã tính lãi tiết kiệm ${tr(C.interestMonthly)}/tháng). Không tính biến động giá cổ phiếu, khấu hao.</p>`,months+' tháng');
 }
 // ---- trực quan hoá thêm (28/10/2026): tiến độ mục tiêu, thác nước 30 ngày, dòng thời gian, thước giá cổ phiếu, ô tỷ lệ, bậc thang sổ
@@ -1076,7 +1097,8 @@ function heroGoal(C){
   return `<div class="hgoal" data-goto="analysis" role="button" tabindex="0" title="Xem 3 kịch bản ở tab Phân tích">
     <div class="hg-h"><span>${esc(g.name)} · hạn ${sdate(g.due)}</span><b class="num">${pct(p,0)}</b></div>
     <div class="hg-t" role="progressbar" aria-valuenow="${Math.round(p*100)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${p*100}%"></i></div>
-    <div class="hg-s"><span>Còn ${tr(left)} · ${nf(months,0)} tháng · cần để dành ~${tr(per)}/tháng</span>${spark}</div></div>`;
+    <div class="hg-s"><span>Còn ${tr(left)} · ${nf(months,0)} tháng · cần để dành ~${tr(per)}/tháng</span>${spark}</div>
+    ${(()=>{const R=goalScenarios(C);return R&&R.late?`<div class="hg-v">Không kịp với mức dư hiện tại: tới hạn đạt ~${tr(R.base.end)}${R.eta?', đủ vào khoảng '+R.eta:''}.</div>`:'';})()}</div>`;
 }
 // Thác nước: tài sản ròng 30 ngày trước → từng khoản tăng/giảm → hôm nay (trục phóng to quanh tài sản ròng)
 const WHY={savings:'lãi sổ',flex:'lãi ví',durable:'khấu hao',stock:'giá cổ phiếu',biz:'kinh doanh',gold:'giá vàng',crypto:'giá crypto'};
@@ -1145,11 +1167,17 @@ function stockCard(C){
       ${line}
       <p class="note">${sell?(price>=sell?'Đã chạm giá cân nhắc bán.':'Còn '+pct(sell/price-1,1)+' tới giá cân nhắc bán.')+(cost&&sell<cost?` Lưu ý: giá này thấp hơn giá vốn ${K(cost)}, bán ở đó vẫn lỗ khoảng ${tr((cost-sell)*a.qty)}.`:''):'Đặt giá cân nhắc bán ở sheet Giá CP cột G.'} Giá cập nhật mỗi giờ trong phiên.</p></div>`;}).join('')+riskBar(C));
 }
+// Thanh so với trần Kai đặt (cổ phiếu + crypto, cho vay, Kai Café): vạch đậm là trần, vượt thì đỏ
+function capBar(label,v,cap,shown,tip,note){
+  const mx=Math.max(cap*1.6,v*1.1)||1, X=x=>Math.min(100,x/mx*100), over=v>cap;
+  return `<div class="label" style="margin:14px 0 6px">${label}</div>
+    <div class="bar rk" style="height:12px" data-tip="${tip}"><i style="width:${X(v)}%;background:${over?'var(--bad)':'var(--c3)'}"></i><em style="left:${X(cap)}%"></em></div>
+    <p class="note"><b class="${over?'neg':''}">${shown}</b> · ${note}</p>`;
+}
 function riskBar(C){
-  const cap=DATA.cfg.riskCap, rk=C.riskShare, mx=Math.max(cap*1.6,rk*1.1), X=v=>Math.min(100,v/mx*100), over=rk>cap;
-  return `<div class="label" style="margin:14px 0 6px">Cổ phiếu + crypto so với tài sản ròng</div>
-    <div class="bar rk" style="height:12px" data-tip="${tr(C.risky)} ÷ tài sản ròng ${tr(C.nw)}"><i style="width:${X(rk)}%;background:${over?'var(--bad)':'var(--c3)'}"></i><em style="left:${X(cap)}%"></em></div>
-    <p class="note"><b class="${over?'neg':''}">${pct(rk,1)}</b> · trần ${pct(cap,0)} (${tr(cap*C.nw)}) ở Cấu hình B19. ${over?'Đang vượt trần: không mua thêm.':'Còn cách trần '+tr(cap*C.nw-C.risky)+'.'}</p>`;
+  const cap=DATA.cfg.riskCap, rk=C.riskShare;
+  return capBar('Cổ phiếu + crypto so với tài sản ròng',rk,cap,pct(rk,1),tr(C.risky)+' ÷ tài sản ròng '+tr(C.nw),
+    `trần ${pct(cap,0)} (${tr(cap*C.nw)}) ở Cấu hình B19. ${rk>cap?'Đang vượt trần: không mua thêm.':'Còn cách trần '+tr(cap*C.nw-C.risky)+'.'}`);
 }
 // Ô tỷ lệ (treemap, chia ô vuông dần): mỗi ô một tài sản, diện tích theo giá trị, màu theo tầng
 function squarify(items,W,H){
@@ -1269,7 +1297,12 @@ function vLoans(C){
       <div class="kpi"><div class="label">Người khác nợ bạn</div><div class="v">${tr(lend)}</div><div class="s">Cộng vào tài sản ròng, xếp T4</div></div>
       <div class="kpi"><div class="label">Bạn đang nợ</div><div class="v ${borrow?'neg':''}">${tr(borrow)}</div><div class="s">Trừ vào tài sản ròng</div></div>
       <div class="kpi"><div class="label">Quá hạn</div><div class="v ${late?'neg':''}">${late} khoản</div><div class="s">Email nhắc trước hạn 7 ngày</div></div>
-    </div><div class="alist">${rows}</div>`,open.length+' khoản đang mở');
+    </div>${lendBar(lend)}<div class="alist" style="margin-top:12px">${rows}</div>`,open.length+' khoản đang mở');
+}
+function lendBar(lend){
+  const cap=DATA.cfg.lendCap;
+  return capBar('Tổng cho vay so với trần',lend,cap,tr(lend),'Khoản cho vay còn mở ở sheet Sổ nợ',
+    `trần ${tr(cap)} ở Cấu hình B22. ${lend>cap?'Đang vượt trần: không cho vay thêm.':'Còn cho vay được tối đa '+tr(cap-lend)+'.'}`);
 }
 const GST={done:['good','Đạt'],late:['bad','Quá hạn'],open:['info','Chưa có hạn']};
 function vGoals(C){
@@ -1355,6 +1388,12 @@ function kaiInsights(k){
   if(k.payback!=null&&k.inv>0)L.push({sev:'info',icon:'target',t:`Thu hồi vốn đầu tư ${pct(k.payback,1)}`,d:k.paybackNote});
   return L;
 }
+function kaiBar(C){
+  if(!C.kaiA)return '';
+  const cap=DATA.cfg.kaiCap, put=C.kaiPut;
+  return capBar('Tiền bạn đã góp so với trần',put,cap,tr(put),'Vốn góp của bạn ở Kai Café',
+    `trần ${tr(cap)} ở Cấu hình B23. ${put>cap?'Đã vượt trần: không góp thêm.':'Góp thêm tối đa '+tr(cap-put)+'.'} Phần của bạn hiện còn ${tr(C.kaiVal)} (${trs(C.kaiVal-put)} so với tiền góp).`);
+}
 function vKai(C){
   const k=KAI;
   if(!k)return `${card('Kai Café','coffee',`<div class="empty">${ic('coffee','lg')}<div><b>${KAI_ERR?'Chưa đọc được sheet Kai Café':'Đang chờ dữ liệu Kai Café'}</b><p>${KAI_ERR?esc(KAI_ERR)+'. ':''}Tab này đọc sheet "[Kai Café] Internal Dashboard" bằng cùng tài khoản Google. Bấm Làm mới sau khi đăng nhập.</p></div></div>
@@ -1396,7 +1435,7 @@ function vKai(C){
     ${card('Kết quả theo tháng','calendar',ms.length?`<div class="tablewrap"><table><tr><th>Tháng</th><th>Doanh thu</th><th>Giá vốn</th><th>Nhân sự</th><th>Vận hành</th><th>Lãi HĐ</th><th>Tiền cuối</th></tr>
       ${ms.map(m=>`<tr><td>${esc(m.lab)}</td><td>${tr(m.rev)}</td><td>${tr(m.cogs)}</td><td>${tr(m.staff)}</td><td>${tr(m.ops)}</td><td class="${cls(m.op)}">${trs(m.op)}</td><td>${tr(m.cash)}</td></tr>`).join('')}</table></div>`:'<p class="muted">Chưa có tháng nào có số liệu.</p>')}
   </div>
-  ${k.partners.length?card('Vốn góp','handshake',`<div class="tablewrap"><table><tr><th>Người</th><th>Vốn góp</th><th>Tỷ lệ</th><th>Phần tiền còn lại</th></tr>${k.partners.map(p=>`<tr><td>${KAI_ME.test(p.who)?'<b>'+esc(p.who)+' (bạn)</b>':esc(p.who)}</td><td>${tr(p.cap)}</td><td>${pct(p.share,0)}</td><td>${tr(p.share*k.cash)}</td></tr>`).join('')}</table></div>`):''}
+  ${k.partners.length?card('Vốn góp','handshake',`<div class="tablewrap"><table><tr><th>Người</th><th>Vốn góp</th><th>Tỷ lệ</th><th>Phần tiền còn lại</th></tr>${k.partners.map(p=>`<tr><td>${KAI_ME.test(p.who)?'<b>'+esc(p.who)+' (bạn)</b>':esc(p.who)}</td><td>${tr(p.cap)}</td><td>${pct(p.share,0)}</td><td>${tr(p.share*k.cash)}</td></tr>`).join('')}</table></div>${kaiBar(C)}`):''}
   <p style="margin:0;display:flex;gap:8px;flex-wrap:wrap"><a class="btn" href="${KAI_DASH}" target="_blank" rel="noopener">${ic('chart','sm')} Mở Kai Dashboard đầy đủ</a><a class="btn ghost" href="${KAI_URL}" target="_blank" rel="noopener">${ic('sheet','sm')} Mở sheet Kai Café</a></p>`;
 }
 // 6 nguyên tắc vàng (plan 16/06/2026), tự kiểm tra; nguyên tắc 02 (chia lương 15/35) Kai bỏ vì tự quy tài sản
@@ -1415,12 +1454,14 @@ function rulesCheck(C){
   const r3=C.rows.find(r=>r.id===3), r4=C.rows.find(r=>r.id===4), risk=(r3?r3.share:0)+(r4?r4.share:0), lim=((r3?r3.target:0)+(r4?r4.target:0))/100;
   out.push(['06','Ổn định hơn tăng trưởng, không FOMO',risk<=lim+0.05?['good','Đạt']:['warn','Cần chú ý'],'T3 + T4 đang '+pct(risk,0)+', mục tiêu '+pct(lim,0)]);
   out.push(['07','Cổ phiếu + crypto không quá '+pct(cfg.riskCap,0)+' tài sản ròng',C.riskShare<=cfg.riskCap?['good','Đạt']:['warn','Vượt trần'],'Đang '+pct(C.riskShare,1)+' · '+tr(C.risky)]);
+  out.push(['08','Cho vay tổng không quá '+tr(cfg.lendCap),C.recV<=cfg.lendCap?['good','Đạt']:['warn','Vượt trần'],'Đang cho vay '+tr(C.recV)]);
+  if(C.kaiA)out.push(['09','Góp vào Kai Café không quá '+tr(cfg.kaiCap),C.kaiPut<=cfg.kaiCap?['good','Đạt']:['warn','Vượt trần'],'Đã góp '+tr(C.kaiPut)+' · phần của bạn còn '+tr(C.kaiVal)]);
   return out;
 }
 function vRules(C){
   const rs=rulesCheck(C), ok=rs.filter(r=>r[2][0]==='good').length;
   return card('Nguyên tắc vàng','shield',`<div class="alist">${rs.map(r=>`<div class="arow" style="grid-template-columns:auto minmax(0,1fr) auto"><span class="logo sm" style="--lc:var(--accent)">${r[0]}</span><div style="min-width:0"><div class="nm">${r[1]}</div><div class="sb">${r[3]}</div></div><span class="chip ${r[2][0]}">${r[2][1]}</span></div>`).join('')}</div>
-    <p class="note">Theo plan tài chính 16/06/2026. Nguyên tắc 02 (chia lương 15/35) không theo dõi vì bạn tự quy tài sản. Nguyên tắc 07 bạn thêm ngày 28/10/2026.</p>`,ok+'/'+rs.length+' đạt');
+    <p class="note">Theo plan tài chính 16/06/2026. Nguyên tắc 02 (chia lương 15/35) không theo dõi vì bạn tự quy tài sản. Nguyên tắc 07–09 bạn thêm ngày 28/10/2026.</p>`,ok+'/'+rs.length+' đạt');
 }
 function vAnalysis(C){
   const ins=insights(C), plan=ins.filter(i=>i.a&&i.sev!=='good').slice(0,3), net=INCOME-S.expense;
@@ -1528,7 +1569,7 @@ function parseSheet(res){
   const gc=r=>G[r+',1'];
   const cfg={personal:n(gc(2)),fixed:n(gc(3)),other:n(gc(4)),income:n(gc(6)),ref:n(gc(7)),emin:n(gc(8))||6,emax:n(gc(9))||12,longd:n(gc(10))||365,debt:n(gc(11)),
     haircut:gc(12)===undefined?0.7:n(gc(12)),gap:n(gc(13)),insured:gc(14)?String(gc(14)):'',saveGoal:n(gc(15))||100000000,saveWallet:String(gc(16)||'Zalopay'),saveCount:n(gc(17))||5,
-    riskCap:n(gc(18))||0.15,keepM:n(gc(19))||2,matWarn:n(gc(20))||15};
+    riskCap:n(gc(18))||0.15,keepM:n(gc(19))||2,matWarn:n(gc(20))||15,lendCap:n(gc(21))||3e7,kaiCap:n(gc(22))||2.5e7};
   const tiers=[];for(let r=2;r<6;r++){if(T[r+',0']===undefined)continue;tiers.push({id:n(T[r+',0']),name:String(T[r+',1']||''),def:String(T[r+',2']||''),target:Math.round(n(T[r+',3'])*100)});}
   const types=[];for(let r=9;r<19;r++){if(!T[r+',0'])continue;types.push({name:String(T[r+',0']),tier:n(T[r+',1']),liq:T[r+',2']==='Có'});}
   if(tiers.length!==4) throw new Error('Sheet Tầng cần đủ 4 tầng');
@@ -1538,7 +1579,7 @@ function parseSheet(res){
   return {rows,cfg,tiers,types,prices};
 }
 // Hai nguồn dữ liệu: artifact trên claude.ai đọc qua connector; bản website đọc Sheets API bằng token đăng nhập Google (chỉ đọc)
-const RANGES=["'Tài sản'!A5:O54","'Tài sản'!S5:V54","'Cấu hình'!A3:B21","'Tầng'!A3:D6","'Tầng'!A10:C19","'Giá CP'!A3:G12"];
+const RANGES=["'Tài sản'!A5:O54","'Tài sản'!S5:V54","'Cấu hình'!A3:B23","'Tầng'!A3:D6","'Tầng'!A10:C19","'Giá CP'!A3:G12"];
 const HIST_RANGE="'Lịch sử'!A2:J2000", CF_RANGE="'Dòng tiền'!A3:L62", GOAL_RANGE="'Mục tiêu'!A3:F22", LOAN_RANGE="'Sổ nợ'!A3:J40";
 function rowsOf(res,title,r0,r1,read){const M=cellMap(res)[title]||{},out=[];for(let r=r0;r<r1;r++){const g=c=>M[r+','+c];const x=read(g);if(x)out.push(x);}return out;}
 const num=v=>typeof v==='number'?v:0;
