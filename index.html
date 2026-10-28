@@ -235,6 +235,65 @@ svg.chart text.h{fill:var(--ink);font:700 14px var(--f-disp);letter-spacing:.03e
 .snz:hover{color:var(--ink);background:var(--surface2)}
 .linkbtn{appearance:none;border:0;background:none;padding:0;color:var(--accent);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer}
 details.more{margin-top:8px} details.more summary{cursor:pointer;font-size:12.5px;font-weight:600;color:var(--accent);padding:4px 0} details.more .todo{margin-top:8px}
+/* tiến độ mục tiêu trên thẻ đầu */
+.hgoal{display:grid;gap:6px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);cursor:pointer}
+.hg-h{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--hero-mute)} .hg-h b{font:700 16px var(--f-disp);color:var(--hero-ink)}
+.hg-t{height:8px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden} .hg-t i{display:block;height:100%;border-radius:99px;background:var(--up-hero)}
+.hg-s{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--hero-mute)} .hg-s span{min-width:0}
+.spark{width:96px;height:28px;flex:none;opacity:.9}
+/* thác nước 30 ngày */
+.wf{display:grid;gap:6px}
+.wf-r{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:12.5px}
+.wf-l{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .wf-l small{display:block;color:var(--muted);font-size:11px}
+.wf-r.end .wf-l{font-weight:700} .wf-r b{font-size:12.5px;text-align:right;min-width:4.6em}
+.wf-t{position:relative;height:16px;background:repeating-linear-gradient(90deg,transparent 0 24px,var(--line) 24px 25px)}
+.wf-t i{position:absolute;top:2px;bottom:2px;border-radius:3px} .wf-t i.up{background:var(--good)} .wf-t i.dn{background:var(--bad)}
+.wf-t em{position:absolute;top:-1px;bottom:-1px;width:3px;margin-left:-1.5px;border-radius:2px;background:var(--ink)}
+/* dòng thời gian */
+.tl{display:grid;gap:6px;margin-top:10px}
+.tl-i{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:4px 8px;align-items:center;font-size:12.5px;padding:6px 0;border-top:1px solid var(--line)}
+.tl-d{color:var(--muted);font-size:12px} .tl-t{min-width:0} .tl-v{text-align:right;font-weight:600}
+.tl-i .chip{grid-column:3/5;justify-self:start}
+@media (min-width:560px){.tl-i{grid-template-columns:auto 5.5em minmax(0,1fr) auto auto}.tl-i .chip{grid-column:auto}}
+/* thước giá cổ phiếu */
+.pg-wrap+.pg-wrap{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.pg-h{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center}
+.pg-h .nm{font:700 18px var(--f-disp);letter-spacing:.03em} .pg-h .sb{font-size:12.5px;color:var(--muted)}
+.pg{margin:18px 4px 6px}
+.pg-t{position:relative;height:10px;border-radius:99px;background:var(--surface2);border:1px solid var(--line)}
+.pg-t i{position:absolute;top:0;bottom:0;border-radius:99px;opacity:.85} .pg-t i.up{background:var(--good)} .pg-t i.dn{background:var(--bad)}
+.pg-t em{position:absolute;top:-6px;bottom:-6px;width:2px;margin-left:-1px;background:var(--ink)} .pg-t em.sell{background:var(--good);width:3px}
+.pg-t b{position:absolute;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:var(--c3);border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line)}
+.pg-l{position:relative;height:18px;margin-top:8px;font-size:11.5px;color:var(--muted)}
+.pg-l span{position:absolute;transform:translateX(-50%);white-space:nowrap} .pg-l span.sell{color:var(--good);font-weight:600}
+.pg-now{position:relative;height:16px;margin-bottom:6px;font:700 12px var(--f-body);color:var(--c3)} .pg-now span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+/* ô tỷ lệ */
+.tm{position:relative;width:100%;aspect-ratio:16/11;border-radius:8px;overflow:hidden}
+.tm-c{position:absolute;box-sizing:border-box;border:2px solid var(--surface);background:color-mix(in srgb,var(--tc) 30%,var(--surface));border-top:4px solid var(--tc);border-radius:6px;overflow:hidden}
+.tm-in{padding:6px 7px;display:grid;gap:2px;align-content:start;font-size:11.5px;line-height:1.25}
+.tm-in b,.tm-in span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .tm-in b{font-weight:700} .tm-in span{color:var(--ink);opacity:.8}
+.tm-in .logo{width:26px;height:26px;margin-bottom:2px}
+/* bậc thang sổ */
+.ladder{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:8px;align-items:end}
+.lad-c{display:grid;grid-template-rows:130px auto auto auto;gap:2px;text-align:center;min-width:0;font-size:11.5px}
+.lad-b{position:relative;display:flex;align-items:flex-end;justify-content:center;border:1.5px dashed var(--line);border-radius:6px;overflow:hidden;align-self:end}
+.lad-b i{position:absolute;left:0;right:0;bottom:0;border-radius:0 0 4px 4px}
+.lad-b b{position:relative;font:700 14px var(--f-disp);padding:4px 0;color:var(--ink)}
+.lad-b.full{border-style:solid;border-color:var(--c2)}
+.lad-b.full b{color:var(--surface)}
+.lad-c.next .lad-b{border-color:var(--c1)}
+.lad-lg{position:absolute;top:6px;left:50%;transform:translateX(-50%)} .lad-lg .logo{width:24px;height:24px}
+.lad-t{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px} .lad-s{color:var(--muted);font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* tháp: chữ lệch mục tiêu */
+svg .dv{font:700 12.5px var(--f-body);fill:var(--muted)} svg .dv.pos{fill:var(--good)} svg .dv.neg{fill:var(--bad)}
+/* kéo để làm mới, khung chờ */
+html{overscroll-behavior-y:contain}
+#ptr{position:fixed;z-index:40;top:calc(env(safe-area-inset-top,0px) + 6px);left:0;right:0;margin:0 auto;width:fit-content;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);font-size:12.5px;color:var(--muted)}
+#ptr[hidden]{display:none}
+#ptr.ready{color:var(--accent);border-color:var(--accent)} #ptr.ready svg{transform:rotate(180deg)} #ptr svg{transition:transform .2s}
+.sk{border-radius:10px;background:linear-gradient(90deg,var(--surface2) 25%,var(--line) 50%,var(--surface2) 75%);background-size:200% 100%;animation:sk 1.3s ease-in-out infinite}
+@keyframes sk{from{background-position:200% 0}to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.sk{animation:none}}
 .slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:8px}
 .slot{display:grid;gap:2px;padding:10px 12px;border-radius:12px;border:1px dashed var(--line);font-size:12.5px}
 .slot.on{border-style:solid;background:var(--surface2)}
@@ -306,6 +365,7 @@ tr.clickable{cursor:pointer} tr.clickable:hover td,tr.sel td{background:var(--su
     <button class="iconbtn" id="refresh" aria-label="Làm mới dữ liệu từ Google Sheet" title="Làm mới"></button>
     <a class="iconbtn" id="opensheet" target="_blank" rel="noopener" aria-label="Mở Google Sheet" title="Mở Google Sheet"></a>
   </header>
+  <div id="ptr" hidden aria-live="polite"><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Kéo để làm mới</span></div>
   <nav class="tabs" role="tablist" id="tabs"></nav>
   <main id="view"></main>
 </div>
@@ -402,7 +462,7 @@ function buildAssets(S,now){
   const list=DATA.rows.filter(r=>r.name).map((r,i)=>{
     const isSav=r.rate>0&&r.start>0&&r.term>0, isFlex=r.rate>0&&r.start>0&&!(r.term>0), ti=typeInfo(r.type);
     const a={id:'r'+i,name:r.name,note:r.note||'',type:r.type,kind:kindOf(r,isSav,isFlex),value:r.value||0,cost:r.cost||0,chg30:r.chg30||0,
-      nw:r.nw!=='Không',tierSheet:parseTier(r.tier),autoTier:ti.tier,liq:ti.liq,sym:r.sym||''};
+      nw:r.nw!=='Không',tierSheet:parseTier(r.tier),autoTier:ti.tier,liq:ti.liq,sym:r.sym||'',qty:r.qty||0};
     a.sub=a.note||r.type;
     if(isSav){const c=savCalc({principal:r.value,rate:r.rate*100,start:serialISO(r.start),term:r.term},now);
       Object.assign(a,{value:c.value,cost:r.value,chg30:c.last30,rate:r.rate*100,daysLeft:c.daysLeft,sv:c,principal:r.value,
@@ -666,15 +726,17 @@ function pyramid(rows){
   [4,3,2,1].forEach((id,i)=>{
     const r=rows.find(x=>x.id===id), y0=top+i*lh+gap/2, y1=top+(i+1)*lh-gap/2;
     const pts=`${cx-hw(y0)},${y0} ${cx+hw(y0)},${y0} ${cx+hw(y1)},${y1} ${cx-hw(y1)},${y1}`;
-    const f=Math.min(r.ratio,1), fy=y1-f*(y1-y0), yc=(y0+y1)/2;
+    const f=Math.min(r.ratio,1), fy=y1-f*(y1-y0), yc=(y0+y1)/2, dv=r.share*100-r.target;
     defs+=`<clipPath id="pc${id}"><rect x="0" y="${fy}" width="300" height="${f*(y1-y0)+.5}"/></clipPath>`;
     out+=`<g class="layer" data-tier="${id}" tabindex="0" role="button" aria-label="Xem tài sản tầng ${id}" data-tip="T${id} ${esc(r.name)}: ${tr(r.value)} · đạt ${nf(r.ratio,1)} lần mục tiêu">
       <polygon points="${pts}" fill="${tcol(id)}" fill-opacity=".16"/>
       <polygon points="${pts}" clip-path="url(#pc${id})" fill="${tcol(id)}"/>
       <text x="${cx}" y="${yc+5}" text-anchor="middle" class="v" style="font:700 14px var(--f-disp);fill:var(--surface)">${id===4?'T4':`T${id} · ${pct(r.share,0)}`}</text>
+      <text x="${cx+hw(yc)+8}" y="${yc-1}" class="dv ${dv>0.5?'pos':dv<-0.5?'neg':''}">${dv>=0?'+':'−'}${nf(Math.abs(dv),0)} điểm</text>
+      <text x="${cx+hw(yc)+8}" y="${yc+13}">${id===4?pct(r.share,0)+' · ':''}mục tiêu ${r.target}%</text>
     </g>`;
   });
-  return `<svg class="chart" viewBox="0 0 300 264" style="max-width:360px;margin:0 auto" role="group" aria-label="Tháp so với mục tiêu"><defs>${defs}</defs>${out}</svg>`;
+  return `<svg class="chart" viewBox="0 0 380 264" style="max-width:440px;margin:0 auto" role="group" aria-label="Tháp so với mục tiêu"><defs>${defs}</defs>${out}</svg>`;
 }
 function allocBars(C){
   const mx=Math.max(...C.rows.map(r=>Math.max(r.share,r.target/100)))*1.08||1;
@@ -692,13 +754,6 @@ function donut(segs,center,sub){
   return `<svg class="chart" viewBox="0 0 160 160" style="max-width:170px" role="img" aria-label="Cơ cấu tài sản">${arcs}
     <text x="80" y="78" text-anchor="middle" class="v" style="font:700 22px var(--f-disp);fill:var(--ink)">${center}</text>
     <text x="80" y="97" text-anchor="middle">${sub}</text></svg>`;
-}
-function composition(C){
-  const segs=C.rows.map(r=>({v:r.value,col:tcol(r.id),label:'T'+r.id+' '+r.name}));
-  if(C.outside.length)segs.push({v:sum(C.outside,'value'),col:'var(--c0)',label:'Ngoài tháp'});
-  const tot=sum(segs,'v')||1;
-  return `<div class="donutwrap">${donut(segs,trn(tot),'triệu đồng')}
-    <div class="dlist">${segs.map(s=>`<div class="drow"><i class="tdot" style="background:${s.col}"></i><span>${esc(s.label)}</span><b class="num">${tr(s.v)}</b><span class="muted num">${pct(s.v/tot,0)}</span></div>`).join('')}</div></div>`;
 }
 function accCard(C){
   const a=C.acc, p=Math.min(1,a.have/a.goal), cash=C.inNW.filter(x=>x.kind==='cash');
@@ -974,14 +1029,123 @@ function vScenarios(C){
     ${sc.map(s=>`<tr><td><i class="tdot" style="background:${s.col}"></i> ${s.n}</td><td class="${cls(s.save)}">${trs(s.save)}</td><td class="${s.end>=g.need?'pos':'neg'}">${tr(s.end)}</td><td>${s.eta==null?'Không đạt':s.eta<=months?'Sau '+s.eta+' tháng':'Trễ '+(s.eta-months)+' tháng'}</td></tr>`).join('')}</table></div>
     <p class="note">Còn ${months} tháng. Để kịp hạn cần để dành khoảng <b>${tr(Math.max(0,R.needMonthly))}/tháng</b> (đã tính lãi tiết kiệm ${tr(C.interestMonthly)}/tháng). Không tính biến động giá cổ phiếu, khấu hao.</p>`,months+' tháng');
 }
+// ---- trực quan hoá thêm (28/10/2026): tiến độ mục tiêu, thác nước 30 ngày, dòng thời gian, thước giá cổ phiếu, ô tỷ lệ, bậc thang sổ
+// Mục tiêu tài sản ròng lớn nhất có hạn (2 tỷ): thanh tiến độ trên thẻ đầu + đường tài sản ròng 90 ngày đã chụp
+const mainGoal=()=>[...GOALS].filter(g=>g.due&&g.need>0).sort((a,b)=>b.need-a.need)[0]||null;
+function heroGoal(C){
+  const g=mainGoal();if(!g)return '';
+  const today=serialOf(C.now), p=Math.max(0,Math.min(1,C.nw/g.need)), months=Math.max(0,(g.due-today)/30.44), left=Math.max(0,g.need-C.nw);
+  const per=Math.max(0,(months>=1?left/months:left)-C.interestMonthly);
+  const pts=HIST.filter(h=>h.d<today&&h.d>=today-90).map(h=>({d:h.d,v:h.nw}));pts.push({d:today,v:C.nw});
+  let spark='';
+  if(pts.length>=3){const W=120,H=34,vs=pts.map(q=>q.v),lo=Math.min(...vs),hi=Math.max(...vs),d0=pts[0].d;
+    const x=d=>(d-d0)/((today-d0)||1)*(W-4)+2, y=v=>H-4-(v-lo)/((hi-lo)||1)*(H-8);
+    spark=`<svg class="spark" viewBox="0 0 ${W} ${H}" aria-label="Tài sản ròng ${pts.length} ngày gần nhất"><path d="${pts.map((q,i)=>(i?'L':'M')+x(q.d).toFixed(1)+','+y(q.v).toFixed(1)).join('')}" fill="none" stroke="var(--hero-ink)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${x(today)}" cy="${y(C.nw)}" r="2.8" fill="var(--hero-ink)"/></svg>`;}
+  return `<div class="hgoal" data-goto="analysis" role="button" tabindex="0" title="Xem 3 kịch bản ở tab Phân tích">
+    <div class="hg-h"><span>${esc(g.name)} · hạn ${sdate(g.due)}</span><b class="num">${pct(p,0)}</b></div>
+    <div class="hg-t" role="progressbar" aria-valuenow="${Math.round(p*100)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${p*100}%"></i></div>
+    <div class="hg-s"><span>Còn ${tr(left)} · ${nf(months,0)} tháng · cần để dành ~${tr(per)}/tháng</span>${spark}</div></div>`;
+}
+// Thác nước: tài sản ròng 30 ngày trước → từng khoản tăng/giảm → hôm nay (trục phóng to quanh tài sản ròng)
+const WHY={savings:'lãi sổ',flex:'lãi ví',durable:'khấu hao',stock:'giá cổ phiếu',biz:'kinh doanh',gold:'giá vàng',crypto:'giá crypto'};
+function waterfall(C){
+  const items=C.inNW.filter(a=>!a.sim&&Math.abs(a.chg30)>=5e4).map(a=>({n:a.name,v:a.chg30,k:a.kind})).sort((a,b)=>Math.abs(b.v)-Math.abs(a.v));
+  if(!items.length)return `<div class="empty">${ic('calendar','lg')}<div><b>Chưa có thay đổi</b><p>30 ngày qua chưa có khoản nào tăng hoặc giảm.</p></div></div>`;
+  const top=items.slice(0,6), rest=items.slice(6);
+  if(rest.length)top.push({n:'Khác ('+rest.length+' khoản)',v:sum(rest,'v')});
+  const end=C.nw, start=end-sum(items,'v');let run=start;
+  const rows=top.map(t=>{const a=run;run+=t.v;return {...t,a,b:run};});
+  const all=[start,end,...rows.flatMap(r=>[r.a,r.b])], lo=Math.min(...all), hi=Math.max(...all), pad=(hi-lo)*.06||1, X=v=>(v-lo+pad)/(hi-lo+2*pad)*100;
+  const mark=(l,v)=>`<div class="wf-r end"><span class="wf-l">${l}</span><div class="wf-t"><em style="left:${X(v)}%"></em></div><b class="num">${tr(v)}</b></div>`;
+  return `<div class="wf">${mark('30 ngày trước',start)}
+    ${rows.map(r=>`<div class="wf-r" data-tip="${esc(r.n)}: ${trs(r.v)}${WHY[r.k]?' ('+WHY[r.k]+')':''}"><span class="wf-l">${esc(r.n)}${WHY[r.k]?`<small>${WHY[r.k]}</small>`:''}</span>
+      <div class="wf-t"><i class="${r.v>=0?'up':'dn'}" style="left:${X(Math.min(r.a,r.b))}%;width:${Math.max(.8,Math.abs(X(r.b)-X(r.a)))}%"></i></div><b class="num ${cls(r.v)}">${trs(r.v)}</b></div>`).join('')}
+    ${mark('Hôm nay',end)}</div>
+    <p class="note">Tổng ${trs(end-start)}. Cổ phiếu theo giá, sổ và ví là lãi 30 ngày, xe, laptop là khấu hao; tiền nạp, rút không tính. Trục phóng to quanh tài sản ròng để thấy rõ từng khoản.</p>`;
+}
+// Dòng thời gian 12 tháng: sổ đáo hạn, hạn nợ, hạn mục tiêu, ngày ví tích lũy dự kiến đủ để mở sổ
+const TL={sav:['var(--c2)','Sổ đáo hạn'],in:['var(--good)','Thu nợ'],out:['var(--bad)','Trả nợ'],goal:['var(--accent)','Mục tiêu'],acc:['var(--c1)','Mở sổ mới']};
+function timeline(C){
+  const today=serialOf(C.now), end=today+365, ev=[];
+  for(const a of C.inNW)if(a.kind==='savings'&&!a.sv.done){const d=serialOf(a.sv.mat);if(d<=end)ev.push({d,t:'Sổ '+a.name+' đáo hạn',v:a.value,ty:'sav'});}
+  for(const l of LOANS)if(l.left>0&&l.due&&l.due<=end)ev.push({d:l.due,t:l.dir==='lend'?l.who+' trả nợ':'Trả nợ '+l.who,v:l.dir==='lend'?l.left:-l.left,ty:l.dir==='lend'?'in':'out'});
+  for(const g of GOALS)if(g.due&&g.due>=today&&g.due<=end&&g.have<g.need)ev.push({d:g.due,t:'Hạn mục tiêu '+g.name,v:null,ty:'goal'});
+  const a=C.acc;if(a&&!a.ready&&a.months&&a.months<=12)ev.push({d:today+Math.round(a.months*30.44),t:a.w.name+' đủ '+tr(a.goal)+', mở sổ mới',v:null,ty:'acc',est:true});
+  if(!ev.length)return '';
+  ev.sort((x,y)=>x.d-y.d);
+  const W=360,H=58,L=10,R=10,Y=30, x=d=>L+Math.max(0,Math.min(1,(d-today)/365))*(W-L-R), seen={};
+  const months=Array.from({length:13},(_,i)=>{const t=new Date(C.now+7*36e5);t.setUTCDate(1);t.setUTCMonth(t.getUTCMonth()+i);return {d:Math.floor(t/DAY)+25569,m:t.getUTCMonth()+1,y:t.getUTCFullYear()};}).filter(m=>m.d>today&&m.d<=end);
+  const dots=ev.map(e=>{const k=Math.round(x(e.d)/9);const n=seen[k]=(seen[k]||0)+1;return `<circle cx="${x(e.d)}" cy="${Y-(n-1)*11}" r="5.5" fill="${TL[e.ty][0]}" stroke="var(--surface)" stroke-width="2"${e.est?' fill-opacity=".55"':''}><title>${esc(sdate(e.d))}: ${esc(e.t)}</title></circle>`;}).join('');
+  const svg=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Các mốc 12 tháng tới">
+    <line x1="${L}" x2="${W-R}" y1="${Y}" y2="${Y}" stroke="var(--line)" stroke-width="2"/>
+    ${months.map(m=>`<line x1="${x(m.d)}" x2="${x(m.d)}" y1="${Y-4}" y2="${Y+4}" stroke="var(--line)"/>${m.m%2||x(m.d)<34?'':`<text x="${x(m.d)}" y="${H-6}" text-anchor="middle">${m.m===1?'1/'+String(m.y).slice(2):m.m}</text>`}`).join('')}
+    <text x="${L}" y="${H-6}">Nay</text>${dots}</svg>`;
+  const list=ev.map(e=>{const dd=e.d-today;return `<div class="tl-i"><i class="tdot" style="background:${TL[e.ty][0]}"></i><span class="tl-d num">${e.est?'~':''}${sdate(Math.max(e.d,0))}</span>
+    <span class="tl-t">${esc(e.t)}</span><span class="tl-v num ${e.v?cls(e.v):''}">${e.v?trs(e.v):''}</span><span class="chip ${dd<0?'bad':dd<=14?'warn':''}">${dd<0?'quá '+(-dd)+' ngày':dd===0?'hôm nay':'còn '+dd+' ngày'}</span></div>`;}).join('');
+  const used=[...new Set(ev.map(e=>e.ty))];
+  return card('12 tháng tới','calendar',svg+`<div class="legend">${used.map(t=>`<span><i class="tdot" style="background:${TL[t][0]}"></i>${TL[t][1]}</span>`).join('')}</div><div class="tl">${list}</div>
+    ${ev.some(e=>e.est)?'<p class="note">Dấu ~ là ước tính theo mức dư tháng gần nhất.</p>':''}`,ev.length+' mốc');
+}
+// Thước giá cổ phiếu: giá vốn, giá hiện tại, giá cân nhắc bán; thêm đường giá theo ngày khi có từ 3 lần chụp
+function stockCard(C){
+  const st=C.inNW.filter(a=>a.kind==='stock'&&a.sym&&a.qty>0);if(!st.length)return '';
+  const K=v=>PRIV?HIDE:nf(v/1000,1)+'K';
+  return card('Cổ phiếu','chart',st.map(a=>{
+    const P=(DATA.prices||{})[a.sym.toUpperCase()]||{}, price=a.value/a.qty, cost=a.cost>0?a.cost/a.qty:null, sell=P.sell||null;
+    const vals=[price,cost,sell].filter(Boolean), lo=Math.min(...vals)*.95, hi=Math.max(...vals)*1.04, X=v=>(v-lo)/(hi-lo)*100;
+    const up=cost&&price>=cost;
+    const hist=HIST.filter(h=>h.a&&h.a[a.name]!=null&&h.d<serialOf(C.now)).map(h=>({d:h.d,v:h.a[a.name]/a.qty}));hist.push({d:serialOf(C.now),v:price});
+    let line='';
+    if(hist.length>=3){const W=360,H=120,T=10,B=22,Lx=6,Rx=56, vs=[...hist.map(h=>h.v),...vals], l=Math.min(...vs)*.98, h2=Math.max(...vs)*1.02, d0=hist[0].d, d1=hist[hist.length-1].d;
+      const x=d=>Lx+(d-d0)/((d1-d0)||1)*(W-Lx-Rx), y=v=>T+(1-(v-l)/(h2-l))*(H-T-B);
+      const ref=(v,c,t)=>v?`<line x1="${Lx}" x2="${W-Rx+4}" y1="${y(v)}" y2="${y(v)}" stroke="${c}" stroke-dasharray="4 4"/><text x="${W-Rx+8}" y="${y(v)+4}">${t}</text>`:'';
+      line=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Giá ${esc(a.sym)} theo ngày" style="margin-top:10px">${ref(cost,'var(--muted)','Vốn')}${ref(sell,'var(--good)','Bán')}
+        <path d="${hist.map((q,i)=>(i?'L':'M')+x(q.d).toFixed(1)+','+y(q.v).toFixed(1)).join('')}" fill="none" stroke="var(--c3)" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="${x(d1)}" cy="${y(price)}" r="4" fill="var(--c3)" stroke="var(--surface)" stroke-width="2"/>
+        ${hist.map(q=>`<rect x="${x(q.d)-5}" y="${T}" width="10" height="${H-T-B}" fill="transparent" data-tip="${sdate(q.d)}: ${nf(q.v,0)}đ"/>`).join('')}</svg>`;}
+    return `<div class="pg-wrap">
+      <div class="pg-h">${logo(a)}<div style="min-width:0"><div class="nm">${esc(a.sym)} <span class="num">${PRIV?HIDE:nf(price,0)+'đ'}</span></div>
+        <div class="sb">${nf(a.qty,0)} cp · giá trị ${tr(a.value)}${cost?` · <span class="${up?'pos':'neg'}">${pcts(price/cost-1)} so với vốn</span>`:''}</div></div></div>
+      <div class="pg"><div class="pg-now"><span style="left:${Math.max(8,Math.min(92,X(price)))}%">Nay ${K(price)}</span></div><div class="pg-t">
+        ${cost?`<i class="${up?'up':'dn'}" style="left:${X(Math.min(cost,price))}%;width:${Math.abs(X(price)-X(cost))}%"></i><em style="left:${X(cost)}%" title="Giá vốn"></em>`:''}
+        ${sell?`<em class="sell" style="left:${X(sell)}%" title="Giá cân nhắc bán"></em>`:''}<b style="left:${X(price)}%"></b></div>
+        <div class="pg-l">${cost?`<span style="left:${X(cost)}%">Vốn ${K(cost)}</span>`:''}${sell?`<span class="sell" style="left:${X(sell)}%">Bán ${K(sell)}</span>`:''}</div></div>
+      ${line}
+      <p class="note">${sell?(price>=sell?'Đã chạm giá cân nhắc bán.':'Còn '+pct(sell/price-1,1)+' tới giá cân nhắc bán.')+(cost&&sell<cost?` Lưu ý: giá này thấp hơn giá vốn ${K(cost)}, bán ở đó vẫn lỗ khoảng ${tr((cost-sell)*a.qty)}.`:''):'Đặt giá cân nhắc bán ở sheet Giá CP cột G.'} Giá cập nhật mỗi giờ trong phiên.</p></div>`;}).join(''));
+}
+// Ô tỷ lệ (treemap, chia ô vuông dần): mỗi ô một tài sản, diện tích theo giá trị, màu theo tầng
+function squarify(items,W,H){
+  const out=[], tot=sum(items,'v')||1;let x=0,y=0,w=W,h=H, rest=items.map(i=>({...i,ar:i.v/tot*W*H}));
+  const worst=(row,s)=>{const sm=sum(row,'ar'),mx=Math.max(...row.map(r=>r.ar)),mn=Math.min(...row.map(r=>r.ar));return Math.max(s*s*mx/(sm*sm),sm*sm/(s*s*mn));};
+  while(rest.length){
+    const s=Math.min(w,h);let row=[rest[0]],best=worst(row,s),i=1;
+    while(i<rest.length){const t=[...row,rest[i]],wv=worst(t,s);if(wv<=best){row=t;best=wv;i++;}else break;}
+    const th=sum(row,'ar')/s;let off=0;
+    for(const r of row){const len=r.ar/th;out.push(w>=h?{...r,x,y:y+off,w:th,h:len}:{...r,x:x+off,y,w:len,h:th});off+=len;}
+    if(w>=h){x+=th;w-=th;}else{y+=th;h-=th;}
+    rest=rest.slice(row.length);
+  }
+  return out;
+}
+function composition(C){
+  const items=C.inNW.filter(a=>a.value>0&&!a.sim).map(a=>({a,v:a.value,col:a.tier?tcol(a.tier):'var(--c0)'})).sort((p,q)=>q.v-p.v);
+  const W=160,H=110, tot=sum(items,'v')||1, cells=squarify(items,W,H);
+  const segs=C.rows.map(r=>({v:r.value,col:tcol(r.id),label:'T'+r.id+' '+r.name}));
+  if(C.outside.length)segs.push({v:sum(C.outside,'value'),col:'var(--c0)',label:'Ngoài tháp'});
+  return `<div class="tm" role="img" aria-label="Cơ cấu tài sản, mỗi ô một tài sản">${cells.map(c=>{const big=c.w/W>.2&&c.h/H>.22, mid=c.w/W>.13&&c.h/H>.2;
+    return `<div class="tm-c" style="left:${c.x/W*100}%;top:${c.y/H*100}%;width:${c.w/W*100}%;height:${c.h/H*100}%;--tc:${c.col}" data-tip="${esc(c.a.name)}: ${tr(c.v)} · ${pct(c.v/tot,1)} · ${esc(tierName(c.a.tier))}">
+      ${mid?`<div class="tm-in">${big&&c.a.brand&&c.a.brand.logo?logo(c.a):''}<b>${esc(c.a.name)}</b><span class="num">${tr(c.v)} · ${pct(c.v/tot,0)}</span></div>`:''}</div>`;}).join('')}</div>
+    <div class="dlist" style="margin-top:12px">${segs.map(s=>`<div class="drow"><i class="tdot" style="background:${s.col}"></i><span>${esc(s.label)}</span><b class="num">${tr(s.v)}</b><span class="muted num">${pct(s.v/tot,0)}</span></div>`).join('')}</div>`;
+}
 function vOverview(C){
   const net=INCOME-S.expense;
   return `
   <section class="hero">
     <div class="l">
-      <div><div class="label">Tài sản ròng</div><div class="big">${vnd(C.nw)}</div>
+      <div><div class="label">Tài sản ròng</div><div class="big" data-n="${PRIV?'':Math.round(C.nw)}">${vnd(C.nw)}</div>
         ${C.entV+C.recV>0?`<div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:6px">Khả dụng <b style="color:var(--hero-ink)">${tr(C.nwAvail)}</b>${C.entV?' · chờ nhận '+tr(C.entV):''}${C.recV?' · cho vay '+tr(C.recV):''}${C.payable?' · nợ '+tr(C.payable):''}</div>`:''}</div>
       <span class="chip-chg ${C.chg30>=0?'up':'dn'}">${ic(C.chg30>=0?'up':'down','sm')} ${trs(C.chg30)} · ${pcts(C.chgPct,2)} trong 30 ngày</span>
+      ${heroGoal(C)}
       <div class="stats">
         <div class="stat"><div class="label">Thanh khoản</div><div class="v">${tr(C.liquid)}</div><div class="s">Đủ ${nf(C.runway,1)} tháng chi thiết yếu</div></div>
         <div class="stat"><div class="label">Dư mỗi tháng</div><div class="v ${net>=0?'up':'dn'}">${trs(net)}</div><div class="s">Để dành ${INCOME>0?pct(net/INCOME,0):'–'} thu nhập</div></div>
@@ -990,12 +1154,16 @@ function vOverview(C){
     <div>${heroPyramid(C.rows)}</div>
   </section>
   ${vTodo(C)}
+  ${timeline(C)}
   ${C.acc?card('Tích lũy vào '+esc(C.acc.w.name),'bank',accCard(C),C.acc.ready?'đủ mở sổ':'mục tiêu '+tr(C.acc.goal)):''}
   <div class="grid2">
     ${card('Phân bổ so với mục tiêu','target',allocBars(C)+'<p class="note">Tính trên '+tr(C.tw)+' trong tháp. Bấm một tầng trên tháp để xem tài sản của tầng đó.</p>')}
-    ${card('Cơ cấu tài sản','pie',composition(C))}
+    ${card('Cơ cấu tài sản','pie',composition(C),tr(sum(C.inNW.filter(a=>a.value>0&&!a.sim),'value')))}
   </div>
-  ${card('Tài sản ròng theo thời gian','up',histChart(C),HIST.length?HIST.length+' ngày đã lưu':'')}
+  <div class="grid2">
+    ${card('30 ngày qua thay đổi vì đâu','chart',waterfall(C),trs(C.chg30))}
+    ${card('Tài sản ròng theo thời gian','up',histChart(C),HIST.length?HIST.length+' ngày đã lưu':'')}
+  </div>
   ${card('Dòng tiền tháng','flow',cashflow())}`;
 }
 function vTower(C){
@@ -1081,13 +1249,17 @@ function vGoals(C){
 function vSavingsPlan(C){
   const cfg=DATA.cfg, want=cfg.saveCount||5, size=cfg.saveGoal||100000000;
   const so=C.inNW.filter(a=>a.kind==='savings'&&!a.sv.done).sort((a,b)=>a.sv.mat-b.sv.mat), n=so.length, a=C.acc;
-  const slots=[...so.map((s,i)=>`<div class="slot on"><b>Sổ #${i+1}</b><span>${esc(s.name)}</span><span class="num">${tr(s.principal)} · ${nf(s.rate,2)}%</span><span class="muted">đáo hạn ${fmtD(s.sv.mat)}</span></div>`),
-    ...Array.from({length:Math.max(0,want-n)},(_,i)=>`<div class="slot"><b>Sổ #${n+i+1}</b><span class="muted">${i===0&&a?(a.ready?'Đủ tiền, mở ngay':'Khi '+esc(a.w.name)+' đủ '+tr(size)+(a.eta?' · ~'+a.eta:'')):'Kế hoạch'}</span></div>`)];
+  // bậc thang: mỗi bậc một sổ, cao dần; sổ đã có tô đầy, bậc kế tiếp lấp theo ví tích lũy
+  const steps=[...so.map(s=>({f:Math.min(1,s.principal/size),col:'var(--c2)',top:logo(s),t:esc(s.name),s:tr(s.principal)+' · '+nf(s.rate,2)+'%',d:'đáo hạn '+fmtD(s.sv.mat)})),
+    ...Array.from({length:Math.max(0,want-n)},(_,i)=>i===0&&a?{f:Math.min(1,a.have/size),col:'var(--c1)',top:'',t:a.ready?'Mở ngay':esc(a.w.name),s:tr(a.have)+' / '+tr(size),d:a.ready?'đủ tiền':a.eta?'~'+a.eta:'',next:1}:{f:0,t:'Kế hoạch',s:'',d:''})].slice(0,Math.max(want,n));
+  const hs=i=>40+i*(60/Math.max(1,steps.length-1));
+  const slots=steps.map((st,i)=>`<div class="lad-c${st.next?' next':''}" data-tip="Sổ #${i+1}: ${st.t}${st.s?' · '+st.s:''}${st.d?' · '+st.d:''}"><div class="lad-b${st.f>=1?' full':''}" style="height:${hs(i)}%"><i style="height:${st.f*100}%;background:${st.col||'transparent'}"></i>${st.top?'<span class="lad-lg">'+st.top+'</span>':''}<b>#${i+1}</b></div>
+    <div class="lad-t">${st.t}</div><div class="lad-s num">${st.s}</div><div class="lad-s">${st.d}</div></div>`);
   return card('Kế hoạch sổ tiết kiệm','bank',`<div class="kpis" style="margin-bottom:12px">
       <div class="kpi"><div class="label">Đang có</div><div class="v">${n}/${want} sổ</div><div class="s">${tr(sum(so,'principal'))} tiền gốc</div></div>
       <div class="kpi"><div class="label">Sổ tiếp theo</div><div class="v">${a?(a.ready?'Mở ngay':tr(a.left)):'–'}</div><div class="s">${a?(a.ready?'Đủ '+tr(size)+' trong '+esc(a.w.name):'còn thiếu trong '+esc(a.w.name)):'Chưa có ví tích lũy'}</div></div>
       <div class="kpi"><div class="label">Lãi sổ mỗi tháng</div><div class="v">${tr2(sum(so,x=>x.sv.daily*30.4))}</div><div class="s">Lãi trung bình ${n?nf(sum(so,'rate')/n,2)+'%':'–'}</div></div>
-    </div><div class="slots">${slots.join('')}</div>
+    </div><div class="ladder" style="--n:${steps.length}">${slots.join('')}</div>
     <p class="note">Mỗi sổ khoảng ${tr(size)}, kỳ hạn 12 tháng, rải nhiều ngân hàng; đáo hạn thì đảo lại nếu lãi còn cao. Số sổ mục tiêu ở Cấu hình B18.</p>`,n+'/'+want);
 }
 function vAssets(C){
@@ -1250,6 +1422,7 @@ function vPerf(C){
     <div class="kpi"><div class="label">Lãi tiết kiệm đã có</div><div class="v pos">${trs(sum(sav,a=>(a.sv||a.fx).accrued))}</div><div class="s">Thêm khoảng ${tr2(C.interestMonthly)}/tháng</div></div>
     <div class="kpi"><div class="label">Thay đổi 30 ngày</div><div class="v ${cls(C.chg30)}">${trs(C.chg30)}</div><div class="s">${pcts(C.chgPct,2)} tài sản ròng</div></div>
   </div></section>
+  ${stockCard(C)}
   <div class="grid2">
     ${card('Lãi/lỗ theo nhóm','chart',divBars(groups.map(g=>({label:g.n,v:g.pp,dot:g.col,tip:`${g.n}: ${tr(g.v)} so với vốn ${tr(g.c)} (${trs(g.p)})`})),v=>pcts(v,1))+
       `<div class="tablewrap" style="margin-top:12px"><table><tr><th>Nhóm</th><th>Giá trị</th><th>Vốn</th><th>Lãi/lỗ</th></tr>
@@ -1266,6 +1439,16 @@ function vPerf(C){
 // ---- khung, đồng bộ
 const fmtT=ms=>new Date(ms).toLocaleTimeString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour:'2-digit',minute:'2-digit'});
 const LIVE={state:'snap',at:0,msg:''};
+// số tài sản ròng chạy lên khi số đổi (không chạy lại mỗi lần làm mới nếu số giữ nguyên; tôn trọng "giảm chuyển động")
+let SHOWN_NW=null;
+function countUp(){
+  const el=document.querySelector('.big[data-n]');if(!el||!el.dataset.n)return;
+  const to=+el.dataset.n, from=SHOWN_NW==null?to*0.94:SHOWN_NW;SHOWN_NW=to;
+  if(from===to||!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches||!window.requestAnimationFrame)return;
+  const t0=performance.now(), D=700, f=v=>Math.round(v).toLocaleString('vi-VN')+'đ';
+  const step=t=>{const k=Math.min(1,(t-t0)/D), e=1-Math.pow(1-k,3);if(!el.isConnected)return;el.textContent=f(from+(to-from)*e);if(k<1)requestAnimationFrame(step);};
+  el.textContent=f(from);requestAnimationFrame(step);
+}
 function render(){
   const C=compute(S);
   document.getElementById('tabs').innerHTML=TABS.map(([k,n,i])=>`<button role="tab" data-tab="${k}" aria-selected="${S.tab===k}">${ic(i)}<span>${n}</span></button>`).join('');
@@ -1277,13 +1460,15 @@ function render(){
     <p>${shown}${LIVE.msg&&LIVE.pwErr?' <b class="neg" style="display:inline">'+esc(LIVE.msg)+'</b>':''} Nhập mật khẩu một lần, máy này sẽ nhớ.</p>
     ${WEB_CFG.api?`<form id="pwform" class="pwform" autocomplete="on"><input id="pw" type="password" autocomplete="current-password" placeholder="Mật khẩu xem" aria-label="Mật khẩu xem số liệu" required><button class="btn" type="submit">${ic('check','sm')} Đăng nhập</button></form>`:''}
     <p style="margin-top:10px"><button class="btn ghost" data-signin>Hoặc đăng nhập Google</button></p></div></div>`;
-  document.getElementById('view').innerHTML=banner+{overview:vOverview,tower:vTower,assets:vAssets,kai:vKai,analysis:vAnalysis,perf:vPerf}[S.tab](C)+
+  const skel=IS_WEB&&DATA===SNAP&&LIVE.state==='load';
+  document.getElementById('view').innerHTML=skel?`<div class="sk hero" style="height:260px"></div><div class="sk" style="height:180px"></div><div class="sk" style="height:140px"></div>`:banner+{overview:vOverview,tower:vTower,assets:vAssets,kai:vKai,analysis:vAnalysis,perf:vPerf}[S.tab](C)+
     (IS_WEB&&(gTok||PW)?`<p class="note" style="text-align:center"><button class="btn ghost" data-signout>Đăng xuất (máy này quên mật khẩu và số liệu)</button></p>`:'');
   const st=document.getElementById('stamp');
   if(st)st.innerHTML=`<span class="status"><i class="dotlive ${LIVE.state==='ok'?'ok':LIVE.state==='err'?'bad':''}"></i>${LIVE.state==='ok'?'Đồng bộ '+fmtT(LIVE.at)+' · '+fmtD(LIVE.at):LIVE.state==='load'?'Đang đọc Google Sheet…':DATA===SNAP?'Dữ liệu mẫu · chưa nối sheet':'Số liệu lúc '+(LIVE.at?fmtT(LIVE.at)+' · '+fmtD(LIVE.at):'trước')}</span>`;
   const rb=document.getElementById('refresh');if(rb){rb.innerHTML=ic('refresh');rb.classList.toggle('spin',LIVE.state==='load');}
   const ob=document.getElementById('opensheet');if(ob){ob.href=SHEET_URL;ob.innerHTML=ic('sheet');}
   const ib=document.getElementById('install');if(ib){ib.innerHTML=ic('download');ib.hidden=!installEvt;}
+  countUp();
   const pb=document.getElementById('privacy');if(pb){pb.innerHTML=ic(PRIV?'eyeOff':'eye');pb.setAttribute('aria-pressed',PRIV);pb.title=PRIV?'Hiện số tiền':'Ẩn số tiền';}
 }
 // ---- đọc Google Sheet qua connector
@@ -1509,6 +1694,13 @@ document.addEventListener('pointermove',e=>{
 });
 document.addEventListener('pointerleave',()=>{if(tip)tip.hidden=true;});
 document.addEventListener('scroll',()=>{if(tip)tip.hidden=true;},{passive:true});
+// kéo xuống ở đầu trang để làm mới
+let ptrY=null;const ptr=document.getElementById('ptr');
+document.addEventListener('touchstart',e=>{ptrY=window.scrollY<=0&&e.touches.length===1?e.touches[0].clientY:null;},{passive:true});
+document.addEventListener('touchmove',e=>{if(ptrY==null||!ptr)return;const dy=e.touches[0].clientY-ptrY;if(dy<=8){ptr.hidden=true;return;}
+  ptr.hidden=false;ptr.style.transform='translateY('+Math.min(dy,110)*0.5+'px)';ptr.classList.toggle('ready',dy>80);ptr.lastChild.textContent=dy>80?'Thả để làm mới':'Kéo để làm mới';},{passive:true});
+document.addEventListener('touchend',()=>{if(ptrY==null||!ptr)return;const go=ptr.classList.contains('ready');ptr.hidden=true;ptr.style.transform='';ptr.classList.remove('ready');ptrY=null;
+  if(go){const rb=document.getElementById('refresh');if(rb)rb.click();}});
 // tự đọc lại mỗi phút khi đang mở; app chạy nền thì không đọc, mở lại (ví dụ từ màn hình chính) thì đọc ngay nếu số đã cũ hơn 1 phút
 const canLoad=()=>mcp||(IS_WEB&&(gTok||PW));
 setInterval(()=>{if(document.hidden)return;const a=document.activeElement;if(a&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName))return;if(canLoad())loadSheet(false);else render();},60000);
