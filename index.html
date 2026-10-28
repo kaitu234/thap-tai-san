@@ -413,16 +413,16 @@ body{overflow-x:clip}
 .brand .mark .mk{width:26px;height:auto}
 /* màn mở app ~0,9 giây: 4 tầng nổi lên lần lượt, cờ cắm, chữ hiện, rồi mờ đi */
 #splash{position:fixed;inset:0;z-index:100;display:grid;place-items:center;pointer-events:none;
-  background:radial-gradient(120% 90% at 50% 38%,var(--hero2),var(--hero) 72%);animation:spOut .24s ease .74s forwards}
+  background:radial-gradient(120% 90% at 50% 38%,var(--hero2),var(--hero) 72%);animation:spOut .48s ease 1.48s forwards}
 .sp-in{display:grid;justify-items:center;gap:16px}
 .sp-logo{width:116px;height:auto;overflow:visible}
-.sp-logo .ring{stroke-dasharray:100;animation:spRing .38s cubic-bezier(.4,0,.2,1) both}
-.sp-logo .b{transform-box:fill-box;animation:spDrop .34s cubic-bezier(.3,1.5,.5,1) both}
-.sp-logo .b1{animation-delay:.1s}.sp-logo .b2{animation-delay:.2s}.sp-logo .b3{animation-delay:.3s}.sp-logo .b4{animation-delay:.4s}
-.sp-logo .fl{transform-box:fill-box;transform-origin:0 100%;animation:spFlag .24s ease-out .56s both}
+.sp-logo .ring{stroke-dasharray:100;animation:spRing .76s cubic-bezier(.4,0,.2,1) both}
+.sp-logo .b{transform-box:fill-box;animation:spDrop .68s cubic-bezier(.3,1.5,.5,1) both}
+.sp-logo .b1{animation-delay:.2s}.sp-logo .b2{animation-delay:.4s}.sp-logo .b3{animation-delay:.6s}.sp-logo .b4{animation-delay:.8s}
+.sp-logo .fl{transform-box:fill-box;transform-origin:0 100%;animation:spFlag .48s ease-out 1.12s both}
 @keyframes spRing{from{stroke-dashoffset:100}}
 @keyframes spDrop{from{opacity:0;transform:translateY(-46px)}60%{opacity:1}}
-.sp-word{font:800 24px/1 var(--f-disp);letter-spacing:.1em;color:var(--hero-ink);text-transform:uppercase;animation:spWord .32s ease-out .22s both}
+.sp-word{font:800 24px/1 var(--f-disp);letter-spacing:.1em;color:var(--hero-ink);text-transform:uppercase;animation:spWord .64s ease-out .44s both}
 .sp-word span{color:var(--h2)}
 @keyframes spTier{from{opacity:0;transform:translateY(22px) scaleX(.6)}}
 @keyframes spFlag{from{opacity:0;transform:scaleY(.2)}}
@@ -1513,7 +1513,7 @@ function composition(C){
   if(C.outside.length)segs.push({v:sum(C.outside,'value'),col:'var(--c0)',label:'Ngoài tháp'});
   return `<div class="tm" role="img" aria-label="Cơ cấu tài sản, mỗi ô một tài sản">${cells.map(c=>{const big=c.w/W>.2&&c.h/H>.22, mid=c.w/W>.13&&c.h/H>.2;
     return `<div class="tm-c" style="left:${c.x/W*100}%;top:${c.y/H*100}%;width:${c.w/W*100}%;height:${c.h/H*100}%;--tc:${c.col}" data-tip="${esc(c.a.name)}: ${tr(c.v)} · ${pct(c.v/tot,1)} · ${esc(tierName(c.a.tier))}">
-      ${mid?`<div class="tm-in">${big&&c.a.brand&&c.a.brand.logo?logo(c.a):''}<b>${esc(c.a.name)}</b><span class="num">${tr(c.v)} · ${pct(c.v/tot,0)}</span></div>`:''}</div>`;}).join('')}</div>
+      ${mid?`<div class="tm-in">${big&&c.a.brand?logo(c.a):''}<b>${esc(c.a.name)}</b><span class="num">${tr(c.v)} · ${pct(c.v/tot,0)}</span></div>`:''}</div>`;}).join('')}</div>
     <div class="dlist" style="margin-top:12px">${segs.map(s=>`<div class="drow"><i class="tdot" style="background:${s.col}"></i><span>${esc(s.label)}</span><b class="num">${tr(s.v)}</b><span class="muted num">${pct(s.v/tot,0)}</span></div>`).join('')}</div>`;
 }
 function vOverview(C){
@@ -2066,8 +2066,9 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=24, SEEN_KEY='thaptaisan.seen';
+const APP_VER=25, SEEN_KEY='thaptaisan.seen';
 const CHANGES=[
+  [25,'28/10/2026',['Màn mở app chậm gấp đôi (khoảng 2 giây) để kịp thấy vòng tròn và các tầng rơi xuống','Ô tỷ lệ ở Cơ cấu tài sản hiện đủ logo, kể cả BHXH, Honda, Zalopay']],
   [24,'28/10/2026',['<b>Tháp kính</b> phát sáng ở tab Tháp: trời sao, đỉnh lấp lánh; chạm tầng để làm sáng, chạm lần nữa để xem tài sản','Màn mở app mới: vòng tròn tự vẽ, 4 tầng rơi xuống xếp thành tháp, cờ cắm qua chỗ hở','Thẻ tài sản có <b>thanh tiến độ</b>: sổ đã gửi / còn bao nhiêu ngày, lãi tích lũy; xe, laptop đã khấu hao bao nhiêu','Chip số tiền gọn đúng con số, màu theo mức độ (đỏ, vàng, xanh dương, xanh lá)','Sửa: công nợ, tiền mặt, tiền CK của Kai Café trước đây đọc thành 0']],
   [23,'28/10/2026',['Chạm vào <b>biểu đồ hoặc bảng</b> để xem to toàn màn hình (biểu đồ ngang tự xoay ngang); chạm ra ngoài để thu nhỏ','Logo <b>BHXH</b> và biểu tượng bảo hiểm đỏ trắng (BHTN, BHYT)','Chip <b>Khả dụng</b> màu xanh lá nổi hơn; số tiền trong Việc cần làm và nhận xét được tô đậm']],
   [22,'28/10/2026',['Tháp <b>3D</b>: mỗi tầng là một khối có mặt bên, mặt trên và bóng đổ; mức đạt mục tiêu như mực nước trong khối; các tầng xếp lần lượt khi chuyển tab','Logo <b>Honda</b> và <b>Zalopay</b> mới theo ảnh bạn gửi','Sổ nợ: biểu tượng nam/nữ theo cách xưng hô (Cô, Chú…); tên riêng thì ghi "nam" hoặc "nữ" ở cột Ghi chú']],
@@ -2172,7 +2173,7 @@ window.addEventListener('resize',movePill);
 try{document.fonts&&document.fonts.ready.then(movePill);}catch(_){}
 window.addEventListener('scroll',()=>{const a=document.querySelector('.appbar');if(a)a.classList.toggle('sc',window.scrollY>4);},{passive:true});
 // màn mở app: tự biến mất sau ~0,9 giây, rồi các thẻ hiện lên
-setTimeout(()=>{const sp=document.getElementById('splash');if(sp)sp.remove();animateView('in-up');if(seenVer()!==APP_VER)openSheet('new');},MOTION()?1000:0);
+setTimeout(()=>{const sp=document.getElementById('splash');if(sp)sp.remove();animateView('in-up');if(seenVer()!==APP_VER)openSheet('new');},MOTION()?2000:0);
 document.addEventListener('click',e=>{
   if(zoomClick(e))return;
   if(e.target.closest('#news')){openSheet('new');return;}
