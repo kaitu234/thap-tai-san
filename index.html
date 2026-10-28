@@ -262,8 +262,13 @@ details.more{margin-top:8px} details.more summary{cursor:pointer;font-size:12.5p
 .hg-t{height:8px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden} .hg-t i{display:block;height:100%;border-radius:99px;background:var(--up-hero)}
 .hg-s{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--hero-mute)} .hg-s span{min-width:0}
 .hg-v{font-size:11.5px;font-weight:600;color:var(--hero-ink);line-height:1.4}
-.avail{display:inline-flex;align-items:baseline;gap:5px;margin-right:6px;padding:3px 10px;border-radius:999px;background:var(--hero-ink);color:var(--hero);font-weight:600;font-size:12.5px}
-.avail b{font-size:14px;font-weight:800}
+.avail{display:inline-flex;align-items:baseline;gap:6px;margin-right:6px;padding:4px 12px;border-radius:999px;
+  background:linear-gradient(135deg,#34B368,#1E7E45);color:#fff;font-weight:600;font-size:12.5px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.22) inset,0 4px 14px rgba(46,170,96,.35)}
+.avail b{font-size:15px;font-weight:800;letter-spacing:.01em}
+/* số tiền trong câu chữ: đậm, nền nhạt trung tính (không ngụ ý lãi/lỗ) */
+b.amt{font-weight:700;color:var(--ink);background:var(--accent-soft);padding:0 4px;border-radius:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ins b b.amt,.todo-i b b.amt{font-weight:800}
 .spark{width:96px;height:28px;flex:none;opacity:.9}
 /* thác nước 30 ngày */
 .wf{display:grid;gap:6px}
@@ -436,6 +441,31 @@ nav.tabs .pill.on{opacity:1}
 #news.dot::after{content:"";position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px var(--surface)}
 #sheet{position:fixed;inset:0;z-index:60;display:grid;align-items:end;justify-items:center}
 #sheet[hidden]{display:none}
+/* phóng to biểu đồ, bảng */
+#view :is(svg.chart,.tablewrap,.wf,.dbars,.tm,.ladder,.stack){cursor:zoom-in}
+#zoom{position:fixed;inset:0;z-index:70;display:grid;place-items:center}
+#zoom[hidden]{display:none}
+.zm-bg{position:absolute;inset:0;background:rgba(20,12,6,.6)}
+.zm{position:relative;display:flex;flex-direction:column;background:var(--surface);color:var(--ink);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.35);
+  width:calc(100vw - 20px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));max-width:1100px;
+  height:calc(100dvh - 24px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));padding:10px 12px 12px}
+.zm-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.zm-t{flex:1;min-width:0;font:700 17px/1.2 var(--f-disp);letter-spacing:.04em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zm-body{position:relative;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
+.zm-svg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.zm-svg.rot{transform:translate(-50%,-50%) rotate(90deg)}
+.zm-body.zm-table .tablewrap{max-height:none;overflow:visible;border:0}
+.zm-body.zm-table table{font-size:13.5px}
+.zm-body.zm-table :is(td,th):first-child{position:sticky;left:0;z-index:2;background:var(--surface)}
+.zm-body.zm-table th:first-child{z-index:3;background:var(--accent)}
+.zm-body>:not(.zm-svg){width:100%}
+@media (prefers-reduced-motion:no-preference){
+  #zoom:not([hidden]) .zm-bg{animation:fadeIn .2s ease both}
+  #zoom:not([hidden]) .zm{animation:zmIn .28s cubic-bezier(.2,.9,.25,1) both}
+  #zoom.closing .zm-bg{animation:fadeOut .18s ease both}
+  #zoom.closing .zm{animation:zmOut .18s ease-in both}
+}
+@keyframes zmIn{from{opacity:0;transform:scale(.92)}} @keyframes zmOut{to{opacity:0;transform:scale(.94)}}
 .sh-bg{position:absolute;inset:0;background:rgba(20,12,6,.5)}
 .sh{position:relative;width:100%;max-width:560px;max-height:min(86vh,760px);display:grid;grid-template-rows:auto auto auto minmax(0,1fr);
   background:var(--surface);color:var(--ink);border-radius:20px 20px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.25);
@@ -492,6 +522,8 @@ nav.tabs .pill.on{opacity:1}
   <main id="view"></main>
 </div>
 <div id="tip" hidden></div>
+<div id="zoom" hidden><div class="zm-bg"></div>
+  <section class="zm" role="dialog" aria-modal="true" aria-labelledby="zmT"><div class="zm-h"><b class="zm-t" id="zmT"></b><button class="iconbtn zm-x" aria-label="Thu nhỏ"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="zm-body"></div></section></div>
 <div id="sheet" hidden><div class="sh-bg" data-close></div>
   <section class="sh" role="dialog" aria-modal="true" aria-labelledby="shT">
     <div class="sh-grab" aria-hidden="true"></div>
@@ -836,8 +868,16 @@ const MARKS={
   acer:['#83B81A',mkT('acer',8.4,700,'#fff')],
   huawei:['#FFFFFF','<g fill="#CF0A2C">'+[-78,-55,-32,-10,10,32,55,78].map(d=>'<ellipse cx="12" cy="10.6" rx="1.75" ry="5.3" transform="rotate('+d+' 12 18)"/>').join('')+'</g>'],
   xiaomi:['#FF6900','<path d="M5.4 8h7.4a3.2 3.2 0 0 1 3.2 3.2V16h-2.3v-4.6a1.2 1.2 0 0 0-1.2-1.2H7.7V16H5.4zM9.6 11.6h2.3V16H9.6zM17.9 8h2.3v8h-2.3z" fill="#fff"/>'],
-  poco:['#FFD60A',mkT('POCO',6.8,900,'#111')]};
-const DEV_BRANDS=[[/zalo/,'zalopay'],[/honda|airblade|vision|\bwave\b|\bsh\b|\blead\b|winner/,'honda'],[/acer|nitro|predator|aspire/,'acer'],[/huawei|matepad/,'huawei'],[/poco/,'poco'],[/xiaomi|redmi|\bmi\b/,'xiaomi']];
+  poco:['#FFD60A',mkT('POCO',6.8,900,'#111')],
+  bhxh:['#00A6E6','<g transform="scale(.24)">'+(()=>{const c=[50,47],P=[0,1,2,3,4].map(i=>{const t=(-90+i*72)*Math.PI/180;return [c[0]+21*Math.cos(t),c[1]+21*Math.sin(t)];}),
+    disc=(r,cr,f)=>P.map(p=>'<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+r+'" fill="'+f+'"/>').join('')+'<circle cx="50" cy="47" r="'+cr+'" fill="'+f+'"/>';
+    return disc(16,21,'#fff')+disc(11,16,'#00A6E6');})()+
+    '<path d="M33 31 50 53 67 31M50 53v34" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="51" cy="37.5" r="6" fill="#fff"/></g>'],
+  bhyt:['#FFFFFF','<rect x="3.5" y="2.8" width="17" height="12.4" rx="1.8" fill="#D7261E" stroke="#222" stroke-width=".9"/>'+
+    '<path d="M10.6 4.9h2.8v2.2h2.2v2.8h-2.2v2.2h-2.8v-2.2H8.4V7.1h2.2z" fill="#fff" stroke="#222" stroke-width=".6"/>'+
+    '<path d="M5.3 6h2.4M5.3 8.2h2.4M5.3 10.4h2.4M16.3 6h2.4M16.3 8.2h2.4M16.3 10.4h2.4" stroke="#fff" stroke-width="1" stroke-linecap="round"/>'+
+    '<path d="M2.4 17.6 5.5 15c1.2-1 2.5-1.3 4-1.1h5.4c1 0 1.5.9 1.1 1.7-.3.6-.9.9-1.6.9h-3.2l4.7.1 4.3-2.4c.9-.5 1.9.6 1.2 1.4l-4.4 4.4c-.7.7-1.6 1-2.6 1H7.6L5 21.8z" fill="#fff" stroke="#222" stroke-width=".9" stroke-linejoin="round"/>']};
+const DEV_BRANDS=[[/bhxh|bảo hiểm xã hội/,'bhxh'],[/bhyt|y tế|bhtn|thất nghiệp/,'bhyt'],[/zalo/,'zalopay'],[/honda|airblade|vision|\bwave\b|\bsh\b|\blead\b|winner/,'honda'],[/acer|nitro|predator|aspire/,'acer'],[/huawei|matepad/,'huawei'],[/poco/,'poco'],[/xiaomi|redmi|\bmi\b/,'xiaomi']];
 function brandOf(a){
   const n=a.name.toLowerCase();
   for(const [re,k] of DEV_BRANDS) if(re.test(n)) return {color:MARKS[k][0],mark:k};
@@ -962,7 +1002,7 @@ function openCheck(C){
   const a=C.acc, k=a&&a.chk;if(!k)return '';
   const need=`${nf(DATA.cfg.keepM,0)} tháng ${k.bySal?'lương tự trả':'chi thiết yếu'} (${tr(DATA.cfg.keepM*k.base)})${k.dueSoon?' + nợ phải trả trong 60 ngày '+tr(k.dueSoon):''}`;
   return `<div class="chk ${k.ok?'ok':'bad'}"><b>${ic(k.ok?'check':'alert','sm')} ${a.ready?'Gửi '+tr(k.lock)+' vào sổ':'Khi ví đủ '+tr(a.goal)+' mà gửi hết vào sổ'}: ${k.ok?'vẫn đủ sống':'tiền dùng ngay sẽ thiếu'}</b>
-    <span>Ví, tiền mặt còn lại khoảng ${tr(Math.max(0,k.after))}, đủ ${nf(Math.max(0,k.months),1)} tháng chi thiết yếu. Cần giữ ${need}.</span>
+    <span>Ví, tiền mặt còn lại khoảng <b class="amt">${tr(Math.max(0,k.after))}</b>, đủ ${nf(Math.max(0,k.months),1)} tháng chi thiết yếu. Cần giữ ${need}.</span>
     ${k.ok?'':`<span>${k.safe>0?'Nên gửi khoảng '+tr(k.safe)+', phần còn lại để trong ví':'Chưa nên gửi'}, chờ thêm thu nhập rồi gửi tiếp. Sổ vẫn rút sớm được nhưng mất lãi.</span>`}</div>`;
 }
 // Lương tự trả (Cấu hình B24 từ tháng B25): mọi thu nhập vào quỹ lương, mỗi tháng rút đúng mức lương.
@@ -1184,7 +1224,9 @@ function insights(C){
   return L.sort((a,b)=>a.prio-b.prio);
 }
 const SEV={bad:['Ưu tiên','alert'],warn:['Cần chú ý','alert'],info:['Gợi ý','bulb'],good:['Tốt','check']};
-const insCard=i=>`<div class="ins ${i.sev}"><span class="ii">${ic(i.icon||SEV[i.sev][1])}</span><div><div class="chips" style="margin:0 0 4px"><span class="chip ${i.sev}">${SEV[i.sev][0]}</span></div><b>${i.t}</b><p>${i.d}</p>${i.a?`<div class="act">${ic('bulb','sm')}<span>${i.a}</span></div>`:''}</div></div>`;
+// Làm bật số tiền trong câu chữ (Việc cần làm, nhận xét): bọc "12,5 Tr", "2.000 tỷ", "74.100đ" bằng <b class="amt">, bỏ qua thẻ HTML
+const hiAmt=s=>String(s==null?'':s).split(/(<[^>]+>)/).map(p=>p.charAt(0)==='<'?p:p.replace(/(\d[\d.,]*\s?(?:Tr|tỷ|triệu|đ))(?![\p{L}])/gu,'<b class="amt">$1</b>')).join('');
+const insCard=i=>`<div class="ins ${i.sev}"><span class="ii">${ic(i.icon||SEV[i.sev][1])}</span><div><div class="chips" style="margin:0 0 4px"><span class="chip ${i.sev}">${SEV[i.sev][0]}</span></div><b>${hiAmt(i.t)}</b><p>${hiAmt(i.d)}</p>${i.a?`<div class="act">${ic('bulb','sm')}<span>${hiAmt(i.a)}</span></div>`:''}</div></div>`;
 
 // ---- các tab
 // Tài sản nhập tay lâu không đổi (>35 ngày): ví tính từ ngày cập nhật số dư; còn lại theo lần đổi giá trị cuối trong sheet Lịch sử
@@ -1232,7 +1274,7 @@ const todoKey=i=>(i.icon||'')+':'+String(i.t).replace(/<[^>]+>/g,'').replace(/[\
 function snooze(k,days){if(k==='*')SNZ={};else SNZ[k]=Date.now()+days*864e5;try{localStorage.setItem(SNZ_KEY,JSON.stringify(SNZ));}catch(_){}}
 function vTodo(C){
   const all=todoList(C), L=all.filter(i=>!(SNZ[todoKey(i)]>Date.now())), hid=all.length-L.length, top=L.slice(0,5),
-    row=i=>`<div class="todo-i ${i.sev}"><span class="ii">${ic(i.icon||'alert','sm')}</span><div><b>${i.t}</b><span>${i.a}</span>
+    row=i=>`<div class="todo-i ${i.sev}"><span class="ii">${ic(i.icon||'alert','sm')}</span><div><b>${hiAmt(i.t)}</b><span>${hiAmt(i.a)}</span>
       <button class="snz" data-snooze="${encodeURIComponent(todoKey(i))}" data-days="${i.sev==='bad'?7:30}">Để sau ${i.sev==='bad'?7:30} ngày</button></div></div>`,
     foot=hid?`<p class="note" style="margin:8px 0 0">Đã để sau ${hid} việc. <button class="linkbtn" data-snooze="*">Hiện lại</button></p>`:'';
   return card('Việc cần làm','check',top.length?`<div class="todo">${top.map(row).join('')}</div>
@@ -1937,8 +1979,9 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=22, SEEN_KEY='thaptaisan.seen';
+const APP_VER=23, SEEN_KEY='thaptaisan.seen';
 const CHANGES=[
+  [23,'28/10/2026',['Chạm vào <b>biểu đồ hoặc bảng</b> để xem to toàn màn hình (biểu đồ ngang tự xoay ngang); chạm ra ngoài để thu nhỏ','Logo <b>BHXH</b> và biểu tượng bảo hiểm đỏ trắng (BHTN, BHYT)','Chip <b>Khả dụng</b> màu xanh lá nổi hơn; số tiền trong Việc cần làm và nhận xét được tô đậm']],
   [22,'28/10/2026',['Tháp <b>3D</b>: mỗi tầng là một khối có mặt bên, mặt trên và bóng đổ; mức đạt mục tiêu như mực nước trong khối; các tầng xếp lần lượt khi chuyển tab','Logo <b>Honda</b> và <b>Zalopay</b> mới theo ảnh bạn gửi','Sổ nợ: biểu tượng nam/nữ theo cách xưng hô (Cô, Chú…); tên riêng thì ghi "nam" hoặc "nữ" ở cột Ghi chú']],
   [21,'28/10/2026',['Nút <b>Có gì mới</b> (ngôi sao trên thanh trên): xem thay đổi của từng bản và cách dùng app','Có bản mới thì bảng này tự mở một lần, nút có chấm đỏ','Biểu tượng và logo thương hiệu cho từng tài sản (Honda, Acer, Xiaomi, Huawei…)']],
   [20,'28/10/2026',['Mở app có logo tháp chuyển động khoảng 0,9 giây','Chuyển tab trượt mượt, các thẻ hiện lần lượt; ô sáng trượt trên thanh tab','Thanh trên và thanh tab dạng kính mờ; nút nhún khi bấm; "Để sau" thu gọn mượt']],
@@ -1966,6 +2009,7 @@ const GUIDE=[
     ['Chụp số liệu','22h mỗi tối, để vẽ đường lịch sử và thác nước 30 ngày.'],
     ['Email','8h sáng nhắc hạn (sổ trước 15 ngày, nợ trước 7 ngày); tối Chủ nhật gửi báo cáo tuần.']]],
   ['Mẹo','bulb','',[
+    ['Chạm biểu đồ hoặc bảng','Xem to toàn màn hình; chạm ra ngoài để thu nhỏ.'],
     ['Kéo xuống ở đầu trang','Làm mới số liệu.'],
     ['Nút con mắt','Ẩn số tiền khi đưa máy cho người khác xem.'],
     ['Đổi mức trần, mức lương','Sửa ở sheet Cấu hình, ô B19 đến B25; app đổi theo.']]]];
@@ -1988,6 +2032,36 @@ function closeSheet(){
   const el=document.getElementById('sheet');if(!el||el.hidden)return;
   const done=()=>{el.hidden=true;el.classList.remove('closing');document.documentElement.style.overflow='';};
   if(MOTION()){el.classList.add('closing');setTimeout(done,200);}else done();
+}
+// ---- Chạm biểu đồ, bảng để xem to (biểu đồ ngang trên điện thoại dọc thì xoay ngang cho to); chạm ra ngoài hoặc ✕ để thu nhỏ
+const ZOOMABLE='svg.chart,.tablewrap,.wf,.dbars,.tm,.ladder,.stack';
+const NOZOOM='[data-tier],[data-goto],[data-tab],[data-filter],[data-snooze],[data-sh],button,a,input,select,label,summary,tr.clickable';
+function openZoom(el){
+  const z=document.getElementById('zoom');if(!z)return;
+  const body=z.querySelector('.zm-body'), card=el.closest('.card'), h=card&&card.querySelector('.card-h h2');
+  z.querySelector('.zm-t').textContent=h?h.textContent:'';
+  const c=el.cloneNode(true);c.removeAttribute('id');body.innerHTML='';body.className='zm-body';
+  z.hidden=false;z.classList.remove('closing');document.documentElement.style.overflow='hidden';
+  if(c.matches('svg')){
+    const vb=(c.getAttribute('viewBox')||'0 0 4 3').trim().split(/[\s,]+/).map(Number), ar=vb[2]/vb[3]||1.33, bw=body.clientWidth||320, bh=body.clientHeight||480;
+    const rot=window.innerWidth<window.innerHeight&&window.innerWidth<700&&ar>=1.8&&!c.classList.contains('pyr3');
+    const w=rot?Math.min(bh,bw*ar):Math.min(bw,bh*ar);
+    c.setAttribute('style','display:block;margin:0;max-width:none;width:'+w+'px;height:'+(w/ar)+'px');
+    const wrap=document.createElement('div');wrap.className='zm-svg'+(rot?' rot':'');wrap.appendChild(c);body.appendChild(wrap);
+  }else{if(c.classList.contains('tablewrap'))body.classList.add('zm-table');body.appendChild(c);}
+}
+function closeZoom(){
+  const z=document.getElementById('zoom');if(!z||z.hidden)return;
+  const done=()=>{z.hidden=true;z.classList.remove('closing');z.querySelector('.zm-body').innerHTML='';if(document.getElementById('sheet').hidden)document.documentElement.style.overflow='';};
+  if(MOTION()){z.classList.add('closing');setTimeout(done,180);}else done();
+}
+// trả về true nếu cú chạm đã được xử lý bởi phần phóng to
+function zoomClick(e){
+  const z=document.getElementById('zoom');
+  if(z&&!z.hidden){if(e.target.closest('.zm-x')||!e.target.closest('.zm-body > *'))closeZoom();return true;}
+  const el=e.target.closest&&e.target.closest(ZOOMABLE);
+  if(!el||!el.closest('#view')||e.target.closest(NOZOOM)||el.closest('#zoom'))return false;
+  openZoom(el);return true;
 }
 // ---- chuyển động: ô sáng trượt theo tab, nội dung trượt vào theo hướng tab
 const MOTION=()=>!!(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -2012,6 +2086,7 @@ window.addEventListener('scroll',()=>{const a=document.querySelector('.appbar');
 // màn mở app: tự biến mất sau ~0,9 giây, rồi các thẻ hiện lên
 setTimeout(()=>{const sp=document.getElementById('splash');if(sp)sp.remove();animateView('in-up');if(seenVer()!==APP_VER)openSheet('new');},MOTION()?900:0);
 document.addEventListener('click',e=>{
+  if(zoomClick(e))return;
   if(e.target.closest('#news')){openSheet('new');return;}
   const sh=e.target.closest('[data-sh]');if(sh){openSheet(sh.dataset.sh);return;}
   if(e.target.closest('[data-close]')){closeSheet();return;}
@@ -2040,7 +2115,7 @@ document.addEventListener('submit',e=>{
   loadSheet(true);
 });
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')closeSheet();
+  if(e.key==='Escape'){closeZoom();closeSheet();}
   if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('layer')){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));}
 });
 document.addEventListener('input',e=>{
