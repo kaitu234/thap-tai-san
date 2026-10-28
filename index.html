@@ -665,7 +665,7 @@ function buildAssets(S,now){
       if(r.autoV!=null)a.value=r.autoV;
       if(r.autoC!=null)a.chg30=r.autoC;
       if(r.sym&&r.qty>0)a.sub=nf(r.qty,0)+' cp '+r.sym+' · giá '+nf(a.value/r.qty,0)+'đ';
-      else if(r.buy&&r.dep>0)a.sub='Mua '+fmtD(flexCalc(0,0,r.buy,0).start)+' · khấu hao '+nf(r.dep*100,1)+'%/năm';
+      else if(r.buy&&r.dep>0){const c=DATA.cfg;a.sub='Mua '+fmtD(flexCalc(0,0,r.buy,0).start)+' · khấu hao '+nf((c.depA||.1)*100,0)+'%/năm '+(c.depN||3)+' năm đầu, sau đó '+nf((c.depB||.05)*100,0)+'%';}
       // cổ phiếu, vàng, crypto: thay đổi 30 ngày lấy từ lịch sử chụp nếu có điểm từ 30 ngày trước
       if(/^(stock|gold|crypto)$/.test(a.kind)){const old=histValue(a.name,30,now);if(old!=null){a.chg30=a.value-old;a.chgAuto=true;}}
     }
@@ -730,7 +730,7 @@ function goalsCalc(now,net){
 function compute(S){
   const now=S.now||Date.now();
   // số liệu chụp sẵn hoặc lưu trên máy từ trước khi có Cấu hình B19–B21: dùng mặc định
-  const cf=DATA.cfg;cf.riskCap=cf.riskCap||0.15;cf.keepM=cf.keepM||2;cf.matWarn=cf.matWarn||15;cf.lendCap=cf.lendCap||3e7;cf.kaiCap=cf.kaiCap||2.5e7;
+  const cf=DATA.cfg;cf.riskCap=cf.riskCap||0.15;cf.keepM=cf.keepM||2;cf.matWarn=cf.matWarn||15;cf.lendCap=cf.lendCap||3e7;cf.kaiCap=cf.kaiCap||2.5e7;cf.depA=cf.depA||0.1;cf.depN=cf.depN||3;cf.depB=cf.depB||0.05;
   const assets=buildAssets(S,now).map(a=>({...a,tier:tierOf(S,a)}));
   const essential=Math.max(1,(S.exp.fixed+S.exp.personal)||S.expense);
   const targetM=Math.max(DATA.cfg.emin||6,DATA.cfg.gap||0), emTarget=targetM*essential;
@@ -1583,7 +1583,7 @@ function progBlock(a){
       `<div class="pgb-s">Lãi tích lũy <b class="pos">+${tr(s.accrued)}</b> · cả kỳ ${tr(s.full)}</div>`;}
   if(a.kind==='flex'&&a.fx)return `<div class="pgb-s">Lãi tích lũy <b class="pos">+${tr(a.fx.accrued)}</b> từ ${fmtD(a.fx.start)}</div>`;
   if(a.kind==='durable'&&a.cost>0){const p=1-a.value/a.cost;
-    const end=a.buy&&a.dep>0?'hết khấu hao năm '+(new Date((a.buy-25569)*DAY).getUTCFullYear()+Math.round(1/a.dep)):'';
+    const c=DATA.cfg, life=c.depN+(1-c.depA*c.depN)/c.depB, end=a.buy&&a.dep>0?'hết khấu hao năm '+(new Date((a.buy-25569)*DAY).getUTCFullYear()+Math.round(life)):'';
     return pgBar(p,'Đã khấu hao '+pct(Math.max(0,p),1),end,'var(--bad)');}
   return '';
 }
@@ -1903,7 +1903,7 @@ function parseSheet(res){
   const gc=r=>G[r+',1'];
   const cfg={personal:n(gc(2)),fixed:n(gc(3)),other:n(gc(4)),income:n(gc(6)),ref:n(gc(7)),emin:n(gc(8))||6,emax:n(gc(9))||12,longd:n(gc(10))||365,debt:n(gc(11)),
     haircut:gc(12)===undefined?0.7:n(gc(12)),gap:n(gc(13)),insured:gc(14)?String(gc(14)):'',saveGoal:n(gc(15))||100000000,saveWallet:String(gc(16)||'Zalopay'),saveCount:n(gc(17))||5,
-    riskCap:n(gc(18))||0.15,keepM:n(gc(19))||2,matWarn:n(gc(20))||15,lendCap:n(gc(21))||3e7,kaiCap:n(gc(22))||2.5e7,salary:n(gc(23)),salStart:dateCell(gc(24))};
+    riskCap:n(gc(18))||0.15,keepM:n(gc(19))||2,matWarn:n(gc(20))||15,lendCap:n(gc(21))||3e7,kaiCap:n(gc(22))||2.5e7,salary:n(gc(23)),salStart:dateCell(gc(24)),depA:n(gc(25))||0.1,depN:n(gc(26))||3,depB:n(gc(27))||0.05};
   const tiers=[];for(let r=2;r<6;r++){if(T[r+',0']===undefined)continue;tiers.push({id:n(T[r+',0']),name:String(T[r+',1']||''),def:String(T[r+',2']||''),target:Math.round(n(T[r+',3'])*100)});}
   const types=[];for(let r=9;r<19;r++){if(!T[r+',0'])continue;types.push({name:String(T[r+',0']),tier:n(T[r+',1']),liq:T[r+',2']==='Có'});}
   if(tiers.length!==4) throw new Error('Sheet Tầng cần đủ 4 tầng');
@@ -1913,7 +1913,7 @@ function parseSheet(res){
   return {rows,cfg,tiers,types,prices};
 }
 // Hai nguồn dữ liệu: artifact trên claude.ai đọc qua connector; bản website đọc Sheets API bằng token đăng nhập Google (chỉ đọc)
-const RANGES=["'Tài sản'!A5:O54","'Tài sản'!S5:V54","'Cấu hình'!A3:B25","'Tầng'!A3:D6","'Tầng'!A10:C19","'Giá CP'!A3:G12"];
+const RANGES=["'Tài sản'!A5:O54","'Tài sản'!S5:V54","'Cấu hình'!A3:B28","'Tầng'!A3:D6","'Tầng'!A10:C19","'Giá CP'!A3:G12"];
 const HIST_RANGE="'Lịch sử'!A2:J2000", CF_RANGE="'Dòng tiền'!A3:L62", GOAL_RANGE="'Mục tiêu'!A3:F22", LOAN_RANGE="'Sổ nợ'!A3:J40";
 function rowsOf(res,title,r0,r1,read){const M=cellMap(res)[title]||{},out=[];for(let r=r0;r<r1;r++){const g=c=>M[r+','+c];const x=read(g);if(x)out.push(x);}return out;}
 const num=v=>typeof v==='number'?v:0;
@@ -2066,8 +2066,9 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=25, SEEN_KEY='thaptaisan.seen';
+const APP_VER=26, SEEN_KEY='thaptaisan.seen';
 const CHANGES=[
+  [26,'28/10/2026',['Khấu hao xe, laptop, điện thoại mới: <b>10%/năm trên giá gốc 3 năm đầu, sau đó 5%/năm</b> (Cấu hình B26–B28). Xe còn 30,7 Tr, laptop còn 17,6 Tr','Thẻ tài sản ghi năm hết khấu hao theo quy tắc mới']],
   [25,'28/10/2026',['Màn mở app chậm gấp đôi (khoảng 2 giây) để kịp thấy vòng tròn và các tầng rơi xuống','Ô tỷ lệ ở Cơ cấu tài sản hiện đủ logo, kể cả BHXH, Honda, Zalopay']],
   [24,'28/10/2026',['<b>Tháp kính</b> phát sáng ở tab Tháp: trời sao, đỉnh lấp lánh; chạm tầng để làm sáng, chạm lần nữa để xem tài sản','Màn mở app mới: vòng tròn tự vẽ, 4 tầng rơi xuống xếp thành tháp, cờ cắm qua chỗ hở','Thẻ tài sản có <b>thanh tiến độ</b>: sổ đã gửi / còn bao nhiêu ngày, lãi tích lũy; xe, laptop đã khấu hao bao nhiêu','Chip số tiền gọn đúng con số, màu theo mức độ (đỏ, vàng, xanh dương, xanh lá)','Sửa: công nợ, tiền mặt, tiền CK của Kai Café trước đây đọc thành 0']],
   [23,'28/10/2026',['Chạm vào <b>biểu đồ hoặc bảng</b> để xem to toàn màn hình (biểu đồ ngang tự xoay ngang); chạm ra ngoài để thu nhỏ','Logo <b>BHXH</b> và biểu tượng bảo hiểm đỏ trắng (BHTN, BHYT)','Chip <b>Khả dụng</b> màu xanh lá nổi hơn; số tiền trong Việc cần làm và nhận xét được tô đậm']],
