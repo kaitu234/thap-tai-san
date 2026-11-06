@@ -664,7 +664,7 @@ function buildAssets(S,now){
     else{
       if(r.autoV!=null)a.value=r.autoV;
       if(r.autoC!=null)a.chg30=r.autoC;
-      if(r.sym&&r.qty>0)a.sub=nf(r.qty,0)+' cp '+r.sym+' · giá '+nf(a.value/r.qty,0)+'đ';
+      if(r.sym&&r.qty>0)a.sub=nf(r.qty,0)+' cp '+r.sym+' · giá '+nf(a.value/r.qty,0)+'đ'+(a.cost>0?' · giá vốn '+nf(a.cost/r.qty,0)+'đ':'');
       else if(r.buy&&r.dep>0){const c=DATA.cfg;a.sub='Mua '+fmtD(flexCalc(0,0,r.buy,0).start)+' · khấu hao '+nf((c.depA||.1)*100,0)+'%/năm '+(c.depN||3)+' năm đầu, sau đó '+nf((c.depB||.05)*100,0)+'%';}
       // cổ phiếu, vàng, crypto: thay đổi 30 ngày lấy từ lịch sử chụp nếu có điểm từ 30 ngày trước
       if(/^(stock|gold|crypto)$/.test(a.kind)){const old=histValue(a.name,30,now);if(old!=null){a.chg30=a.value-old;a.chgAuto=true;}}
@@ -1587,6 +1587,12 @@ function progBlock(a){
     return pgBar(p,'Đã khấu hao '+pct(Math.max(0,p),1),end,'var(--bad)');}
   return '';
 }
+// Giá trị ban đầu: sổ, ví = gốc; xe, laptop = giá mua; cổ phiếu = vốn; kinh doanh = vốn góp. Không hiện với khoản cho vay, mô phỏng, chờ nhận (vốn = giá trị)
+function costLine(a){
+  if(!(a.cost>0)||a.sim||a.receivable||a.entitled)return '';
+  const lb=a.kind==='savings'||a.kind==='flex'?'Gốc':a.kind==='durable'?'Giá mua':a.kind==='biz'?'Vốn góp':'Vốn';
+  return `<div class="sb cost">${lb} ${tr2(a.cost)}</div>`;
+}
 function assetRow(a){
   const p=a.cost>0?(a.value-a.cost)/a.cost:null;
   const chips=[];
@@ -1600,7 +1606,7 @@ function assetRow(a){
   else if(a.receivable)chips.push(a.loan&&a.loan.due&&a.loan.due<serialOf(Date.now())?'<span class="chip bad">Quá hạn</span>':'<span class="chip warn">Cho vay</span>');
   else chips.push(isLiquid(a)?'<span class="chip good">Rút được</span>':'<span class="chip warn">Khóa</span>');
   return `<div class="arow">${logo(a)}<div style="min-width:0"><div class="nm">${esc(a.name)}</div><div class="sb">${esc(a.sub)}</div><div class="chips">${chips.join('')}</div>${progBlock(a)}</div>
-    <div class="rt"><div class="val">${tr2(a.value)}</div>${p==null?'<div class="sb">không có vốn</div>':`<span class="chip ${p>=0.00005?'up':p<=-0.00005?'dn':''} num">${pcts(p)}</span>`}</div></div>`;
+    <div class="rt"><div class="val">${tr2(a.value)}</div>${costLine(a)}${p==null?'<div class="sb">không có vốn</div>':`<span class="chip ${p>=0.00005?'up':p<=-0.00005?'dn':''} num">${pcts(p)}</span>`}</div></div>`;
 }
 const sdate=n=>fmtD(flexCalc(0,0,n,0).start);
 function loanStatus(l,today){
@@ -2066,8 +2072,9 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=26, SEEN_KEY='thaptaisan.seen';
+const APP_VER=27, SEEN_KEY='thaptaisan.seen';
 const CHANGES=[
+  [27,'06/11/2026',['Thẻ tài sản hiện <b>giá trị ban đầu</b> dưới giá trị hiện tại: vốn cổ phiếu, gốc sổ và ví, giá mua xe, laptop, điện thoại, vốn góp Kai Café','MSN ghi thêm giá vốn trung bình mỗi cổ phiếu']],
   [26,'28/10/2026',['Khấu hao xe, laptop, điện thoại mới: <b>10%/năm trên giá gốc 3 năm đầu, sau đó 5%/năm</b> (Cấu hình B26–B28). Xe còn 30,7 Tr, laptop còn 17,6 Tr','Thẻ tài sản ghi năm hết khấu hao theo quy tắc mới']],
   [25,'28/10/2026',['Màn mở app chậm gấp đôi (khoảng 2 giây) để kịp thấy vòng tròn và các tầng rơi xuống','Ô tỷ lệ ở Cơ cấu tài sản hiện đủ logo, kể cả BHXH, Honda, Zalopay']],
   [24,'28/10/2026',['<b>Tháp kính</b> phát sáng ở tab Tháp: trời sao, đỉnh lấp lánh; chạm tầng để làm sáng, chạm lần nữa để xem tài sản','Màn mở app mới: vòng tròn tự vẽ, 4 tầng rơi xuống xếp thành tháp, cờ cắm qua chỗ hở','Thẻ tài sản có <b>thanh tiến độ</b>: sổ đã gửi / còn bao nhiêu ngày, lãi tích lũy; xe, laptop đã khấu hao bao nhiêu','Chip số tiền gọn đúng con số, màu theo mức độ (đỏ, vàng, xanh dương, xanh lá)','Sửa: công nợ, tiền mặt, tiền CK của Kai Café trước đây đọc thành 0']],
