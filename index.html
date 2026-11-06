@@ -1606,7 +1606,7 @@ function assetRow(a){
   else if(a.receivable)chips.push(a.loan&&a.loan.due&&a.loan.due<serialOf(Date.now())?'<span class="chip bad">Quá hạn</span>':'<span class="chip warn">Cho vay</span>');
   else chips.push(isLiquid(a)?'<span class="chip good">Rút được</span>':'<span class="chip warn">Khóa</span>');
   return `<div class="arow">${logo(a)}<div style="min-width:0"><div class="nm">${esc(a.name)}</div><div class="sb">${esc(a.sub)}</div><div class="chips">${chips.join('')}</div>${progBlock(a)}</div>
-    <div class="rt"><div class="val">${tr2(a.value)}</div>${costLine(a)}${p==null?'<div class="sb">không có vốn</div>':`<span class="chip ${p>=0.00005?'up':p<=-0.00005?'dn':''} num">${pcts(p)}</span>`}</div></div>`;
+    <div class="rt"><div class="val">${tr2(a.value)}</div>${costLine(a)}${p==null?'<div class="sb">không có vốn</div>':`<span class="chip ${p>=0.00005?'up':p<=-0.00005?'dn':''} num">${Math.abs(a.value-a.cost)>=1e3?trs(a.value-a.cost)+' · ':''}${pcts(p)}</span>`}</div></div>`;
 }
 const sdate=n=>fmtD(flexCalc(0,0,n,0).start);
 function loanStatus(l,today){
@@ -2072,8 +2072,9 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=27, SEEN_KEY='thaptaisan.seen';
+const APP_VER=28, SEEN_KEY='thaptaisan.seen';
 const CHANGES=[
+  [28,'06/11/2026',['Thẻ tài sản ghi <b>số tiền lãi/lỗ</b> cạnh phần trăm, ví dụ MSN −17,1 Tr · −13,5%']],
   [27,'06/11/2026',['Thẻ tài sản hiện <b>giá trị ban đầu</b> dưới giá trị hiện tại: vốn cổ phiếu, gốc sổ và ví, giá mua xe, laptop, điện thoại, vốn góp Kai Café','MSN ghi thêm giá vốn trung bình mỗi cổ phiếu']],
   [26,'28/10/2026',['Khấu hao xe, laptop, điện thoại mới: <b>10%/năm trên giá gốc 3 năm đầu, sau đó 5%/năm</b> (Cấu hình B26–B28). Xe còn 30,7 Tr, laptop còn 17,6 Tr','Thẻ tài sản ghi năm hết khấu hao theo quy tắc mới']],
   [25,'28/10/2026',['Màn mở app chậm gấp đôi (khoảng 2 giây) để kịp thấy vòng tròn và các tầng rơi xuống','Ô tỷ lệ ở Cơ cấu tài sản hiện đủ logo, kể cả BHXH, Honda, Zalopay']],
