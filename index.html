@@ -179,6 +179,55 @@ main{padding-top:16px;display:grid;gap:16px}
 @media (max-width:400px){nav.tabs button{font-size:10px;letter-spacing:-.01em}}
 @media (prefers-reduced-motion:no-preference){.ms-cur .ms-dot{animation:msGlow 2s ease-in-out infinite} .ms-bar>i{transition:width .6s cubic-bezier(.2,.8,.2,1)}}
 @keyframes msGlow{50%{box-shadow:0 0 0 7px var(--warn-soft),0 0 26px var(--warn)}}
+.ms-f{font-size:11.5px;color:var(--muted);margin-top:3px}
+/* lộ trình trên nền trời đêm, cùng kiểu tháp kính (màu cố định, không theo sáng/tối) */
+.ms-sky{position:relative;border-radius:16px;padding:16px 14px 6px;overflow:hidden;color:#F1EEFF;
+  background:radial-gradient(120% 80% at 50% 0%,#3A2F7A 0%,#1D1846 55%,#0C0B22 100%)}
+.ms-sky::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.75;background-image:
+  radial-gradient(1.2px 1.2px at 8% 12%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 22% 38%,#fff 50%,transparent 51%),
+  radial-gradient(1.4px 1.4px at 37% 8%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 52% 27%,#fff 50%,transparent 51%),
+  radial-gradient(1.2px 1.2px at 68% 15%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 83% 33%,#fff 50%,transparent 51%),
+  radial-gradient(1.3px 1.3px at 93% 9%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 14% 61%,#fff 50%,transparent 51%),
+  radial-gradient(1.2px 1.2px at 46% 54%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 77% 66%,#fff 50%,transparent 51%),
+  radial-gradient(1.3px 1.3px at 90% 82%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 30% 88%,#fff 50%,transparent 51%),
+  radial-gradient(1.1px 1.1px at 61% 93%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 5% 95%,#fff 50%,transparent 51%)}
+.ms-sky>*{position:relative}
+.ms-apex{display:flex;align-items:center;gap:8px;margin:0 0 12px 4px;font:700 13px var(--f-disp);letter-spacing:.06em;text-transform:uppercase;color:#F1EEFF}
+.ms-apex svg{width:24px;height:24px;filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 12px #B9B2FF)}
+.ms-sky .ms:not(:last-child)::before{background:rgba(255,255,255,.18)}
+.ms-sky .ms-ok:not(:last-child)::before{background:#2FBF71;box-shadow:0 0 8px #2FBF71}
+.ms-sky .ms-dot{background:rgba(255,255,255,.06);color:#C9C4EE;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35)}
+.ms-sky .ms-ok .ms-dot{background:#2FBF71;color:#fff;box-shadow:0 0 14px rgba(47,191,113,.75)}
+.ms-sky .ms-cur .ms-dot{background:#F2B33D;color:#2A1C12;box-shadow:0 0 0 4px rgba(242,179,61,.25),0 0 22px #F2B33D}
+.ms-sky .ms-h b{color:#F1EEFF} .ms-sky .ms-n{color:#D8D3FF;opacity:1}
+.ms-sky .ms-f,.ms-sky .ms-w{color:#A9A3D6}
+.ms-sky .ms-ok .ms-h span{color:#7DE3A0} .ms-sky .ms-cur .ms-h span{color:#F7C65C}
+.ms-sky .ms-lock .ms-b{opacity:.55}
+.ms-sky .ms-bar{background:rgba(255,255,255,.12);box-shadow:none}
+.ms-sky .ms-bar>i{background:linear-gradient(90deg,#F2B33D,#FFE08A);box-shadow:0 0 12px #F2B33D}
+@media (prefers-reduced-motion:no-preference){
+  .ms-sky::before{animation:skyTw 4s ease-in-out infinite}
+  .ms-sky .ms-cur .ms-dot{animation:msGlow2 2s ease-in-out infinite}
+  .ms-apex svg{animation:apx 2.4s ease-in-out infinite}
+  #view[class*=in-] .ms-sky .ms{animation:inUp .45s cubic-bezier(.2,.8,.2,1) both}
+  #view[class*=in-] .ms-sky .ms:nth-child(n+2){animation-delay:.05s} #view[class*=in-] .ms-sky .ms:nth-child(n+4){animation-delay:.1s} #view[class*=in-] .ms-sky .ms:nth-child(n+6){animation-delay:.15s}
+}
+@keyframes skyTw{50%{opacity:.4}}
+@keyframes msGlow2{50%{box-shadow:0 0 0 7px rgba(242,179,61,.18),0 0 30px #F2B33D}}
+.ms-seg{display:inline-grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;border-radius:10px;background:rgba(255,255,255,.12)}
+.ms-seg button{appearance:none;border:0;background:none;color:var(--hero-mute);font:600 12.5px var(--f-body);padding:6px 12px;border-radius:8px;cursor:pointer}
+.ms-seg button[aria-selected="true"]{background:var(--hero-ink);color:var(--hero)}
+.ms-x{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:10px;margin-top:12px}
+.fm-in select{font:600 14px var(--f-body);color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0}
+.fm-chk{grid-column:1/-1;display:flex!important;align-items:center;gap:8px;color:var(--ink)!important;font-size:13px!important}
+.fm-chk input{width:18px;height:18px;accent-color:var(--accent)}
+#msToast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:90;width:min(92vw,420px);display:grid;gap:4px;
+  padding:14px 16px;border-radius:14px;background:var(--surface);color:var(--ink);box-shadow:0 14px 40px rgba(0,0,0,.25);border:2px solid var(--good);overflow:hidden;cursor:pointer}
+#msToast[hidden]{display:none}
+#msToast span{font-size:13px;color:var(--muted)}
+#msToast .cf{position:absolute;top:-10px;width:7px;height:12px;border-radius:2px;animation:cf 1.6s ease-in forwards}
+@keyframes cf{to{transform:translateY(130px) rotate(540deg);opacity:0}}
+@media (prefers-reduced-motion:no-preference){#msToast:not([hidden]){animation:inUp .4s cubic-bezier(.2,.9,.25,1.2) both}}
 /* tháp kính */
 .glass{border-radius:16px}
 .glass .g1{font:700 13px var(--f-disp);letter-spacing:.04em;text-transform:uppercase}
@@ -1540,7 +1589,8 @@ function composition(C){
     <div class="dlist" style="margin-top:12px">${segs.map(s=>`<div class="drow"><i class="tdot" style="background:${s.col}"></i><span>${esc(s.label)}</span><b class="num">${tr(s.v)}</b><span class="muted num">${pct(s.v/tot,0)}</span></div>`).join('')}</div>`;
 }
 // ---- Tự do tài chính: 8 ngưỡng tài sản ròng (Kai 08/11/2026, theo ý tưởng các mốc dễ bỏ cuộc của Grant Sabatier).
-// So tài sản ròng với từng ngưỡng; dự báo thời gian chạm ngưỡng bằng lãi kép với số để dành mỗi tháng + lợi nhuận kỳ vọng mỗi năm.
+// Tính theo tài sản ròng hoặc khả dụng (nút chuyển); mỗi ngưỡng đổi ra năm chi thiết yếu và thu nhập thụ động (rút 4%/năm);
+// dự báo lãi kép (có thể trừ lạm phát), 3 kịch bản thu nhập, điểm giao lãi > tiền để dành, tính ngược số cần để dành, tốc độ thật từ Lịch sử.
 const MS=[
   {v:1e7,name:'Tự chủ ban đầu',why:'Khoản đệm đầu tiên: thôi sống dồn từng tháng lương.'},
   {v:1e8,name:'An toàn cơ bản',why:'Mốc khó nhất: nhiều người bỏ cuộc trước khi tới. Qua đây lãi kép mới bắt đầu thấy rõ.'},
@@ -1550,62 +1600,131 @@ const MS=[
   {v:3e9,name:'Tự do tài chính sơ cấp',why:'Lợi nhuận có thể trả phần lớn chi tiêu thiết yếu.'},
   {v:5e9,name:'Tự do tài chính bền vững',why:'Sống bằng thu nhập thụ động mà không ăn vào vốn.'},
   {v:1e10,name:'Tự do tuyệt đối / thặng dư',why:'Dư để lại cho gia đình, giúp người khác.'}];
-const FM_KEY='thaptaisan.fm';
+const FM_KEY='thaptaisan.fm', MS_TOP_KEY='thaptaisan.msTop', WD=0.04;   // WD: tỷ lệ rút an toàn mỗi năm (quy tắc 4%)
 let FM={};try{FM=JSON.parse(localStorage.getItem(FM_KEY)||'{}')||{};}catch(_){}
-// Số tháng để P (hiện có) chạm T với góp m mỗi tháng, lãi kép năm R (quy về tháng r = (1+R)^(1/12) − 1).
+const saveFM=()=>{try{localStorage.setItem(FM_KEY,JSON.stringify(FM));}catch(_){}};
+const mRate=R=>Math.pow(1+R,1/12)-1;
+// Số tháng để P chạm T với góp m mỗi tháng, lãi kép năm R (tháng r = (1+R)^(1/12) − 1):
 // FV(n) = P(1+r)^n + m((1+r)^n − 1)/r  ⇒  n = ln((T·r + m)/(P·r + m)) / ln(1+r). Không lãi: n = (T − P)/m. Không tới được: null.
 function monthsTo(P,T,m,R){
   if(P>=T)return 0;
-  const r=Math.pow(1+R,1/12)-1;
+  const r=mRate(R);
   if(r<=0)return m>0?Math.ceil((T-P)/m):null;
   const num=T*r+m, den=P*r+m;
   if(den<=0||num<=0)return null;
   const n=Math.log(num/den)/Math.log(1+r);
   return isFinite(n)&&n>=0?Math.ceil(n):null;
 }
-const ymTxt=n=>n==null?'Không tới':n===0?'Đã đạt':(n>=12?Math.floor(n/12)+' năm ':'')+(n%12?n%12+' tháng':'');
-const fmIn=C=>({m:FM.m!=null?FM.m:Math.max(0,Math.round((C.net||0)/1e5)*1e5),R:FM.R!=null?FM.R:REF_RATE/100});
-function msCalc(C){
-  const P=C.nw, {m,R}=fmIn(C), cur=MS.findIndex(x=>P<x.v);
-  return {P,m,R,cur,all:Math.min(1,Math.max(0,P)/MS[MS.length-1].v),
-    rows:MS.map((x,i)=>({...x,i,done:P>=x.v,p:Math.max(0,Math.min(1,P/x.v)),left:Math.max(0,x.v-P),n:monthsTo(Math.max(0,P),x.v,m,R)}))};
+// Tính ngược: cần góp bao nhiêu mỗi tháng để P thành T sau n tháng. m = (T − P·g)·r / (g − 1), g = (1+r)^n
+function needMonthly(P,T,n,R){
+  if(n<=0)return null;
+  const r=mRate(R);
+  if(r<=0)return (T-P)/n;
+  const g=Math.pow(1+r,n);
+  return (T-P*g)*r/(g-1);
 }
-const msVal=v=>v>=1e9?nf(v/1e9,0)+' tỷ':nf(v/1e6,0)+' Tr';
-// Phần phụ thuộc ô nhập (vẽ lại khi gõ, giữ con trỏ ở ô nhập)
+const ymTxt=n=>n==null?'Không tới':n===0?'Đã đạt':(n>=12?Math.floor(n/12)+' năm ':'')+(n%12?n%12+' tháng':'');
+const msLab=(C,n)=>{if(n==null)return '—';if(!n)return 'Đã đạt';const t=new Date(C.now+7*36e5);t.setUTCMonth(t.getUTCMonth()+n);return (t.getUTCMonth()+1)+'/'+t.getUTCFullYear();};
+const msVal=v=>v>=1e9?nf(v/1e9,v%1e9?1:0)+' tỷ':nf(v/1e6,0)+' Tr';
+// Ô nhập: để dành/tháng, lợi nhuận/năm, lạm phát, có trừ lạm phát không, gốc tính (tài sản ròng / khả dụng)
+function fmIn(C){
+  const R=FM.R!=null?FM.R:REF_RATE/100, inf=FM.inf!=null?FM.inf:0.035, real=!!FM.real;
+  return {m:FM.m!=null?FM.m:Math.max(0,Math.round((C.net||0)/1e5)*1e5),R,inf,real,Re:real?(1+R)/(1+inf)-1:R,base:FM.base==='avail'?'avail':'nw'};
+}
+function msCalc(C){
+  const I=fmIn(C), P=I.base==='avail'?C.nwAvail:C.nw, cur=MS.findIndex(x=>P<x.v), E=Math.max(1,C.essential);
+  return {...I,P,E,cur,all:Math.min(1,Math.max(0,P)/MS[MS.length-1].v),fi:E*12/WD,
+    rows:MS.map((x,i)=>({...x,i,done:P>=x.v,p:Math.max(0,Math.min(1,P/x.v)),left:Math.max(0,x.v-P),n:monthsTo(Math.max(0,P),x.v,I.m,I.Re),
+      yrs:x.v/(E*12),pass:x.v*WD/12}))};
+}
+// Ngày vượt từng ngưỡng theo sheet Lịch sử; tốc độ thật (Tr/tháng) khi lịch sử đủ 30 ngày
+function msHist(base){
+  const H=HIST.filter(h=>h.d).sort((a,b)=>a.d-b.d), val=h=>base==='avail'?h.avail:h.nw;
+  const when=MS.map(x=>{const j=H.findIndex(h=>val(h)>=x.v);if(j<0)return null;return j===0?{d:H[0].d,before:true}:{d:H[j].d,before:false};});
+  const span=H.length>1?H[H.length-1].d-H[0].d:0, vel=span>=30?(val(H[H.length-1])-val(H[0]))/span*30.4:null;
+  return {when,span,vel,from:H.length?H[0].d:null};
+}
 function msDyn(C){
-  const M=msCalc(C), when=n=>{if(n==null)return '—';if(!n)return 'Đã đạt';const t=new Date(C.now+7*36e5);t.setUTCMonth(t.getUTCMonth()+n);return (t.getUTCMonth()+1)+'/'+t.getUTCFullYear();};
-  const next=M.rows[M.cur];
-  return `${next?`<div class="chk ${next.n==null?'bad':'ok'}"><b>${ic('target','sm')} Ngưỡng ${next.i+1}: ${msVal(next.v)} sau khoảng ${ymTxt(next.n)}${next.n?' ('+when(next.n)+')':''}</b>
-      <span>Để dành ${tr(M.m)}/tháng, lợi nhuận ${nf(M.R*100,1)}%/năm (lãi kép). Còn thiếu <b class="amt y">${tr(next.left)}</b>.</span></div>`:''}
-    <div class="tablewrap ms-tab" style="margin-top:12px"><table><tr><th>Ngưỡng</th><th>Còn thiếu</th><th>Tiến độ</th><th>Dự kiến</th></tr>
-    ${M.rows.map(x=>`<tr class="${x.done?'ms-ok':x.i===M.cur?'ms-cur':''}"><td><b>${x.i+1}</b> · ${msVal(x.v)}</td><td>${x.done?'0':tr(x.left)}</td><td>${pct(x.p,x.p<0.1?1:0)}</td><td>${x.done?'Đã đạt':when(x.n)}</td></tr>`).join('')}</table></div>
-    <p class="note">Toàn lộ trình (tới 10 tỷ): <b>${pct(M.all,1)}</b>. Dự báo giả định để dành và lợi nhuận đều mỗi tháng, chưa tính lạm phát, chi lớn bất thường hay thu nhập thay đổi.</p>`;
+  const M=msCalc(C), next=M.rows[M.cur], r=mRate(M.Re), cross=M.m>0&&r>0?M.m/r:null, nCross=cross!=null?monthsTo(Math.max(0,M.P),cross,M.m,M.Re):null;
+  const side=CF.filter(x=>x.inc>0).slice(-3), sideAvg=side.length?sum(side,'inc2')/side.length:0, E=S.expense;
+  const sc=[['Như hiện tại',M.m],['Chỉ freelance + affiliate',sideAvg-E]];
+  if(DATA.cfg.salary)sc.push(['Chỉ dư từ lương tự trả',DATA.cfg.salary-E]);
+  const tgt=next?next.v:MS[MS.length-1].v;
+  return `${next?`<div class="chk ${next.n==null?'bad':'ok'}"><b>${ic('target','sm')} Ngưỡng ${next.i+1}: ${msVal(next.v)} sau khoảng ${ymTxt(next.n)}${next.n?' ('+msLab(C,next.n)+')':''}</b>
+      <span>Để dành ${tr(M.m)}/tháng, lợi nhuận ${nf(M.R*100,2)}%/năm${M.real?`, trừ lạm phát ${nf(M.inf*100,1)}% (lãi thực ${nf(M.Re*100,2)}%, tính theo sức mua hôm nay)`:''}. Còn thiếu <b class="amt y">${tr(next.left)}</b>.</span></div>`:''}
+    <div class="ms-x">
+      <div class="kpi"><div class="label">Lãi mỗi tháng bây giờ</div><div class="v">${tr(Math.max(0,M.P)*r)}</div><div class="s">so với ${tr(M.m)} bạn để dành</div></div>
+      <div class="kpi"><div class="label">Điểm giao: lãi > để dành</div><div class="v">${cross==null?'—':msVal(Math.round(cross/1e7)*1e7)}</div><div class="s">${cross==null?'cần để dành và lợi nhuận > 0':M.P>=cross?'Đã qua: tiền làm việc nhiều hơn bạn':'khoảng '+ymTxt(nCross)+(nCross?' ('+msLab(C,nCross)+')':'')}</div></div>
+    </div>
+    <div class="label" style="margin:14px 0 6px">3 kịch bản thu nhập</div>
+    <div class="tablewrap ms-tab"><table><tr><th>Kịch bản</th><th>Dư/tháng</th><th>Tới ${msVal(tgt)}</th><th>Tới tự do</th></tr>
+      ${sc.map(([n,m])=>{const a=monthsTo(Math.max(0,M.P),tgt,m,M.Re), b=monthsTo(Math.max(0,M.P),M.fi,m,M.Re);
+        return `<tr><td style="white-space:normal">${n}</td><td class="${cls(m)}">${trs(m)}</td><td>${msLab(C,a)}</td><td>${msLab(C,b)}</td></tr>`;}).join('')}</table></div>
+    <p class="note">"Tới tự do" = mức tự do của bạn ${msVal(Math.round(M.fi/1e8)*1e8)} (chi thiết yếu × 12 ÷ 4%). Dư âm nghĩa là phải rút vốn để sống; khi đó chỉ còn lãi kéo tài sản đi lên.</p>
+    <div class="label" style="margin:14px 0 6px">Từng ngưỡng</div>
+    <div class="tablewrap ms-tab"><table><tr><th>Ngưỡng</th><th>Còn thiếu</th><th>Tiến độ</th><th>Dự kiến</th></tr>
+    ${M.rows.map(x=>`<tr class="${x.done?'ms-ok':x.i===M.cur?'ms-cur':''}"><td><b>${x.i+1}</b> · ${msVal(x.v)}</td><td>${x.done?'0':tr(x.left)}</td><td>${pct(x.p,x.p<0.1?1:0)}</td><td>${x.done?'Đã đạt':msLab(C,x.n)}</td></tr>`).join('')}</table></div>
+    <p class="note">Toàn lộ trình (tới 10 tỷ): <b>${pct(M.all,1)}</b>. Dự báo giả định để dành và lợi nhuận đều mỗi tháng; chưa tính chi lớn bất thường hay thu nhập thay đổi.</p>`;
+}
+function msRev(C){
+  const M=msCalc(C), ti=FM.tgt!=null?+FM.tgt:Math.max(0,M.cur), T=MS[Math.min(MS.length-1,ti)].v, d=FM.date||'2028-06';
+  const [y,mo]=d.split('-').map(Number), t=new Date(C.now+7*36e5), n=(y-t.getUTCFullYear())*12+(mo-1-t.getUTCMonth());
+  if(!y||!mo||n<=0)return '<p class="note">Chọn một tháng trong tương lai.</p>';
+  const need=needMonthly(Math.max(0,M.P),T,n,M.Re);
+  return `<div class="chk ${need<=M.m?'ok':'bad'}"><b>${ic('calendar','sm')} ${msVal(T)} vào ${mo}/${y} (${n} tháng nữa)</b>
+    <span>${need<=0?'Không cần để dành thêm: riêng lãi đã đưa tới mốc này.':`Cần để dành <b class="amt ${need<=M.m?'g':'r'}">${tr(need)}</b>/tháng, ${need<=M.m?'bạn đang để dành đủ ('+tr(M.m)+').':'gấp '+nf(need/Math.max(M.m,1),1)+' lần mức hiện tại ('+tr(M.m)+').'}`}</span></div>`;
 }
 function vFreedom(C){
-  const M=msCalc(C), fi=C.essential*12*25, nDone=M.rows.filter(x=>x.done).length;
-  // lộ trình đi lên: ngưỡng 8 ở trên, ngưỡng 1 ở dưới
-  const path=[...M.rows].reverse().map(x=>{const st=x.done?'ok':x.i===M.cur?'cur':'lock';
+  const M=msCalc(C), Hs=msHist(M.base), nDone=M.rows.filter(x=>x.done).length, passNow=Math.max(0,M.P)*WD/12;
+  // lộ trình đi lên: ngưỡng 8 ở trên, ngưỡng 1 ở dưới; mỗi ngưỡng đổi ra năm chi thiết yếu và thu nhập thụ động 4%
+  const path=[...M.rows].reverse().map(x=>{const st=x.done?'ok':x.i===M.cur?'cur':'lock', w=Hs.when[x.i];
     return `<div class="ms ms-${st}"><span class="ms-dot">${st==='ok'?ic('check','sm'):st==='lock'?ic('clock','sm'):x.i+1}</span>
       <div class="ms-b"><div class="ms-h"><b>Ngưỡng ${x.i+1} · ${msVal(x.v)}</b><span class="num">${st==='ok'?'Đã đạt vạch':st==='cur'?pct(x.p,x.p<0.1?1:0):'Chưa mở'}</span></div>
         <div class="ms-n">${x.name}</div>
-        ${st==='cur'?`<div class="ms-bar"><i style="width:${(x.p*100).toFixed(1)}%"></i></div><div class="ms-w">${x.why}</div>`:st==='ok'?'':`<div class="ms-w">${x.why}</div>`}</div></div>`;}).join('');
-  const sv=(FM.m!=null?FM.m:fmIn(C).m)/1e6, rv=(FM.R!=null?FM.R:fmIn(C).R)*100;
+        ${st==='cur'?`<div class="ms-bar"><i style="width:${(x.p*100).toFixed(1)}%"></i></div>`:''}
+        <div class="ms-f">≈ ${nf(x.yrs,x.yrs<10?1:0)} năm chi thiết yếu · ~${tr(x.pass)}/tháng thụ động${x.done&&w?' · '+(w.before?'đạt trước '+sdate(w.d):'đạt '+sdate(w.d)):''}</div>
+        ${st==='cur'?`<div class="ms-w">${x.why}</div>`:''}</div></div>`;}).join('');
+  const sv=M.m/1e6, rv=M.R*100, iv=M.inf*100, nextIdx=Math.max(0,M.cur), dv=FM.date||'2028-06';
+  const tModel=M.m+Math.max(0,M.P)*mRate(M.Re);
   return `
   <section class="hero">
-    <div class="l"><div><div class="label">Tài sản ròng so với lộ trình tự do tài chính</div><div class="big">${tr(C.nw)}</div>
+    <div class="l"><div>
+      <div class="ms-seg" role="tablist"><button data-msbase="nw" aria-selected="${M.base==='nw'}">Tài sản ròng</button><button data-msbase="avail" aria-selected="${M.base==='avail'}">Khả dụng</button></div>
+      <div class="label" style="margin-top:12px">${M.base==='avail'?'Khả dụng (trừ BHXH, BHTN chờ nhận, cho vay)':'Tài sản ròng'} so với lộ trình</div><div class="big">${tr(M.P)}</div>
       <div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:8px">Đã qua <b style="color:var(--hero-ink)">${nDone}/8 ngưỡng</b>${M.rows[M.cur]?' · đang hướng tới '+msVal(M.rows[M.cur].v):''}</div></div>
       <div class="stats">
-        <div class="stat"><div class="label">Mức tự do của bạn</div><div class="v">${msVal(Math.round(fi/1e8)*1e8)}</div><div class="s">Chi thiết yếu × 12 × 25</div></div>
-        <div class="stat"><div class="label">Toàn lộ trình</div><div class="v">${pct(M.all,1)}</div><div class="s">tới 10 tỷ</div></div>
+        <div class="stat"><div class="label">Đủ sống không đi làm</div><div class="v">${nf(Math.max(0,M.P)/(M.E*12),1)} năm</div><div class="s">chi thiết yếu ${tr(M.E)}/tháng</div></div>
+        <div class="stat"><div class="label">Thụ động (rút 4%/năm)</div><div class="v">${tr(passNow)}/th</div><div class="s">${pct(passNow/M.E,0)} chi thiết yếu · tự do ở ${msVal(Math.round(M.fi/1e8)*1e8)}</div></div>
       </div></div>
   </section>
-  ${card('Lộ trình 8 ngưỡng','flag',`<div class="ms-path">${path}</div>`,nDone+'/8 đã đạt')}
+  ${card('Lộ trình 8 ngưỡng','flag',`<div class="ms-sky"><div class="ms-apex"><svg viewBox="-12 -12 24 24" aria-hidden="true"><path d="M0-11 2-2.2 11 0 2 2.2 0 11-2 2.2-11 0-2-2.2z" fill="#fff"/></svg><span>Đích: 10 tỷ · tự do tuyệt đối</span></div><div class="ms-path">${path}</div></div>`,nDone+'/8 đã đạt')}
   ${card('Dự báo bằng lãi kép','calendar',`<div class="fm-in">
       <label><span>Để dành mỗi tháng (Tr)</span><input id="fmSave" type="number" inputmode="decimal" min="0" step="0.5" value="${+sv.toFixed(1)}"></label>
-      <label><span>Lợi nhuận kỳ vọng/năm (%)</span><input id="fmRet" type="number" inputmode="decimal" min="0" max="30" step="0.25" value="${+rv.toFixed(2)}"></label></div>
+      <label><span>Lợi nhuận kỳ vọng/năm (%)</span><input id="fmRet" type="number" inputmode="decimal" min="0" max="30" step="0.25" value="${+rv.toFixed(2)}"></label>
+      <label><span>Lạm phát/năm (%)</span><input id="fmInf" type="number" inputmode="decimal" min="0" max="20" step="0.5" value="${+iv.toFixed(1)}"></label>
+      <label class="fm-chk"><input id="fmReal" type="checkbox"${M.real?' checked':''}><span>Tính theo sức mua hôm nay (trừ lạm phát)</span></label></div>
     <div id="fmDyn">${msDyn(C)}</div>
-    <p class="note">Mặc định: để dành = mức dư hằng tháng hiện tại, lợi nhuận = lãi tiết kiệm tham chiếu (Cấu hình B8). Số bạn nhập chỉ lưu trên máy này.</p>`)}
-  <p class="note" style="text-align:center">Các ngưỡng để tham khảo động lực, theo ý tưởng "những mốc dễ bỏ cuộc nhất" của Grant Sabatier. Không phải tư vấn đầu tư.</p>`;
+    <p class="note">Mặc định: để dành = mức dư hằng tháng hiện tại, lợi nhuận = lãi tiết kiệm tham chiếu (Cấu hình B8), lạm phát 3,5%. Số bạn nhập chỉ lưu trên máy này.</p>`)}
+  ${card('Tính ngược: cần để dành bao nhiêu','target',`<div class="fm-in">
+      <label><span>Ngưỡng muốn tới</span><select id="fmTgt">${MS.map((x,i)=>`<option value="${i}"${i===(FM.tgt!=null?+FM.tgt:nextIdx)?' selected':''}>Ngưỡng ${i+1} · ${msVal(x.v)}</option>`).join('')}</select></label>
+      <label><span>Vào tháng</span><input id="fmDate" type="month" value="${dv}"></label></div>
+    <div id="fmRev">${msRev(C)}</div>`)}
+  ${card('Tốc độ thật','pulse',Hs.vel==null?`<p class="note" style="margin:0">Cần ít nhất 30 ngày trong sheet Lịch sử để tính tốc độ thật (hiện có ${Hs.span} ngày${Hs.from?', từ '+sdate(Hs.from):''}). App chụp số liệu mỗi tối 22h.</p>`:
+    `<div class="ms-x"><div class="kpi"><div class="label">Tăng thật mỗi tháng</div><div class="v ${cls(Hs.vel)}">${trs(Hs.vel)}</div><div class="s">theo Lịch sử ${Hs.span} ngày, từ ${sdate(Hs.from)}</div></div>
+      <div class="kpi"><div class="label">Dự báo đang giả định</div><div class="v">${trs(tModel)}</div><div class="s">để dành + lãi mỗi tháng</div></div></div>
+    <p class="note">${Hs.vel>=tModel?'Bạn đang đi nhanh hơn dự báo.':'Tốc độ thật chậm hơn dự báo: dự báo có thể quá lạc quan.'} Tốc độ thật gồm cả biến động giá cổ phiếu, khấu hao, góp vốn.</p>`)}
+  <p class="note" style="text-align:center">Các ngưỡng để tham khảo động lực, theo ý tưởng "những mốc dễ bỏ cuộc nhất" của Grant Sabatier; quy tắc rút 4%/năm là quy ước tham khảo. Không phải tư vấn đầu tư.</p>`;
+}
+// Chúc mừng khi tài sản ròng vượt ngưỡng mới (so với lần mở trước trên máy này); lần đầu chỉ ghi nhớ, không chúc
+function msCelebrate(C){
+  const top=MS.filter(x=>C.nw>=x.v).length;let prev=null;
+  try{prev=localStorage.getItem(MS_TOP_KEY);localStorage.setItem(MS_TOP_KEY,String(top));}catch(_){return;}
+  if(prev==null||top<=+prev)return;
+  const x=MS[top-1];let el=document.getElementById('msToast');
+  if(!el){el=document.createElement('div');el.id='msToast';el.setAttribute('role','status');document.body.appendChild(el);}
+  el.innerHTML=`<b>🎉 Chúc mừng! Bạn đã qua Ngưỡng ${top}: ${msVal(x.v)}</b><span>${x.name}. ${MS[top]?'Ngưỡng tiếp theo: '+msVal(MS[top].v)+'.':'Bạn đã đi hết lộ trình.'}</span>`+
+    (MOTION()?Array.from({length:24},(_,i)=>`<i class="cf" style="left:${(i*4.2)%100}%;background:var(--${['good','warn','info','bad'][i%4]});animation-delay:${(i%8)*0.08}s"></i>`).join(''):'');
+  el.hidden=false;el.onclick=()=>{el.hidden=true;};setTimeout(()=>{el.hidden=true;},7000);
 }
 function vOverview(C){
   const net=INCOME-S.expense;
@@ -1956,7 +2075,7 @@ function countUp(){
 }
 let LASTC=null;
 function render(){
-  const C=compute(S);LASTC=C;
+  const C=compute(S);LASTC=C;if(DATA!==SNAP)msCelebrate(C);
   const tabsEl=document.getElementById('tabs');
   if(!tabsEl.querySelector('[data-tab]'))tabsEl.innerHTML='<span class="pill" aria-hidden="true"></span>'+TABS.map(([k,n,i])=>`<button role="tab" data-tab="${k}" aria-selected="${S.tab===k}">${ic(i)}<span>${n}</span></button>`).join('');
   else tabsEl.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===S.tab)));
@@ -2164,8 +2283,9 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=30, SEEN_KEY='thaptaisan.seen';
+const APP_VER=31, SEEN_KEY='thaptaisan.seen';
 const CHANGES=[
+  [31,'08/11/2026',['Tab Tự do thêm: nút chuyển <b>tài sản ròng / khả dụng</b>; mỗi ngưỡng đổi ra năm chi tiêu và thu nhập thụ động (rút 4%/năm); <b>điểm giao</b> lãi vượt tiền để dành','<b>3 kịch bản thu nhập</b>, trừ lạm phát, <b>tính ngược</b> cần để dành bao nhiêu để tới một ngưỡng đúng hạn','Tốc độ thật từ sheet Lịch sử, ngày vượt từng ngưỡng; <b>chúc mừng</b> trên app và qua email khi vượt ngưỡng mới']],
   [30,'08/11/2026',['Tab <b>Tự do</b> làm lại: <b>8 ngưỡng tài sản ròng</b> 10 Tr → 10 tỷ (theo ý tưởng các mốc dễ bỏ cuộc của Grant Sabatier), ngưỡng đã qua xanh, ngưỡng đang tới có thanh %','Dự báo bằng lãi kép: nhập số để dành mỗi tháng và lợi nhuận kỳ vọng, app tính bao lâu tới từng ngưỡng']],
   [29,'08/11/2026',['Tab mới <b>Tự do</b> (bản đầu, đã thay ở v30)']],
   [28,'06/11/2026',['Thẻ tài sản ghi <b>số tiền lãi/lỗ</b> cạnh phần trăm, ví dụ MSN −17,1 Tr · −13,5%']],
@@ -2280,6 +2400,7 @@ window.addEventListener('scroll',()=>{const a=document.querySelector('.appbar');
 setTimeout(()=>{const sp=document.getElementById('splash');if(sp)sp.remove();animateView('in-up');if(seenVer()!==APP_VER)openSheet('new');},MOTION()?2000:0);
 document.addEventListener('click',e=>{
   if(zoomClick(e))return;
+  const mb=e.target.closest('[data-msbase]');if(mb){FM.base=mb.dataset.msbase;saveFM();const y=window.scrollY;render();window.scrollTo(0,y);return;}
   if(e.target.closest('#news')){openSheet('new');return;}
   const sh=e.target.closest('[data-sh]');if(sh){openSheet(sh.dataset.sh);return;}
   if(e.target.closest('[data-close]')){closeSheet();return;}
@@ -2313,10 +2434,21 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeZoom();closeSheet();}
   if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('layer')){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));}
 });
+// ô nhập của tab Tự do: cập nhật FM, lưu trên máy, chỉ vẽ lại phần dự báo (giữ con trỏ ở ô đang gõ)
+function fmInput(e){
+  const id=e.target.id, num=()=>parseFloat(String(e.target.value).replace(',','.'));
+  if(!/^fm(Save|Ret|Inf|Real|Tgt|Date)$/.test(id))return false;
+  const v=num();
+  if(id==='fmSave'&&v>=0)FM.m=v*1e6; else if(id==='fmRet'&&v>=0)FM.R=v/100; else if(id==='fmInf'&&v>=0)FM.inf=v/100;
+  else if(id==='fmReal')FM.real=e.target.checked; else if(id==='fmTgt')FM.tgt=+e.target.value; else if(id==='fmDate'&&e.target.value)FM.date=e.target.value;
+  saveFM();
+  if(LASTC){const d=document.getElementById('fmDyn'),r=document.getElementById('fmRev');if(d)d.innerHTML=msDyn(LASTC);if(r)r.innerHTML=msRev(LASTC);}
+  return true;
+}
+document.addEventListener('change',e=>{fmInput(e);});
 document.addEventListener('input',e=>{
   const id=e.target.id;
-  if(id==='fmSave'||id==='fmRet'){const v=parseFloat(String(e.target.value).replace(',','.'));if(!isNaN(v)&&v>=0){if(id==='fmSave')FM.m=v*1e6;else FM.R=v/100;try{localStorage.setItem(FM_KEY,JSON.stringify(FM));}catch(_){}
-    const box=document.getElementById('fmDyn');if(box&&LASTC)box.innerHTML=msDyn(LASTC);}return;}
+  if(fmInput(e))return;
   if(id==='sim'||id==='gap'){
     if(id==='sim')S.sim=(+e.target.value)*1e6;else S.gap=+e.target.value;
     const y=window.scrollY;render();const el=document.getElementById(id);if(el)el.focus();window.scrollTo(0,y);}
