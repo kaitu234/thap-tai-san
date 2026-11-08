@@ -15,7 +15,7 @@
 <body>
 <title>Tháp Tài Sản</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Chakra+Petch:wght@500;600;700&display=swap">
 <style>
 /* Layout: app di động theo hệ nhận diện Kai Café (KaiDashboard): nền be, chữ nâu, thẻ trắng viền mảnh bo 8px,
    bảng có dòng tiêu đề nâu, số liệu chữ hẹp. Tăng = xanh (--good), giảm = đỏ (--bad); màu tầng không dùng xanh lá/đỏ để khỏi lẫn. */
@@ -179,6 +179,64 @@ main{padding-top:16px;display:grid;gap:16px}
 @media (max-width:400px){nav.tabs button{font-size:10px;letter-spacing:-.01em}}
 @media (prefers-reduced-motion:no-preference){.ms-cur .ms-dot{animation:msGlow 2s ease-in-out infinite} .ms-bar>i{transition:width .6s cubic-bezier(.2,.8,.2,1)}}
 @keyframes msGlow{50%{box-shadow:0 0 0 7px var(--warn-soft),0 0 26px var(--warn)}}
+/* ---- Viễn tưởng / kỹ thuật số (08/11/2026): thẻ đầu (.hero) và biểu đồ lớn (.card.sky) là bảng điều khiển trời đêm.
+   Đổi lại token màu bên trong để mọi biểu đồ con tự theo; màu cố định, không theo chế độ sáng/tối. */
+:root{--f-tech:'Chakra Petch','Barlow Condensed','Be Vietnam Pro',sans-serif}
+.hero,.card.sky{
+  --hero:#070B1E; --hero2:#1A1748; --hero-ink:#EAF4FF; --hero-mute:#9FB2DA;
+  --bg:#0A0D24; --surface:rgba(255,255,255,.045); --surface2:rgba(255,255,255,.08); --ink:#EAF0FF; --muted:#9AA7D1; --line:rgba(140,170,255,.22);
+  --accent:#5EE7FF; --accent-ink:#04121F; --accent-soft:rgba(94,231,255,.16); --caramel:#F2B33D;
+  --good:#5BE49B; --bad:#FF7A90; --warn:#FFD166; --info:#7CC4FF;
+  --good-soft:rgba(91,228,155,.14); --bad-soft:rgba(255,122,144,.14); --warn-soft:rgba(255,209,102,.14); --info-soft:rgba(124,196,255,.14);
+  --up-hero:#5BE49B; --dn-hero:#FF7A90; --c1:var(--h1); --c2:var(--h2); --c3:var(--h3); --c4:var(--h4); --c0:#5B6390;
+  --hud:#5EE7FF; --hud2:#A78BFA;
+  position:relative;overflow:hidden;isolation:isolate;color:var(--ink);border:1px solid rgba(94,231,255,.28);
+  background:radial-gradient(120% 90% at 85% -10%,#3B2A86 0%,rgba(59,42,134,0) 55%),radial-gradient(90% 80% at 0% 110%,#0E3B5C 0%,rgba(14,59,92,0) 60%),linear-gradient(160deg,#0B1030 0%,#070B1E 100%);
+  box-shadow:0 0 0 1px rgba(167,139,250,.12) inset,0 10px 30px rgba(7,11,30,.35),0 0 24px rgba(94,231,255,.08)}
+/* lưới kỹ thuật số + sao */
+.hero::before,.card.sky::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:
+    radial-gradient(1.2px 1.2px at 8% 14%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 27% 36%,#fff 50%,transparent 51%),radial-gradient(1.3px 1.3px at 44% 9%,#fff 50%,transparent 51%),
+    radial-gradient(1px 1px at 63% 28%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 81% 12%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 92% 47%,#fff 50%,transparent 51%),
+    radial-gradient(1px 1px at 15% 72%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 56% 64%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 76% 86%,#fff 50%,transparent 51%),
+    linear-gradient(rgba(94,231,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(94,231,255,.07) 1px,transparent 1px);
+  background-size:auto,auto,auto,auto,auto,auto,auto,auto,auto,26px 26px,26px 26px;
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.6) 100%);mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.6) 100%)}
+/* khung ngắm 4 góc + vệt quét sáng */
+.hero::after,.card.sky::after{content:"";position:absolute;inset:6px;z-index:0;pointer-events:none;border-radius:6px;
+  background:
+    linear-gradient(var(--hud),var(--hud)) top left/16px 2px no-repeat,linear-gradient(var(--hud),var(--hud)) top left/2px 16px no-repeat,
+    linear-gradient(var(--hud),var(--hud)) top right/16px 2px no-repeat,linear-gradient(var(--hud),var(--hud)) top right/2px 16px no-repeat,
+    linear-gradient(var(--hud2),var(--hud2)) bottom left/16px 2px no-repeat,linear-gradient(var(--hud2),var(--hud2)) bottom left/2px 16px no-repeat,
+    linear-gradient(var(--hud2),var(--hud2)) bottom right/16px 2px no-repeat,linear-gradient(var(--hud2),var(--hud2)) bottom right/2px 16px no-repeat,
+    linear-gradient(180deg,transparent 0%,rgba(94,231,255,.10) 48%,rgba(94,231,255,.18) 50%,transparent 52%) 0 -120%/100% 60% no-repeat;
+  filter:drop-shadow(0 0 3px rgba(94,231,255,.6))}
+.hero>*,.card.sky>*{position:relative;z-index:1}
+.hero .label,.card.sky .label,.card.sky .card-h h2{font-family:var(--f-tech);letter-spacing:.12em}
+.card.sky .card-h h2{color:#EAF4FF;text-shadow:0 0 12px rgba(94,231,255,.45);font-weight:700;font-size:16px}
+.card.sky .card-h .ico{background:linear-gradient(135deg,#5EE7FF,#A78BFA);color:#04121F;box-shadow:0 0 14px rgba(94,231,255,.5)}
+.card.sky .card-h .aside{font-family:var(--f-tech);color:#5EE7FF}
+.hero .big{font-family:var(--f-tech);font-weight:700;letter-spacing:.02em;background:linear-gradient(90deg,#EAF4FF,#9DEBFF 45%,#C9B6FF);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(94,231,255,.35))}
+.hero .stat,.card.sky .kpi{background:linear-gradient(160deg,rgba(94,231,255,.08),rgba(167,139,250,.06));border:1px solid rgba(94,231,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.hero .stat .v,.card.sky .kpi .v{font-family:var(--f-tech);font-weight:700}
+.hero .chip-chg{background:rgba(94,231,255,.1);border:1px solid rgba(94,231,255,.25)}
+.card.sky .note,.card.sky .legend{color:var(--muted)}
+.card.sky .tablewrap{border-color:var(--line)}
+.card.sky th{background:linear-gradient(90deg,rgba(94,231,255,.9),rgba(167,139,250,.9));color:#04121F}
+.card.sky tr:nth-child(even) td{background:rgba(255,255,255,.03)}
+.card.sky .tm-c{background:color-mix(in srgb,var(--tc) 46%,#0B1030);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tc) 75%,transparent),0 0 10px color-mix(in srgb,var(--tc) 30%,transparent)}
+.card.sky svg.chart text{fill:var(--muted)}
+/* thẻ thường: viền óng ánh nhẹ */
+.card:not(.sky){border:1px solid transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,
+  linear-gradient(120deg,rgba(94,231,255,.55),rgba(167,139,250,.45),rgba(240,171,252,.4),rgba(253,224,138,.5),rgba(94,231,255,.55)) border-box;background-size:100% 100%,300% 300%}
+@media (prefers-reduced-motion:no-preference){
+  .hero::after,.card.sky::after{animation:hudScan 6s linear infinite}
+  .card:not(.sky){animation:iri 12s linear infinite}
+  .card.sky .card-h .ico{animation:hudPulse 3s ease-in-out infinite}
+}
+@keyframes hudScan{to{background-position:top left,top left,top right,top right,bottom left,bottom left,bottom right,bottom right,0 220%}}
+@keyframes iri{to{background-position:0 0,300% 0}}
+@keyframes hudPulse{50%{box-shadow:0 0 22px rgba(94,231,255,.8)}}
 .ms-f{font-size:11.5px;color:var(--muted);margin-top:3px}
 /* lộ trình trên nền trời đêm, cùng kiểu tháp kính (màu cố định, không theo sáng/tối) */
 .ms-sky{position:relative;border-radius:16px;padding:16px 14px 6px;overflow:hidden;color:#F1EEFF;
@@ -1011,7 +1069,9 @@ try{const h=(location.hash||'').slice(1);if(TABS.some(t=>t[0]===h))S.tab=h;}catc
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const tcol=id=>`var(--c${id})`;
 const tierName=t=>t===0?'Ngoài tháp':'T'+t+' '+((TIERS0[t-1]||{}).short||'');
-const card=(title,icon,body,aside='',extra='')=>`<section class="card ${extra}"><div class="card-h"><span class="ico">${ic(icon)}</span><h2>${title}</h2>${aside?`<span class="aside">${aside}</span>`:''}</div>${body}</section>`;
+// Thẻ biểu đồ lớn vẽ trên nền trời đêm kiểu bảng điều khiển viễn tưởng (class sky)
+const SKY_CARDS=/^(12 tháng tới|Cơ cấu tài sản|30 ngày qua|Tài sản ròng theo thời gian|Cổ phiếu|Tháp so với mục tiêu|Lộ trình 8 ngưỡng|Dự báo bằng lãi kép)/;
+const card=(title,icon,body,aside='',extra='')=>`<section class="card ${extra}${SKY_CARDS.test(title)?' sky':''}"><div class="card-h"><span class="ico">${ic(icon)}</span><h2>${title}</h2>${aside?`<span class="aside">${aside}</span>`:''}</div>${body}</section>`;
 
 // ---- biểu đồ
 // Tháp 3D nhìn chéo từ trên-phải: mỗi tầng là một khối có mặt trước, mặt bên (tối), mặt trên (sáng).
@@ -1465,7 +1525,7 @@ function vScenarios(C){
   return card(esc(g.name)+' · '+sdate(g.due),'flag',svg+`<div class="tablewrap" style="margin-top:10px"><table><tr><th>Kịch bản</th><th>Dư/tháng</th><th>Tới hạn</th><th>Đạt mục tiêu</th></tr>
     ${sc.map(s=>`<tr><td><i class="tdot" style="background:${s.col}"></i> ${s.n}</td><td class="${cls(s.save)}">${trs(s.save)}</td><td class="${s.end>=g.need?'pos':'neg'}">${tr(s.end)}</td><td>${s.eta==null?'Không đạt':s.eta<=months?'Sau '+s.eta+' tháng':'Trễ '+(s.eta-months)+' tháng'}</td></tr>`).join('')}</table></div>
     <p class="note">${goalVerdict(R)}</p>
-    <p class="note">Còn ${months} tháng. Để kịp hạn cần để dành khoảng <b>${tr(Math.max(0,R.needMonthly))}/tháng</b> (đã tính lãi tiết kiệm ${tr(C.interestMonthly)}/tháng). Không tính biến động giá cổ phiếu, khấu hao.</p>`,months+' tháng');
+    <p class="note">Còn ${months} tháng. Để kịp hạn cần để dành khoảng <b>${tr(Math.max(0,R.needMonthly))}/tháng</b> (đã tính lãi tiết kiệm ${tr(C.interestMonthly)}/tháng). Không tính biến động giá cổ phiếu, khấu hao.</p>`,months+' tháng','sky');
 }
 // ---- trực quan hoá thêm (28/10/2026): tiến độ mục tiêu, thác nước 30 ngày, dòng thời gian, thước giá cổ phiếu, ô tỷ lệ, bậc thang sổ
 // Mục tiêu tài sản ròng lớn nhất có hạn (2 tỷ): thanh tiến độ trên thẻ đầu + đường tài sản ròng 90 ngày đã chụp
@@ -2283,8 +2343,9 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=31, SEEN_KEY='thaptaisan.seen';
+const APP_VER=32, SEEN_KEY='thaptaisan.seen';
 const CHANGES=[
+  [32,'08/11/2026',['Giao diện <b>viễn tưởng, kỹ thuật số</b>: thẻ đầu các tab và biểu đồ lớn thành bảng điều khiển trời đêm (lưới, sao, khung ngắm, vệt quét sáng, số kiểu kỹ thuật)','Các thẻ còn lại có viền óng ánh']],
   [31,'08/11/2026',['Tab Tự do thêm: nút chuyển <b>tài sản ròng / khả dụng</b>; mỗi ngưỡng đổi ra năm chi tiêu và thu nhập thụ động (rút 4%/năm); <b>điểm giao</b> lãi vượt tiền để dành','<b>3 kịch bản thu nhập</b>, trừ lạm phát, <b>tính ngược</b> cần để dành bao nhiêu để tới một ngưỡng đúng hạn','Tốc độ thật từ sheet Lịch sử, ngày vượt từng ngưỡng; <b>chúc mừng</b> trên app và qua email khi vượt ngưỡng mới']],
   [30,'08/11/2026',['Tab <b>Tự do</b> làm lại: <b>8 ngưỡng tài sản ròng</b> 10 Tr → 10 tỷ (theo ý tưởng các mốc dễ bỏ cuộc của Grant Sabatier), ngưỡng đã qua xanh, ngưỡng đang tới có thanh %','Dự báo bằng lãi kép: nhập số để dành mỗi tháng và lợi nhuận kỳ vọng, app tính bao lâu tới từng ngưỡng']],
   [29,'08/11/2026',['Tab mới <b>Tự do</b> (bản đầu, đã thay ở v30)']],
