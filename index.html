@@ -183,25 +183,22 @@ main{padding-top:16px;display:grid;gap:16px}
    Đổi lại token màu bên trong để mọi biểu đồ con tự theo; màu cố định, không theo chế độ sáng/tối. */
 :root{--f-tech:'Chakra Petch','Barlow Condensed','Be Vietnam Pro',sans-serif}
 .hero,.card.sky{
-  --hero:#070B1E; --hero2:#1A1748; --hero-ink:#EAF4FF; --hero-mute:#9FB2DA;
+  --hero:#040C1F; --hero2:#0B2A5C; --hero-ink:#EAF4FF; --hero-mute:#9FB2DA;
   --bg:#0A0D24; --surface:rgba(255,255,255,.045); --surface2:rgba(255,255,255,.08); --ink:#EAF0FF; --muted:#9AA7D1; --line:rgba(140,170,255,.22);
-  --accent:#5EE7FF; --accent-ink:#04121F; --accent-soft:rgba(94,231,255,.16); --caramel:#F2B33D;
+  --accent:#5ED0FF; --accent-ink:#04121F; --accent-soft:rgba(94,231,255,.16); --caramel:#F2B33D;
   --good:#5BE49B; --bad:#FF7A90; --warn:#FFD166; --info:#7CC4FF;
   --good-soft:rgba(91,228,155,.14); --bad-soft:rgba(255,122,144,.14); --warn-soft:rgba(255,209,102,.14); --info-soft:rgba(124,196,255,.14);
   --up-hero:#5BE49B; --dn-hero:#FF7A90; --c1:var(--h1); --c2:var(--h2); --c3:var(--h3); --c4:var(--h4); --c0:#5B6390;
-  --hud:#5EE7FF; --hud2:#A78BFA;
+  --hud:#5ED0FF; --hud2:#2F7BFF;
   position:relative;overflow:hidden;isolation:isolate;color:var(--ink);border:1px solid rgba(94,231,255,.28);
-  background:radial-gradient(120% 90% at 85% -10%,#3B2A86 0%,rgba(59,42,134,0) 55%),radial-gradient(90% 80% at 0% 110%,#0E3B5C 0%,rgba(14,59,92,0) 60%),linear-gradient(160deg,#0B1030 0%,#070B1E 100%);
+  background:radial-gradient(120% 90% at 85% -10%,#0F4C9A 0%,rgba(15,76,154,0) 58%),radial-gradient(90% 80% at 0% 110%,#0B3A6E 0%,rgba(11,58,110,0) 60%),linear-gradient(160deg,#08204A 0%,#040C1F 100%);
   box-shadow:0 0 0 1px rgba(167,139,250,.12) inset,0 10px 30px rgba(7,11,30,.35),0 0 24px rgba(94,231,255,.08)}
 /* lưới kỹ thuật số + sao */
 .hero::before,.card.sky::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background-image:
-    radial-gradient(1.2px 1.2px at 8% 14%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 27% 36%,#fff 50%,transparent 51%),radial-gradient(1.3px 1.3px at 44% 9%,#fff 50%,transparent 51%),
-    radial-gradient(1px 1px at 63% 28%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 81% 12%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 92% 47%,#fff 50%,transparent 51%),
-    radial-gradient(1px 1px at 15% 72%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 56% 64%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 76% 86%,#fff 50%,transparent 51%),
-    linear-gradient(rgba(94,231,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(94,231,255,.07) 1px,transparent 1px);
-  background-size:auto,auto,auto,auto,auto,auto,auto,auto,auto,26px 26px,26px 26px;
-  -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.6) 100%);mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.6) 100%)}
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%22%20height%3D%22100%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%234FB3FF%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.55%22%3E%3Cpath%20d%3D%22M22%206V16M22%2084V94M6%2022H16M84%2022H94%22%2F%3E%3Cpath%20d%3D%22M31.5%206V16M31.5%2084V94M6%2031.5H16M84%2031.5H94%22%2F%3E%3Cpath%20d%3D%22M41%206V16M41%2084V94M6%2041H16M84%2041H94%22%2F%3E%3Cpath%20d%3D%22M50.5%206V16M50.5%2084V94M6%2050.5H16M84%2050.5H94%22%2F%3E%3Cpath%20d%3D%22M60%206V16M60%2084V94M6%2060H16M84%2060H94%22%2F%3E%3Cpath%20d%3D%22M69.5%206V16M69.5%2084V94M6%2069.5H16M84%2069.5H94%22%2F%3E%3Cpath%20d%3D%22M79%206V16M79%2084V94M6%2079H16M84%2079H94%22%2F%3E%3Crect%20x%3D%2216%22%20y%3D%2216%22%20width%3D%2268%22%20height%3D%2268%22%20rx%3D%225%22%2F%3E%3Crect%20x%3D%2226%22%20y%3D%2226%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%223%22%20opacity%3D%22.6%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%234FB3FF%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20opacity%3D%22.42%22%3E%3Cpath%20d%3D%22M0%2040H60L80%2060H140%22%2F%3E%3Cpath%20d%3D%22M20%200V30L40%2050V110%22%2F%3E%3Cpath%20d%3D%22M200%2090H150L130%20110V170%22%2F%3E%3Cpath%20d%3D%22M90%20200V160L110%20140H170%22%2F%3E%3Cpath%20d%3D%22M0%20150H40L60%20170V200%22%2F%3E%3Cpath%20d%3D%22M120%200V20L100%2040H90%22%2F%3E%3Cpath%20d%3D%22M200%2020H175V60%22%2F%3E%3Cpath%20d%3D%22M0%2095H18L28%2085H50%22%2F%3E%3Cpath%20d%3D%22M150%20200V185L165%20170%22%2F%3E%3Ccircle%20cx%3D%22140%22%20cy%3D%2260%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%22110%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%22130%22%20cy%3D%22170%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%22170%22%20cy%3D%22140%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%2290%22%20cy%3D%2240%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%22175%22%20cy%3D%2260%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2285%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%22165%22%20cy%3D%22170%22%20r%3D%223.3%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%234FB3FF%22%20opacity%3D%22.55%22%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2240%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2260%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%2250%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%22150%22%20cy%3D%2290%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%22110%22%20cy%3D%22140%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%22150%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%2240%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%2228%22%20cy%3D%2285%22%20r%3D%221.4%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),linear-gradient(rgba(79,179,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(79,179,255,.05) 1px,transparent 1px);
+  background-size:120px 120px,200px 200px,20px 20px,20px 20px;background-position:right -14px top -14px,0 0,0 0,0 0;background-repeat:no-repeat,repeat,repeat,repeat;
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.55) 100%);mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.55) 100%)}
+@media (prefers-reduced-motion:no-preference){.hero::before,.card.sky::before{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%22%20height%3D%22100%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%234FB3FF%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.55%22%3E%3Cpath%20d%3D%22M22%206V16M22%2084V94M6%2022H16M84%2022H94%22%2F%3E%3Cpath%20d%3D%22M31.5%206V16M31.5%2084V94M6%2031.5H16M84%2031.5H94%22%2F%3E%3Cpath%20d%3D%22M41%206V16M41%2084V94M6%2041H16M84%2041H94%22%2F%3E%3Cpath%20d%3D%22M50.5%206V16M50.5%2084V94M6%2050.5H16M84%2050.5H94%22%2F%3E%3Cpath%20d%3D%22M60%206V16M60%2084V94M6%2060H16M84%2060H94%22%2F%3E%3Cpath%20d%3D%22M69.5%206V16M69.5%2084V94M6%2069.5H16M84%2069.5H94%22%2F%3E%3Cpath%20d%3D%22M79%206V16M79%2084V94M6%2079H16M84%2079H94%22%2F%3E%3Crect%20x%3D%2216%22%20y%3D%2216%22%20width%3D%2268%22%20height%3D%2268%22%20rx%3D%225%22%2F%3E%3Crect%20x%3D%2226%22%20y%3D%2226%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%223%22%20opacity%3D%22.6%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%234FB3FF%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20opacity%3D%22.42%22%3E%3Cpath%20d%3D%22M0%2040H60L80%2060H140%22%2F%3E%3Cpath%20d%3D%22M20%200V30L40%2050V110%22%2F%3E%3Cpath%20d%3D%22M200%2090H150L130%20110V170%22%2F%3E%3Cpath%20d%3D%22M90%20200V160L110%20140H170%22%2F%3E%3Cpath%20d%3D%22M0%20150H40L60%20170V200%22%2F%3E%3Cpath%20d%3D%22M120%200V20L100%2040H90%22%2F%3E%3Cpath%20d%3D%22M200%2020H175V60%22%2F%3E%3Cpath%20d%3D%22M0%2095H18L28%2085H50%22%2F%3E%3Cpath%20d%3D%22M150%20200V185L165%20170%22%2F%3E%3Ccircle%20cx%3D%22140%22%20cy%3D%2260%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%22110%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%22130%22%20cy%3D%22170%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%22170%22%20cy%3D%22140%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%2290%22%20cy%3D%2240%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%22175%22%20cy%3D%2260%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2285%22%20r%3D%223.3%22%2F%3E%3Ccircle%20cx%3D%22165%22%20cy%3D%22170%22%20r%3D%223.3%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%234FB3FF%22%20opacity%3D%22.55%22%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2240%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2260%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%2250%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%22150%22%20cy%3D%2290%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%22110%22%20cy%3D%22140%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%22150%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%2240%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%2228%22%20cy%3D%2285%22%20r%3D%221.4%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%23BFF0FF%22%3E%3Ccircle%20r%3D%222.2%22%3E%3CanimateMotion%20dur%3D%223.6s%22%20repeatCount%3D%22indefinite%22%20path%3D%22M0%2040H60L80%2060H140%22%2F%3E%3C%2Fcircle%3E%3Ccircle%20r%3D%222.2%22%3E%3CanimateMotion%20dur%3D%224.4s%22%20begin%3D%221.2s%22%20repeatCount%3D%22indefinite%22%20path%3D%22M200%2090H150L130%20110V170%22%2F%3E%3C%2Fcircle%3E%3Ccircle%20r%3D%222%22%3E%3CanimateMotion%20dur%3D%223.2s%22%20begin%3D%22.6s%22%20repeatCount%3D%22indefinite%22%20path%3D%22M90%20200V160L110%20140H170%22%2F%3E%3C%2Fcircle%3E%3C%2Fg%3E%3C%2Fsvg%3E"),linear-gradient(rgba(79,179,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(79,179,255,.05) 1px,transparent 1px)}}
 /* khung ngắm 4 góc + vệt quét sáng */
 .hero::after,.card.sky::after{content:"";position:absolute;inset:6px;z-index:0;pointer-events:none;border-radius:6px;
   background:
@@ -214,24 +211,21 @@ main{padding-top:16px;display:grid;gap:16px}
 .hero>*,.card.sky>*{position:relative;z-index:1}
 .hero .label,.card.sky .label,.card.sky .card-h h2{font-family:var(--f-tech);letter-spacing:.12em}
 .card.sky .card-h h2{color:#EAF4FF;text-shadow:0 0 12px rgba(94,231,255,.45);font-weight:700;font-size:16px}
-.card.sky .card-h .ico{background:linear-gradient(135deg,#5EE7FF,#A78BFA);color:#04121F;box-shadow:0 0 14px rgba(94,231,255,.5)}
+.card.sky .card-h .ico{background:linear-gradient(135deg,#5ED0FF,#2F7BFF);color:#04121F;box-shadow:0 0 14px rgba(94,231,255,.5)}
 .card.sky .card-h .aside{font-family:var(--f-tech);color:#5EE7FF}
-.hero .big{font-family:var(--f-tech);font-weight:700;letter-spacing:.02em;background:linear-gradient(90deg,#EAF4FF,#9DEBFF 45%,#C9B6FF);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(94,231,255,.35))}
-.hero .stat,.card.sky .kpi{background:linear-gradient(160deg,rgba(94,231,255,.08),rgba(167,139,250,.06));border:1px solid rgba(94,231,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.hero .big{font-family:var(--f-tech);font-weight:700;letter-spacing:.02em;background:linear-gradient(90deg,#FFFFFF,#A9E4FF 45%,#5ED0FF);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(94,231,255,.35))}
+.hero .stat,.card.sky .kpi{background:linear-gradient(160deg,rgba(94,208,255,.09),rgba(47,123,255,.06));border:1px solid rgba(94,231,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
 .hero .stat .v,.card.sky .kpi .v{font-family:var(--f-tech);font-weight:700}
 .hero .chip-chg{background:rgba(94,231,255,.1);border:1px solid rgba(94,231,255,.25)}
 .card.sky .note,.card.sky .legend{color:var(--muted)}
 .card.sky .tablewrap{border-color:var(--line)}
-.card.sky th{background:linear-gradient(90deg,rgba(94,231,255,.9),rgba(167,139,250,.9));color:#04121F}
+.card.sky th{background:linear-gradient(90deg,rgba(94,208,255,.92),rgba(47,123,255,.92));color:#04121F}
 .card.sky tr:nth-child(even) td{background:rgba(255,255,255,.03)}
 .card.sky .tm-c{background:color-mix(in srgb,var(--tc) 46%,#0B1030);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tc) 75%,transparent),0 0 10px color-mix(in srgb,var(--tc) 30%,transparent)}
 .card.sky svg.chart text{fill:var(--muted)}
 /* thẻ thường: viền óng ánh nhẹ */
-.card:not(.sky){border:1px solid transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,
-  linear-gradient(120deg,rgba(94,231,255,.55),rgba(167,139,250,.45),rgba(240,171,252,.4),rgba(253,224,138,.5),rgba(94,231,255,.55)) border-box;background-size:100% 100%,300% 300%}
 @media (prefers-reduced-motion:no-preference){
   .hero::after,.card.sky::after{animation:hudScan 6s linear infinite}
-  .card:not(.sky){animation:iri 12s linear infinite}
   .card.sky .card-h .ico{animation:hudPulse 3s ease-in-out infinite}
 }
 @keyframes hudScan{to{background-position:top left,top left,top right,top right,bottom left,bottom left,bottom right,bottom right,0 220%}}
@@ -572,7 +566,6 @@ nav.tabs .pill.on{opacity:1}
   nav.tabs .pill{background:var(--accent-soft);border-radius:12px}
 }
 /* thẻ đầu: ánh sáng nhẹ góc trên */
-.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(90% 70% at 100% 0%,rgba(255,255,255,.11),transparent 62%)}
 .hero>*{position:relative}
 @media (prefers-reduced-motion:no-preference){
   nav.tabs .pill.on{transition:transform .34s cubic-bezier(.3,.9,.3,1),width .34s cubic-bezier(.3,.9,.3,1),height .34s}
@@ -661,6 +654,59 @@ nav.tabs .pill.on{opacity:1}
 @keyframes fadeIn{from{opacity:0}} @keyframes fadeOut{to{opacity:0}}
 @keyframes sheetUp{from{transform:translateY(100%)}} @keyframes sheetDown{to{transform:translateY(100%)}}
 @media (min-width:761px){@keyframes sheetUp{from{opacity:0;transform:translateY(24px) scale(.98)}} @keyframes sheetDown{to{opacity:0;transform:translateY(16px) scale(.98)}}}
+
+/* ==== Giao diện bảng mạch / kỹ thuật số cho toàn app (Kai 08/11/2026). Một giao diện tối duy nhất cho cả chế độ sáng và tối. ==== */
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"],:root[data-theme="light"]{
+  --bg:#050E24; --surface:#0B1A3C; --surface2:#11285A; --ink:#E6F1FF; --muted:#93A6CF; --line:rgba(94,208,255,.18);
+  --accent:#5ED0FF; --accent-ink:#04121F; --accent-soft:rgba(94,208,255,.16); --caramel:#F2B33D;
+  --hero:#040C1F; --hero2:#0B2A5C; --hero-ink:#EAF4FF; --hero-mute:#9FB2DA;
+  --good:#5BE49B; --warn:#FFD166; --bad:#FF7A90; --info:#7CC4FF;
+  --good-soft:rgba(91,228,155,.14); --warn-soft:rgba(255,209,102,.14); --bad-soft:rgba(255,122,144,.14); --info-soft:rgba(124,196,255,.14);
+  --up-hero:#5BE49B; --dn-hero:#FF7A90;
+  --c1:#4E9BFF; --c2:#E0A960; --c3:#B08CFF; --c4:#FF6FA8; --c0:#5B6E9A;
+  --h1:#4E9BFF; --h2:#E0A960; --h3:#B08CFF; --h4:#FF6FA8;
+  --shadow:0 10px 28px rgba(0,0,0,.38); --on-brand:#FFFFFF;
+  --f-disp:'Chakra Petch','Barlow Condensed','Be Vietnam Pro',sans-serif;
+  color-scheme:dark}
+html{background:#040B1D}
+body{background-color:#050E24;background-image:radial-gradient(120% 60% at 50% -10%,rgba(47,123,255,.22),transparent 60%),url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%234FB3FF%22%20stroke-width%3D%221.1%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20opacity%3D%22.16%22%3E%3Cpath%20d%3D%22M0%2040H60L80%2060H140%22%2F%3E%3Cpath%20d%3D%22M20%200V30L40%2050V110%22%2F%3E%3Cpath%20d%3D%22M200%2090H150L130%20110V170%22%2F%3E%3Cpath%20d%3D%22M90%20200V160L110%20140H170%22%2F%3E%3Cpath%20d%3D%22M0%20150H40L60%20170V200%22%2F%3E%3Cpath%20d%3D%22M120%200V20L100%2040H90%22%2F%3E%3Cpath%20d%3D%22M200%2020H175V60%22%2F%3E%3Cpath%20d%3D%22M0%2095H18L28%2085H50%22%2F%3E%3Cpath%20d%3D%22M150%20200V185L165%20170%22%2F%3E%3Ccircle%20cx%3D%22140%22%20cy%3D%2260%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%22110%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%22130%22%20cy%3D%22170%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%22170%22%20cy%3D%22140%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%2290%22%20cy%3D%2240%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%22175%22%20cy%3D%2260%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2285%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%22165%22%20cy%3D%22170%22%20r%3D%223%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");background-size:100% 900px,200px 200px;background-repeat:no-repeat,repeat}
+/* thẻ: tấm kính xanh đậm, viền phát sáng, vạch sáng chạy trên mép trên */
+.card{position:relative;background:linear-gradient(160deg,rgba(18,42,96,.78),rgba(7,17,42,.88));border:1px solid rgba(94,208,255,.2);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:12px}
+.card:not(.sky)::before{content:"";position:absolute;left:14px;right:14px;top:-1px;height:2px;border-radius:2px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,#5ED0FF 30%,#A78BFA 60%,transparent);background-size:200% 100%;opacity:.8}
+.card-h h2{font-family:var(--f-disp);letter-spacing:.08em;color:#EAF4FF;font-weight:700;font-size:16px}
+.card-h .ico{background:linear-gradient(135deg,#5ED0FF,#2F7BFF);color:#04121F;box-shadow:0 0 12px rgba(94,208,255,.45)}
+.kpi,.ins,.cl,.gd,.todo-i,.arow{border-color:rgba(94,208,255,.16)}
+.kpi{background:linear-gradient(160deg,rgba(94,208,255,.07),rgba(47,123,255,.04))}
+.kpi .v{font-family:var(--f-disp)}
+.ins,.todo-i{background:rgba(255,255,255,.025)}
+th{background:linear-gradient(90deg,#3FB8F0,#2F7BFF);color:#04121F}
+tbody tr:nth-child(even) td,tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+.brand h1{font-family:var(--f-disp);letter-spacing:.04em} .brand h1 span{color:#5ED0FF;text-shadow:0 0 12px rgba(94,208,255,.55)}
+.brand .mark{background:linear-gradient(160deg,#0B2A5C,#040C1F);box-shadow:0 0 0 1px rgba(94,208,255,.3),0 0 14px rgba(94,208,255,.25)}
+.iconbtn{background:rgba(11,26,60,.8);border-color:rgba(94,208,255,.25);color:#CFE6FF}
+.iconbtn:hover{background:rgba(94,208,255,.14)}
+.appbar{background:color-mix(in srgb,#050E24 80%,transparent)}
+@media (max-width:760px){nav.tabs{background:color-mix(in srgb,#071733 86%,transparent);border-color:rgba(94,208,255,.22);box-shadow:0 -8px 30px rgba(0,0,0,.45)}}
+nav.tabs .pill{background:linear-gradient(135deg,rgba(94,208,255,.22),rgba(47,123,255,.22));box-shadow:inset 0 0 0 1px rgba(94,208,255,.35),0 0 16px rgba(94,208,255,.25)}
+nav.tabs button[aria-selected="true"]{color:#5ED0FF}
+.btn{background:linear-gradient(135deg,#5ED0FF,#2F7BFF);color:#04121F}
+.btn.ghost{background:rgba(94,208,255,.1);color:#CFE6FF}
+.fbtn{background:rgba(255,255,255,.04);border-color:rgba(94,208,255,.2)}
+.chip{border-color:rgba(94,208,255,.18)}
+#splash{background:radial-gradient(120% 90% at 50% 38%,#0B2A5C,#040C1F 72%)}
+.sh,.zm{background:linear-gradient(160deg,#0D2050,#060F28);border:1px solid rgba(94,208,255,.22)}
+.seg{background:rgba(255,255,255,.05)} .seg button[aria-selected="true"]{background:rgba(94,208,255,.18);color:#EAF4FF}
+@media (prefers-reduced-motion:no-preference){
+  .card:not(.sky)::before{animation:edgeRun 5s linear infinite}
+  .card{transition:box-shadow .25s,border-color .25s,transform .25s}
+}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){.card:hover{border-color:rgba(94,208,255,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(94,208,255,.2),0 14px 36px rgba(0,0,0,.45),0 0 26px rgba(94,208,255,.12)}}
+@keyframes edgeRun{to{background-position:-200% 0}}
+@media (max-width:480px){.brand h1{font-size:17px;letter-spacing:.01em}}
+.hero .stat,.card.sky .kpi{background:linear-gradient(160deg,rgba(9,30,70,.86),rgba(5,16,40,.9))}
+.hero .chip-chg{background:rgba(6,22,52,.85)}
 </style>
 
 <div id="splash" aria-hidden="true"><div class="sp-in"><svg viewBox="0 0 120 124" class="sp-logo" aria-hidden="true">
@@ -2343,8 +2389,10 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=32, SEEN_KEY='thaptaisan.seen';
+const APP_VER=34, SEEN_KEY='thaptaisan.seen';
 const CHANGES=[
+  [34,'08/11/2026',['<b>Giao diện mới toàn app</b>: nền bảng mạch xanh đêm, mọi thẻ là tấm kính phát sáng, vạch sáng chạy trên mép thẻ, phông kỹ thuật','App dùng một giao diện tối duy nhất cho đồng bộ']],
+  [33,'08/11/2026',['Bảng điều khiển đổi sang nền <b>bảng mạch điện tử</b> xanh: đường mạch, chân hàn, chip, đốm sáng chạy theo mạch']],
   [32,'08/11/2026',['Giao diện <b>viễn tưởng, kỹ thuật số</b>: thẻ đầu các tab và biểu đồ lớn thành bảng điều khiển trời đêm (lưới, sao, khung ngắm, vệt quét sáng, số kiểu kỹ thuật)','Các thẻ còn lại có viền óng ánh']],
   [31,'08/11/2026',['Tab Tự do thêm: nút chuyển <b>tài sản ròng / khả dụng</b>; mỗi ngưỡng đổi ra năm chi tiêu và thu nhập thụ động (rút 4%/năm); <b>điểm giao</b> lãi vượt tiền để dành','<b>3 kịch bản thu nhập</b>, trừ lạm phát, <b>tính ngược</b> cần để dành bao nhiêu để tới một ngưỡng đúng hạn','Tốc độ thật từ sheet Lịch sử, ngày vượt từng ngưỡng; <b>chúc mừng</b> trên app và qua email khi vượt ngưỡng mới']],
   [30,'08/11/2026',['Tab <b>Tự do</b> làm lại: <b>8 ngưỡng tài sản ròng</b> 10 Tr → 10 tỷ (theo ý tưởng các mốc dễ bỏ cuộc của Grant Sabatier), ngưỡng đã qua xanh, ngưỡng đang tới có thanh %','Dự báo bằng lãi kép: nhập số để dành mỗi tháng và lợi nhuận kỳ vọng, app tính bao lâu tới từng ngưỡng']],
