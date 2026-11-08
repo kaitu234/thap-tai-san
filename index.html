@@ -156,20 +156,29 @@ main{padding-top:16px;display:grid;gap:16px}
 .hp .tv{font:500 11.5px var(--f-body);fill:var(--hero-mute)}
 .hp .gl{font:800 15px var(--f-disp);fill:var(--hero)}
 .layer{cursor:pointer}
-/* tab Tự do: tháp thanh tiến độ 6 tầng */
-.ft-pyr{display:grid;justify-items:center;gap:6px}
-.ft-row{position:relative;height:38px;border-radius:10px;background:var(--surface2);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden;max-width:100%}
-.ft-row>i{position:absolute;inset:0 auto 0 0;background:var(--warn);opacity:.85}
-.ft-row.done>i{background:var(--good)} .ft-row.min>i{background:var(--info)} .ft-row.lock>i{background:var(--c0)}
-.ft-row>em{position:absolute;top:4px;bottom:4px;width:2px;margin-left:-1px;background:var(--ink);opacity:.55;border-radius:1px}
-.ft-l,.ft-r{position:absolute;top:50%;transform:translateY(-50%);font-size:12.5px;white-space:nowrap;z-index:1}
-.ft-l{left:10px;color:var(--ink)} .ft-l b{font-family:var(--f-disp);font-size:14px;margin-right:3px}
-.ft-r{right:10px;font-weight:700;color:var(--ink);display:flex;align-items:center}
-.ft-row.lock .ft-l,.ft-row.lock .ft-r{color:var(--muted)}
-@media (max-width:480px){.ft-l{font-size:11.5px}}
+/* tab Tự do: lộ trình 8 ngưỡng */
+.ms-path{display:grid;gap:0;position:relative}
+.ms{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;position:relative;padding-bottom:12px}
+.ms:not(:last-child)::before{content:"";position:absolute;left:16px;top:34px;bottom:0;width:2px;background:var(--line)}
+.ms-ok:not(:last-child)::before{background:var(--good)}
+.ms-dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:800 15px var(--f-disp);background:var(--surface2);color:var(--muted);box-shadow:inset 0 0 0 2px var(--line);position:relative;z-index:1}
+.ms-ok .ms-dot{background:var(--good);color:#fff;box-shadow:none}
+.ms-cur .ms-dot{background:var(--warn);color:#fff;box-shadow:0 0 0 4px var(--warn-soft),0 0 18px var(--warn)}
+.ms-b{min-width:0;padding-top:6px}
+.ms-h{display:flex;justify-content:space-between;gap:8px;font-size:13.5px} .ms-h span{font-weight:700;white-space:nowrap}
+.ms-ok .ms-h span{color:var(--good)} .ms-cur .ms-h span{color:var(--warn)}
+.ms-n{font-size:12.5px;color:var(--ink);opacity:.85}
+.ms-w{font-size:12px;color:var(--muted);margin-top:3px}
+.ms-lock .ms-b{opacity:.5}
+.ms-bar{height:8px;border-radius:99px;background:var(--surface2);margin-top:6px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
+.ms-bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--warn),#F2C14E);box-shadow:0 0 10px var(--warn)}
+.fm-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px;margin-bottom:12px}
+.fm-in label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.fm-in input{font:700 18px var(--f-disp);color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+.ms-tab :is(td,th){padding:7px 6px} .ms-tab tr.ms-ok td{color:var(--good)} .ms-tab tr.ms-cur td{font-weight:700;background:var(--warn-soft)}
 @media (max-width:400px){nav.tabs button{font-size:10px;letter-spacing:-.01em}}
-.ft-tab :is(td,th){padding:7px 6px} .ft-tab .chip{font-size:10.5px;padding:2px 7px;margin:0}
-@media (prefers-reduced-motion:no-preference){.ft-row>i{transition:width .6s cubic-bezier(.2,.8,.2,1)} #view[class*=in-] .ft-row{animation:inUp .4s cubic-bezier(.2,.8,.2,1) both}}
+@media (prefers-reduced-motion:no-preference){.ms-cur .ms-dot{animation:msGlow 2s ease-in-out infinite} .ms-bar>i{transition:width .6s cubic-bezier(.2,.8,.2,1)}}
+@keyframes msGlow{50%{box-shadow:0 0 0 7px var(--warn-soft),0 0 26px var(--warn)}}
 /* tháp kính */
 .glass{border-radius:16px}
 .glass .g1{font:700 13px var(--f-disp);letter-spacing:.04em;text-transform:uppercase}
@@ -1530,58 +1539,73 @@ function composition(C){
       ${mid?`<div class="tm-in">${big&&c.a.brand?logo(c.a):''}<b>${esc(c.a.name)}</b><span class="num">${tr(c.v)} · ${pct(c.v/tot,0)}</span></div>`:''}</div>`;}).join('')}</div>
     <div class="dlist" style="margin-top:12px">${segs.map(s=>`<div class="drow"><i class="tdot" style="background:${s.col}"></i><span>${esc(s.label)}</span><b class="num">${tr(s.v)}</b><span class="muted num">${pct(s.v/tot,0)}</span></div>`).join('')}</div>`;
 }
-// ---- Tự do tài chính: 6 tầng theo mốc số tiền (Kai 08/11/2026). Song song với tháp 4 tầng, không đổi phân tầng của Kai.
-// Xếp tài sản: T1 vô hình = Cấu hình B29 (Kai tự ghi) · T2 bảo vệ = ví, tiền mặt, BHXH/BHTN · T3 thu nhập ổn định = sổ, trái phiếu, vàng
-// · T4 tăng trưởng = cổ phiếu, bất động sản · T5 mạo hiểm = crypto, kinh doanh (Kai Café), cho vay · T6 di sản = chưa có loại · xe, laptop đứng ngoài
-const FT=[
-  {id:1,name:'Vô hình',def:'Đầu tư bản thân & sức khỏe',min:1e7,max:1e7,icon:'bulb'},
-  {id:2,name:'Bảo vệ',def:'Quỹ khẩn cấp & bảo hiểm',min:1e8,max:1e8,icon:'shield'},
-  {id:3,name:'Thu nhập ổn định',def:'Tiết kiệm, trái phiếu, chứng chỉ quỹ',min:3e8,max:5e8,icon:'bank'},
-  {id:4,name:'Tăng trưởng',def:'Cổ phiếu, bất động sản đầu tư',min:1e9,max:3e9,icon:'up'},
-  {id:5,name:'Mạo hiểm',def:'Crypto, phái sinh, đầu tư mạo hiểm',min:5e9,max:5e9,icon:'rocket',cap:0.1},
-  {id:6,name:'Di sản',def:'Tài sản truyền đời, quỹ gia đình, thiện nguyện',min:1e10,max:1e10,icon:'gem'}];
-const ftOf=a=>a.kind==='cash'||a.kind==='flex'||a.kind==='pension'?2:a.kind==='savings'||a.kind==='bond'||a.kind==='gold'?3:
-  a.kind==='stock'||a.kind==='realestate'?4:a.kind==='crypto'||a.kind==='biz'||a.receivable?5:0;
-function freedomCalc(C){
-  const items=C.inNW.filter(a=>!a.sim&&a.value>0);
-  const tiers=FT.map(t=>{const its=t.id===1?[]:items.filter(a=>ftOf(a)===t.id), v=t.id===1?(DATA.cfg.selfInv||0):sum(its,'value');
-    return {...t,items:its,v,pMin:Math.min(1,v/t.min),pMax:Math.min(1,v/t.max),done:v>=t.max,minOk:v>=t.min};});
-  // tầng cần lấp: tầng thấp nhất chưa đạt mốc tối thiểu; tầng cao hơn mà chưa có tiền thì khóa
-  const focus=tiers.find(t=>!t.minOk), fid=focus?focus.id:7;
-  tiers.forEach(t=>t.st=t.done?'done':t.minOk?'min':t.id>fid&&t.v<=0?'lock':'run');
-  const outside=items.filter(a=>!ftOf(a)), total=Math.max(C.nw,1), t5=tiers[4], risky=tiers[3].v+t5.v;
-  const alerts=[];
-  if(t5.v>t5.cap*total)alerts.push({sev:'bad',icon:'alert',t:'Rủi ro cao: tài sản mạo hiểm vượt ngưỡng an toàn 10%',d:`Tầng 5 đang ${tr(t5.v)}, bằng ${pct(t5.v/total,1)} tài sản ròng.`});
-  if(C.nw<1e8&&risky>0.3*total)alerts.push({sev:'warn',icon:'shield',t:'Cần tập trung lấp đầy Tầng 2 (Bảo vệ) trước khi đẩy mạnh Tầng 4 & 5',d:`Tài sản ròng dưới 100 Tr nhưng cổ phiếu, crypto, mạo hiểm chiếm ${pct(risky/total,0)}.`});
-  // tầng 1 là số Kai tự ghi nên chỉ xét "lấp tầng dưới trước" từ tầng 2 trở lên
-  const f2=tiers.slice(1).find(t=>!t.minOk);
-  if(f2&&tiers.some(t=>t.id>f2.id&&t.v>0&&t.id>=4))alerts.push({sev:'warn',icon:'tower',t:`Tầng ${f2.id} chưa đạt mốc mà đã có tiền ở tầng cao hơn`,d:'Theo mô hình, nên lấp đủ tầng dưới trước khi tăng tầng tăng trưởng, mạo hiểm.'});
-  if(t5.v>0&&t5.v<=t5.cap*total)alerts.push({sev:'good',icon:'check',t:`Tầng 5 mạo hiểm ${pct(t5.v/total,1)} tài sản ròng, dưới ngưỡng 10%`,d:'Còn trong giới hạn an toàn của mô hình.'});
-  return {tiers,focus,outside,total,alerts};
+// ---- Tự do tài chính: 8 ngưỡng tài sản ròng (Kai 08/11/2026, theo ý tưởng các mốc dễ bỏ cuộc của Grant Sabatier).
+// So tài sản ròng với từng ngưỡng; dự báo thời gian chạm ngưỡng bằng lãi kép với số để dành mỗi tháng + lợi nhuận kỳ vọng mỗi năm.
+const MS=[
+  {v:1e7,name:'Tự chủ ban đầu',why:'Khoản đệm đầu tiên: thôi sống dồn từng tháng lương.'},
+  {v:1e8,name:'An toàn cơ bản',why:'Mốc khó nhất: nhiều người bỏ cuộc trước khi tới. Qua đây lãi kép mới bắt đầu thấy rõ.'},
+  {v:3e8,name:'Tích lũy bứt phá',why:'Tiền lãi mỗi năm bắt đầu đáng kể so với số bạn để dành.'},
+  {v:5e8,name:'Bàn đạp đầu tư',why:'Đủ lớn để phân bổ bài bản, không cần mạo hiểm để tăng nhanh.'},
+  {v:1e9,name:'Cột mốc đầu đời',why:'Mốc tâm lý lớn; từ đây mỗi mốc sau đến nhanh hơn nhờ lãi kép.'},
+  {v:3e9,name:'Tự do tài chính sơ cấp',why:'Lợi nhuận có thể trả phần lớn chi tiêu thiết yếu.'},
+  {v:5e9,name:'Tự do tài chính bền vững',why:'Sống bằng thu nhập thụ động mà không ăn vào vốn.'},
+  {v:1e10,name:'Tự do tuyệt đối / thặng dư',why:'Dư để lại cho gia đình, giúp người khác.'}];
+const FM_KEY='thaptaisan.fm';
+let FM={};try{FM=JSON.parse(localStorage.getItem(FM_KEY)||'{}')||{};}catch(_){}
+// Số tháng để P (hiện có) chạm T với góp m mỗi tháng, lãi kép năm R (quy về tháng r = (1+R)^(1/12) − 1).
+// FV(n) = P(1+r)^n + m((1+r)^n − 1)/r  ⇒  n = ln((T·r + m)/(P·r + m)) / ln(1+r). Không lãi: n = (T − P)/m. Không tới được: null.
+function monthsTo(P,T,m,R){
+  if(P>=T)return 0;
+  const r=Math.pow(1+R,1/12)-1;
+  if(r<=0)return m>0?Math.ceil((T-P)/m):null;
+  const num=T*r+m, den=P*r+m;
+  if(den<=0||num<=0)return null;
+  const n=Math.log(num/den)/Math.log(1+r);
+  return isFinite(n)&&n>=0?Math.ceil(n):null;
 }
-const FST={done:['good','Hoàn thành'],min:['info','Đạt mốc thấp'],run:['warn','Đang tích lũy'],lock:['','Chưa tới']};
-const mOne=v=>v>=1e9?nf(v/1e9,0)+' tỷ':nf(v/1e6,0)+' Tr', mTxt=t=>t.min===t.max?mOne(t.min):(t.min>=1e9?nf(t.min/1e9,0):nf(t.min/1e6,0))+'–'+mOne(t.max);
+const ymTxt=n=>n==null?'Không tới':n===0?'Đã đạt':(n>=12?Math.floor(n/12)+' năm ':'')+(n%12?n%12+' tháng':'');
+const fmIn=C=>({m:FM.m!=null?FM.m:Math.max(0,Math.round((C.net||0)/1e5)*1e5),R:FM.R!=null?FM.R:REF_RATE/100});
+function msCalc(C){
+  const P=C.nw, {m,R}=fmIn(C), cur=MS.findIndex(x=>P<x.v);
+  return {P,m,R,cur,all:Math.min(1,Math.max(0,P)/MS[MS.length-1].v),
+    rows:MS.map((x,i)=>({...x,i,done:P>=x.v,p:Math.max(0,Math.min(1,P/x.v)),left:Math.max(0,x.v-P),n:monthsTo(Math.max(0,P),x.v,m,R)}))};
+}
+const msVal=v=>v>=1e9?nf(v/1e9,0)+' tỷ':nf(v/1e6,0)+' Tr';
+// Phần phụ thuộc ô nhập (vẽ lại khi gõ, giữ con trỏ ở ô nhập)
+function msDyn(C){
+  const M=msCalc(C), when=n=>{if(n==null)return '—';if(!n)return 'Đã đạt';const t=new Date(C.now+7*36e5);t.setUTCMonth(t.getUTCMonth()+n);return (t.getUTCMonth()+1)+'/'+t.getUTCFullYear();};
+  const next=M.rows[M.cur];
+  return `${next?`<div class="chk ${next.n==null?'bad':'ok'}"><b>${ic('target','sm')} Ngưỡng ${next.i+1}: ${msVal(next.v)} sau khoảng ${ymTxt(next.n)}${next.n?' ('+when(next.n)+')':''}</b>
+      <span>Để dành ${tr(M.m)}/tháng, lợi nhuận ${nf(M.R*100,1)}%/năm (lãi kép). Còn thiếu <b class="amt y">${tr(next.left)}</b>.</span></div>`:''}
+    <div class="tablewrap ms-tab" style="margin-top:12px"><table><tr><th>Ngưỡng</th><th>Còn thiếu</th><th>Tiến độ</th><th>Dự kiến</th></tr>
+    ${M.rows.map(x=>`<tr class="${x.done?'ms-ok':x.i===M.cur?'ms-cur':''}"><td><b>${x.i+1}</b> · ${msVal(x.v)}</td><td>${x.done?'0':tr(x.left)}</td><td>${pct(x.p,x.p<0.1?1:0)}</td><td>${x.done?'Đã đạt':when(x.n)}</td></tr>`).join('')}</table></div>
+    <p class="note">Toàn lộ trình (tới 10 tỷ): <b>${pct(M.all,1)}</b>. Dự báo giả định để dành và lợi nhuận đều mỗi tháng, chưa tính lạm phát, chi lớn bất thường hay thu nhập thay đổi.</p>`;
+}
 function vFreedom(C){
-  const F=freedomCalc(C), done=F.tiers.filter(t=>t.done).length, f=F.focus;
-  // tháp thanh tiến độ: tầng 6 ở đỉnh (hẹp), tầng 1 ở đáy (rộng)
-  const pyr=[...F.tiers].reverse().map(t=>{const w=46+(6-t.id)*10.8, p=t.id===3||t.id===4?t.pMax:t.pMin;
-    return `<div class="ft-row ${t.st}" style="width:${w}%" data-tip="Tầng ${t.id} ${t.name} (${t.def}): ${tr(t.v)} / mốc ${mTxt(t)}">
-      <i style="width:${(p*100).toFixed(1)}%"></i>${t.max>t.min?`<em style="left:${(t.min/t.max*100).toFixed(1)}%" title="Mốc tối thiểu ${tr(t.min)}"></em>`:''}
-      <span class="ft-l"><b>T${t.id}</b> ${t.name}</span><span class="ft-r num">${t.st==='lock'?ic('clock','sm'):t.done?ic('check','sm'):pct(p,p<0.1?1:0)}</span></div>`;}).join('');
-  const rows=F.tiers.map(t=>{const s=FST[t.st];
-    return `<tr><td style="white-space:normal;min-width:86px"><b>T${t.id}</b> ${t.name}</td><td>${tr(t.v)}<br><span class="muted">/ ${mTxt(t)}</span></td>
-      <td><span class="chip ${s[0]}">${s[1]}</span><br><span class="muted num">${(q=>pct(q,q<0.1?1:0))(t.minOk?t.pMax:t.pMin)}</span></td></tr>`;}).join('');
-  const lists=F.tiers.filter(t=>t.items.length).map(t=>`<details class="more"><summary>T${t.id} ${t.name}: ${t.items.length} tài sản · ${tr(t.v)}</summary>
-    <div class="alist">${t.items.map(assetRow).join('')}</div></details>`).join('');
+  const M=msCalc(C), fi=C.essential*12*25, nDone=M.rows.filter(x=>x.done).length;
+  // lộ trình đi lên: ngưỡng 8 ở trên, ngưỡng 1 ở dưới
+  const path=[...M.rows].reverse().map(x=>{const st=x.done?'ok':x.i===M.cur?'cur':'lock';
+    return `<div class="ms ms-${st}"><span class="ms-dot">${st==='ok'?ic('check','sm'):st==='lock'?ic('clock','sm'):x.i+1}</span>
+      <div class="ms-b"><div class="ms-h"><b>Ngưỡng ${x.i+1} · ${msVal(x.v)}</b><span class="num">${st==='ok'?'Đã đạt vạch':st==='cur'?pct(x.p,x.p<0.1?1:0):'Chưa mở'}</span></div>
+        <div class="ms-n">${x.name}</div>
+        ${st==='cur'?`<div class="ms-bar"><i style="width:${(x.p*100).toFixed(1)}%"></i></div><div class="ms-w">${x.why}</div>`:st==='ok'?'':`<div class="ms-w">${x.why}</div>`}</div></div>`;}).join('');
+  const sv=(FM.m!=null?FM.m:fmIn(C).m)/1e6, rv=(FM.R!=null?FM.R:fmIn(C).R)*100;
   return `
-  ${card('Tiến độ tự do tài chính','flag',`<div class="ft-pyr">${pyr}</div>
-    <div class="legend" style="justify-content:center;margin-top:12px"><span><i class="tdot" style="background:var(--good)"></i>Hoàn thành</span><span><i class="tdot" style="background:var(--info)"></i>Đạt mốc thấp</span><span><i class="tdot" style="background:var(--warn)"></i>Đang tích lũy</span><span><i class="tdot" style="background:var(--c0)"></i>Chưa tới</span></div>
-    ${f?`<div class="chk ${f.id<=2?'bad':'ok'}" style="margin-top:12px"><b>${ic(f.icon,'sm')} Tầng đang cần lấp: T${f.id} ${f.name}</b><span>Có ${tr(f.v)} / mốc ${tr(f.min)}, còn thiếu <b class="amt ${f.id<=2?'r':'y'}">${tr(f.min-f.v)}</b>.${f.id===1?' Ghi số tiền đã đầu tư cho bản thân, sức khỏe ở Cấu hình B29.':''}</span></div>`:''}`,done+'/6 tầng')}
-  ${F.alerts.length?card('Cảnh báo & khuyến nghị','alert',`<div class="insights">${F.alerts.map(a=>insCard(a)).join('')}</div>`):''}
-  ${card('Bảng theo dõi phân bổ','tower',`<div class="tablewrap ft-tab"><table><tr><th>Tầng</th><th>Đang có / mốc</th><th>Trạng thái</th></tr>${rows}</table></div>
-    <p class="note">Tầng 3, 4 có 2 mốc: đạt mốc thấp là "Đạt mốc thấp", đạt mốc cao là "Hoàn thành"; % tính theo mốc đang hướng tới. Ngưỡng an toàn tầng 5: tối đa 10% tài sản ròng (${tr(F.total*0.1)}).${F.outside.length?' Không tính: '+F.outside.map(a=>esc(a.name)).join(', ')+' (đồ dùng).':''}</p>`)}
-  ${lists?card('Tài sản trong từng tầng','wallet',lists):''}
-  <p class="note" style="text-align:center">Mô hình 6 tầng theo mốc số tiền để tham khảo, chạy song song với tháp 4 tầng của bạn. Không phải tư vấn đầu tư.</p>`;
+  <section class="hero">
+    <div class="l"><div><div class="label">Tài sản ròng so với lộ trình tự do tài chính</div><div class="big">${tr(C.nw)}</div>
+      <div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:8px">Đã qua <b style="color:var(--hero-ink)">${nDone}/8 ngưỡng</b>${M.rows[M.cur]?' · đang hướng tới '+msVal(M.rows[M.cur].v):''}</div></div>
+      <div class="stats">
+        <div class="stat"><div class="label">Mức tự do của bạn</div><div class="v">${msVal(Math.round(fi/1e8)*1e8)}</div><div class="s">Chi thiết yếu × 12 × 25</div></div>
+        <div class="stat"><div class="label">Toàn lộ trình</div><div class="v">${pct(M.all,1)}</div><div class="s">tới 10 tỷ</div></div>
+      </div></div>
+  </section>
+  ${card('Lộ trình 8 ngưỡng','flag',`<div class="ms-path">${path}</div>`,nDone+'/8 đã đạt')}
+  ${card('Dự báo bằng lãi kép','calendar',`<div class="fm-in">
+      <label><span>Để dành mỗi tháng (Tr)</span><input id="fmSave" type="number" inputmode="decimal" min="0" step="0.5" value="${+sv.toFixed(1)}"></label>
+      <label><span>Lợi nhuận kỳ vọng/năm (%)</span><input id="fmRet" type="number" inputmode="decimal" min="0" max="30" step="0.25" value="${+rv.toFixed(2)}"></label></div>
+    <div id="fmDyn">${msDyn(C)}</div>
+    <p class="note">Mặc định: để dành = mức dư hằng tháng hiện tại, lợi nhuận = lãi tiết kiệm tham chiếu (Cấu hình B8). Số bạn nhập chỉ lưu trên máy này.</p>`)}
+  <p class="note" style="text-align:center">Các ngưỡng để tham khảo động lực, theo ý tưởng "những mốc dễ bỏ cuộc nhất" của Grant Sabatier. Không phải tư vấn đầu tư.</p>`;
 }
 function vOverview(C){
   const net=INCOME-S.expense;
@@ -1930,8 +1954,9 @@ function countUp(){
   const step=t=>{const k=Math.min(1,(t-t0)/D), e=1-Math.pow(1-k,3);if(!el.isConnected)return;el.textContent=f(from+(to-from)*e);if(k<1)requestAnimationFrame(step);};
   el.textContent=f(from);requestAnimationFrame(step);
 }
+let LASTC=null;
 function render(){
-  const C=compute(S);
+  const C=compute(S);LASTC=C;
   const tabsEl=document.getElementById('tabs');
   if(!tabsEl.querySelector('[data-tab]'))tabsEl.innerHTML='<span class="pill" aria-hidden="true"></span>'+TABS.map(([k,n,i])=>`<button role="tab" data-tab="${k}" aria-selected="${S.tab===k}">${ic(i)}<span>${n}</span></button>`).join('');
   else tabsEl.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===S.tab)));
@@ -1976,7 +2001,7 @@ function parseSheet(res){
   const gc=r=>G[r+',1'];
   const cfg={personal:n(gc(2)),fixed:n(gc(3)),other:n(gc(4)),income:n(gc(6)),ref:n(gc(7)),emin:n(gc(8))||6,emax:n(gc(9))||12,longd:n(gc(10))||365,debt:n(gc(11)),
     haircut:gc(12)===undefined?0.7:n(gc(12)),gap:n(gc(13)),insured:gc(14)?String(gc(14)):'',saveGoal:n(gc(15))||100000000,saveWallet:String(gc(16)||'Zalopay'),saveCount:n(gc(17))||5,
-    riskCap:n(gc(18))||0.15,keepM:n(gc(19))||2,matWarn:n(gc(20))||15,lendCap:n(gc(21))||3e7,kaiCap:n(gc(22))||2.5e7,salary:n(gc(23)),salStart:dateCell(gc(24)),depA:n(gc(25))||0.1,depN:n(gc(26))||3,depB:n(gc(27))||0.05,selfInv:n(gc(28))};
+    riskCap:n(gc(18))||0.15,keepM:n(gc(19))||2,matWarn:n(gc(20))||15,lendCap:n(gc(21))||3e7,kaiCap:n(gc(22))||2.5e7,salary:n(gc(23)),salStart:dateCell(gc(24)),depA:n(gc(25))||0.1,depN:n(gc(26))||3,depB:n(gc(27))||0.05};
   const tiers=[];for(let r=2;r<6;r++){if(T[r+',0']===undefined)continue;tiers.push({id:n(T[r+',0']),name:String(T[r+',1']||''),def:String(T[r+',2']||''),target:Math.round(n(T[r+',3'])*100)});}
   const types=[];for(let r=9;r<19;r++){if(!T[r+',0'])continue;types.push({name:String(T[r+',0']),tier:n(T[r+',1']),liq:T[r+',2']==='Có'});}
   if(tiers.length!==4) throw new Error('Sheet Tầng cần đủ 4 tầng');
@@ -2139,9 +2164,10 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=29, SEEN_KEY='thaptaisan.seen';
+const APP_VER=30, SEEN_KEY='thaptaisan.seen';
 const CHANGES=[
-  [29,'08/11/2026',['Tab mới <b>Tự do</b>: tiến độ 6 tầng tự do tài chính theo mốc số tiền (10 Tr → 10 tỷ), bảng theo dõi phân bổ, cảnh báo tầng mạo hiểm vượt 10%','Tầng 1 vô hình (đầu tư bản thân, sức khỏe) ghi ở Cấu hình B29']],
+  [30,'08/11/2026',['Tab <b>Tự do</b> làm lại: <b>8 ngưỡng tài sản ròng</b> 10 Tr → 10 tỷ (theo ý tưởng các mốc dễ bỏ cuộc của Grant Sabatier), ngưỡng đã qua xanh, ngưỡng đang tới có thanh %','Dự báo bằng lãi kép: nhập số để dành mỗi tháng và lợi nhuận kỳ vọng, app tính bao lâu tới từng ngưỡng']],
+  [29,'08/11/2026',['Tab mới <b>Tự do</b> (bản đầu, đã thay ở v30)']],
   [28,'06/11/2026',['Thẻ tài sản ghi <b>số tiền lãi/lỗ</b> cạnh phần trăm, ví dụ MSN −17,1 Tr · −13,5%']],
   [27,'06/11/2026',['Thẻ tài sản hiện <b>giá trị ban đầu</b> dưới giá trị hiện tại: vốn cổ phiếu, gốc sổ và ví, giá mua xe, laptop, điện thoại, vốn góp Kai Café','MSN ghi thêm giá vốn trung bình mỗi cổ phiếu']],
   [26,'28/10/2026',['Khấu hao xe, laptop, điện thoại mới: <b>10%/năm trên giá gốc 3 năm đầu, sau đó 5%/năm</b> (Cấu hình B26–B28). Xe còn 30,7 Tr, laptop còn 17,6 Tr','Thẻ tài sản ghi năm hết khấu hao theo quy tắc mới']],
@@ -2170,7 +2196,7 @@ const GUIDE=[
     ['Phân tích','Điểm sức khỏe, Nguyên tắc vàng, 3 kịch bản mục tiêu 2 tỷ.'],
     ['Hiệu suất','Lãi/lỗ đầu tư, thước giá MSN, trần cổ phiếu + crypto.'],
     ['Kai Café','Kết quả quán và tiền bạn đã góp so với trần 25 Tr.'],
-    ['Tự do','Tiến độ 6 tầng tự do tài chính theo mốc số tiền, tầng đang cần lấp.']]],
+    ['Tự do','8 ngưỡng tài sản ròng tới tự do tài chính; nhập số để dành, lợi nhuận để xem bao lâu tới từng ngưỡng.']]],
   ['App tự làm','bell','bạn không cần làm gì',[
     ['Giá MSN','Cập nhật mỗi giờ, 9h–15h ngày thường.'],
     ['Chụp số liệu','22h mỗi tối, để vẽ đường lịch sử và thác nước 30 ngày.'],
@@ -2289,6 +2315,8 @@ document.addEventListener('keydown',e=>{
 });
 document.addEventListener('input',e=>{
   const id=e.target.id;
+  if(id==='fmSave'||id==='fmRet'){const v=parseFloat(String(e.target.value).replace(',','.'));if(!isNaN(v)&&v>=0){if(id==='fmSave')FM.m=v*1e6;else FM.R=v/100;try{localStorage.setItem(FM_KEY,JSON.stringify(FM));}catch(_){}
+    const box=document.getElementById('fmDyn');if(box&&LASTC)box.innerHTML=msDyn(LASTC);}return;}
   if(id==='sim'||id==='gap'){
     if(id==='sim')S.sim=(+e.target.value)*1e6;else S.gap=+e.target.value;
     const y=window.scrollY;render();const el=document.getElementById(id);if(el)el.focus();window.scrollTo(0,y);}
