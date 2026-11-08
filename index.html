@@ -556,7 +556,8 @@ body{overflow-x:clip}
 /* thanh trên, thanh tab: kính mờ */
 .appbar{background:color-mix(in srgb,var(--bg) 84%,transparent);-webkit-backdrop-filter:saturate(1.4) blur(12px);backdrop-filter:saturate(1.4) blur(12px);transition:box-shadow .2s}
 .appbar.sc{box-shadow:0 10px 18px -16px rgba(0,0,0,.5)}
-@media (min-width:761px){nav.tabs{position:relative}}
+/* máy tính: thanh tab ghim ngay dưới thanh trên khi cuộn (--abh = chiều cao thanh trên, JS đo) */
+@media (min-width:761px){nav.tabs{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--abh,68px) - 1px);z-index:29}}
 nav.tabs button{position:relative;z-index:1}
 nav.tabs button[aria-selected="true"]{background:none}
 nav.tabs .pill{position:absolute;left:0;top:0;width:0;height:0;border-radius:10px;background:var(--accent);z-index:0;pointer-events:none;opacity:0}
@@ -2525,8 +2526,9 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=36, SEEN_KEY='thaptaisan.seen';
+const APP_VER=37, SEEN_KEY='thaptaisan.seen';
 const CHANGES=[
+  [37,'09/11/2026',['Trên máy tính: <b>thanh trên và thanh tab luôn ghim ở đầu trang</b> khi kéo xuống, chuyển tab không cần cuộn lên']],
   [36,'08/11/2026',['<b>Ngưỡng tự do theo chi tiêu của bạn</b>: quỹ khẩn cấp 6 tháng, an toàn 1 năm, tự chủ 3 năm, tự do tối giản, tự do tài chính, tự do thoải mái; chi tiêu đổi thì ngưỡng tự đổi','Sửa tên, số tiền, thêm mốc riêng ở sheet <b>Ngưỡng</b>','Khối <b>Mốc theo kinh tế Việt Nam</b> (thu nhập bình quân, GDP đầu người, giá căn hộ): chỉ để xem, không tính vào lộ trình']],
   [35,'08/11/2026',['<b>Câu tóm tắt</b> đầu Tổng quan: 30 ngày qua thay đổi vì đâu, còn bao nhiêu tới mốc kế tiếp, việc nên làm trước','<b>Tiền tự sinh ra</b> (Hiệu suất): lãi sổ, ví đã tích lũy, mỗi tháng, mỗi năm','Biểu đồ tài sản ròng có nút <b>1T / 6T / 1N / Tất cả</b>; thẻ tài sản có đường mini','<b>Đồng hồ sức khỏe</b> 5 vòng phát sáng; icon tự vẽ nét','App nhẹ hơn: logo nhỏ lại, bớt phông, hiệu ứng tự dừng khi ra khỏi màn hình']],
   [34,'08/11/2026',['<b>Giao diện mới toàn app</b>: nền bảng mạch xanh đêm, mọi thẻ là tấm kính phát sáng, vạch sáng chạy trên mép thẻ, phông kỹ thuật','App dùng một giao diện tối duy nhất cho đồng bộ']],
@@ -2643,6 +2645,9 @@ function go(tab){
 window.addEventListener('resize',movePill);
 try{document.fonts&&document.fonts.ready.then(movePill);}catch(_){}
 window.addEventListener('scroll',()=>{const a=document.querySelector('.appbar');if(a)a.classList.toggle('sc',window.scrollY>4);},{passive:true});
+// chiều cao thanh trên để ghim thanh tab ngay bên dưới (máy tính)
+const setAbh=()=>{const a=document.querySelector('.appbar');if(a)document.documentElement.style.setProperty('--abh',a.offsetHeight+'px');};
+setAbh();window.addEventListener('resize',setAbh,{passive:true});if(document.fonts&&document.fonts.ready)document.fonts.ready.then(setAbh);
 // màn mở app: tự biến mất sau ~0,9 giây, rồi các thẻ hiện lên
 setTimeout(()=>{const sp=document.getElementById('splash');if(sp)sp.remove();animateView('in-up');if(seenVer()!==APP_VER)openSheet('new');},MOTION()?2000:0);
 document.addEventListener('click',e=>{
