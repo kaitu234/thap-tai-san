@@ -2341,7 +2341,8 @@ const parseCF=res=>rowsOf(res,'Dòng tiền',2,62,g=>{if(typeof g(0)!=='number')
   const planned=fixed+personal+other===0&&plan>0;if(planned)personal=plan;   // chưa có số chi thật: dùng chi dự kiến
   return {m:g(0),inc1,inc2,inc:inc1+inc2,fixed,personal,other,exp:fixed+personal+other,plan,planned,note:g(10)||''};}).sort((a,b)=>a.m-b.m);
 const parseGoals=res=>rowsOf(res,'Mục tiêu',2,22,g=>g(0)?{name:String(g(0)),need:num(g(1)),due:num(g(2))||null,have:num(g(3)),prio:num(g(4))||null,note:g(5)||''}:null);
-const parseLoans=res=>rowsOf(res,'Sổ nợ',2,40,g=>{if(!g(0))return null;const amt=num(g(2)),paid=num(g(3));
+// Cột I là ô tick "Đã trả": tick thì coi như trả đủ dù cột D chưa cộng hết
+const parseLoans=res=>rowsOf(res,'Sổ nợ',2,40,g=>{if(!g(0))return null;const amt=num(g(2)),paid=g(8)===true?amt:num(g(3));
   return {who:String(g(0)),dir:/^đi/i.test(String(g(1)||''))?'borrow':'lend',amt,paid,left:amt-paid,rate:num(g(5)),start:num(g(6))||null,due:num(g(7))||null,note:g(9)||''};});
 // Sheet Lịch sử: A ngày (serial) · B tài sản ròng · C khả dụng · D–G T1–T4 · H ngoài tháp · I chờ nhận · J JSON {tên: giá trị}
 function parseHist(res){
