@@ -740,6 +740,15 @@ nav.tabs button[aria-selected="true"]{color:#5ED0FF}
 @keyframes hgSpin{to{transform:rotate(360deg)}}
 @keyframes icoDraw{to{stroke-dashoffset:0}}
 @keyframes growX{from{width:0}}
+/* mốc theo kinh tế Việt Nam (tham khảo) */
+.vnr-top{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;font-size:13px;color:var(--muted)}
+.vnr-top b{white-space:nowrap;font:700 26px var(--f-disp);color:var(--accent);text-shadow:0 0 12px rgba(94,208,255,.5)}
+.vnr{display:grid;gap:12px}
+.vnr-h{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.vnr-b{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:5px 0 4px}
+.vnr-b>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#2F7BFF,#5ED0FF);box-shadow:0 0 8px rgba(94,208,255,.6)}
+.vnr-s{font-size:11.5px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){#view[class*=in-] .vnr-b>i{animation:growX .9s cubic-bezier(.2,.8,.2,1) both}}
 @media (max-width:480px){.brand h1{font-size:17px;letter-spacing:.01em}}
 .hero .stat,.card.sky .kpi{background:linear-gradient(160deg,rgba(9,30,70,.86),rgba(5,16,40,.9))}
 .hero .chip-chg{background:rgba(6,22,52,.85)}
@@ -1083,6 +1092,7 @@ const ICONS={
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   flow:'<path d="M3 7h13l-3-3M21 17H8l3 3"/>',
   handshake:'<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.9-3.9a3 3 0 0 0-4.2 0l-.9.9a1 1 0 1 1-3-3l2.8-2.8a5.8 5.8 0 0 1 7.1-.9l.5.3a2 2 0 0 0 1.4.3H21"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/>',
   flag:'<path d="M4 22V4"/><path d="M4 4h12l-2 4 2 4H4"/>',
   download:'<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
   eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
@@ -1152,7 +1162,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const tcol=id=>`var(--c${id})`;
 const tierName=t=>t===0?'Ngoài tháp':'T'+t+' '+((TIERS0[t-1]||{}).short||'');
 // Thẻ biểu đồ lớn vẽ trên nền trời đêm kiểu bảng điều khiển viễn tưởng (class sky)
-const SKY_CARDS=/^(Tiền tự sinh ra|Sức khỏe tài chính|12 tháng tới|Cơ cấu tài sản|30 ngày qua|Tài sản ròng theo thời gian|Cổ phiếu|Tháp so với mục tiêu|Lộ trình 8 ngưỡng|Dự báo bằng lãi kép)/;
+const SKY_CARDS=/^(Tiền tự sinh ra|Sức khỏe tài chính|12 tháng tới|Cơ cấu tài sản|30 ngày qua|Tài sản ròng theo thời gian|Cổ phiếu|Tháp so với mục tiêu|Lộ trình \d+ ngưỡng|Dự báo bằng lãi kép)/;
 const card=(title,icon,body,aside='',extra='')=>`<section class="card ${extra}${SKY_CARDS.test(title)?' sky':''}"><div class="card-h"><span class="ico">${ic(icon)}</span><h2>${title}</h2>${aside?`<span class="aside">${aside}</span>`:''}</div>${body}</section>`;
 
 // ---- biểu đồ
@@ -1733,19 +1743,27 @@ function composition(C){
       ${mid?`<div class="tm-in">${big&&c.a.brand?logo(c.a):''}<b>${esc(c.a.name)}</b><span class="num">${tr(c.v)} · ${pct(c.v/tot,0)}</span></div>`:''}</div>`;}).join('')}</div>
     <div class="dlist" style="margin-top:12px">${segs.map(s=>`<div class="drow"><i class="tdot" style="background:${s.col}"></i><span>${esc(s.label)}</span><b class="num">${tr(s.v)}</b><span class="muted num">${pct(s.v/tot,0)}</span></div>`).join('')}</div>`;
 }
-// ---- Tự do tài chính: 8 ngưỡng tài sản ròng (Kai 08/11/2026, theo ý tưởng các mốc dễ bỏ cuộc của Grant Sabatier).
-// Tính theo tài sản ròng hoặc khả dụng (nút chuyển); mỗi ngưỡng đổi ra năm chi thiết yếu và thu nhập thụ động (rút 4%/năm);
+// ---- Tự do tài chính: các ngưỡng tài sản ròng (Kai 08/11/2026: kết hợp A + B).
+// B: mặc định tính từ chi thiết yếu (số tháng chi × chi/tháng); A: sheet Ngưỡng ghi đè (tên, số tháng, hệ số chi, chi/tháng cố định, số tiền cố định, ý nghĩa).
+// Tính theo tài sản ròng hoặc khả dụng (nút chuyển); mỗi ngưỡng đổi ra thu nhập thụ động (rút 4%/năm);
 // dự báo lãi kép (có thể trừ lạm phát), 3 kịch bản thu nhập, điểm giao lãi > tiền để dành, tính ngược số cần để dành, tốc độ thật từ Lịch sử.
-const MS=[
-  {v:1e7,name:'Tự chủ ban đầu',why:'Khoản đệm đầu tiên: thôi sống dồn từng tháng lương.'},
-  {v:1e8,name:'An toàn cơ bản',why:'Mốc khó nhất: nhiều người bỏ cuộc trước khi tới. Qua đây lãi kép mới bắt đầu thấy rõ.'},
-  {v:3e8,name:'Tích lũy bứt phá',why:'Tiền lãi mỗi năm bắt đầu đáng kể so với số bạn để dành.'},
-  {v:5e8,name:'Bàn đạp đầu tư',why:'Đủ lớn để phân bổ bài bản, không cần mạo hiểm để tăng nhanh.'},
-  {v:1e9,name:'Cột mốc đầu đời',why:'Mốc tâm lý lớn; từ đây mỗi mốc sau đến nhanh hơn nhờ lãi kép.'},
-  {v:3e9,name:'Tự do tài chính sơ cấp',why:'Lợi nhuận có thể trả phần lớn chi tiêu thiết yếu.'},
-  {v:5e9,name:'Tự do tài chính bền vững',why:'Sống bằng thu nhập thụ động mà không ăn vào vốn.'},
-  {v:1e10,name:'Tự do tuyệt đối / thặng dư',why:'Dư để lại cho gia đình, giúp người khác.'}];
-const FM_KEY='thaptaisan.fm', MS_TOP_KEY='thaptaisan.msTop', WD=0.04;   // WD: tỷ lệ rút an toàn mỗi năm (quy tắc 4%)
+const MS_DEF=[
+  {name:'Quỹ khẩn cấp',mo:6,why:'6 tháng chi: mất việc, ốm đau vẫn sống bình thường.'},
+  {name:'An toàn',mo:12,why:'Một năm không thu nhập vẫn ổn: đủ thời gian tìm việc hoặc nghỉ ngơi.'},
+  {name:'Tự chủ',mo:36,why:'Ba năm chi tiêu: đổi nghề, thử kinh doanh, nghỉ dài mà không lo tiền.'},
+  {name:'Tự do tối giản (Lean FI)',mo:300,sp:1e7,why:'Rút 4%/năm đủ sống mức tối thiểu (khoảng 10 Tr/tháng).'},
+  {name:'Tự do tài chính (FI)',mo:300,why:'Rút 4%/năm trả được toàn bộ chi thiết yếu hiện tại.'},
+  {name:'Tự do thoải mái (Fat FI)',mo:300,k:2,why:'Gấp đôi mức chi hiện tại: du lịch, lo cho gia đình, giúp người khác.'}];
+let MSD=[];   // các dòng sheet Ngưỡng; trống thì dùng MS_DEF
+// Số tiền mỗi ngưỡng: số tiền cố định, hoặc số tháng × (chi/tháng cố định, hoặc hệ số × chi thiết yếu); xếp tăng dần
+function msList(C){
+  const E=Math.max(1,C.essential), src=MSD.length?MSD:MS_DEF;
+  return src.map(x=>{const fix=x.fix>0, sp=x.sp>0, k=x.k>0?x.k:1;
+    return {name:x.name,why:x.why||'',v:Math.round(fix?x.fix:(x.mo||0)*(sp?x.sp:k*E)),
+      how:fix?'Số tiền cố định · ≈ '+nf(x.fix/(E*12),1)+' năm chi thiết yếu':(x.mo%12===0?x.mo/12+' năm':x.mo+' tháng')+' × '+(sp?tr(x.sp)+'/tháng':k!==1?nf(k,k%1?1:0)+' lần chi thiết yếu':'chi thiết yếu')};})
+    .filter(x=>x.v>0).sort((a,b)=>a.v-b.v);
+}
+const FM_KEY='thaptaisan.fm', MS_TOP_KEY='thaptaisan.msPass', WD=0.04;   // WD: tỷ lệ rút an toàn mỗi năm (quy tắc 4%)
 let FM={};try{FM=JSON.parse(localStorage.getItem(FM_KEY)||'{}')||{};}catch(_){}
 const saveFM=()=>{try{localStorage.setItem(FM_KEY,JSON.stringify(FM));}catch(_){}};
 const mRate=R=>Math.pow(1+R,1/12)-1;
@@ -1777,13 +1795,13 @@ function fmIn(C){
   return {m:FM.m!=null?FM.m:Math.max(0,Math.round((C.net||0)/1e5)*1e5),R,inf,real,Re:real?(1+R)/(1+inf)-1:R,base:FM.base==='avail'?'avail':'nw'};
 }
 function msCalc(C){
-  const I=fmIn(C), P=I.base==='avail'?C.nwAvail:C.nw, cur=MS.findIndex(x=>P<x.v), E=Math.max(1,C.essential);
-  return {...I,P,E,cur,all:Math.min(1,Math.max(0,P)/MS[MS.length-1].v),fi:E*12/WD,
+  const MS=msList(C), I=fmIn(C), P=I.base==='avail'?C.nwAvail:C.nw, cur=MS.findIndex(x=>P<x.v), E=Math.max(1,C.essential), top=MS.length?MS[MS.length-1].v:1;
+  return {...I,P,E,cur,top,all:Math.min(1,Math.max(0,P)/top),fi:E*12/WD,
     rows:MS.map((x,i)=>({...x,i,done:P>=x.v,p:Math.max(0,Math.min(1,P/x.v)),left:Math.max(0,x.v-P),n:monthsTo(Math.max(0,P),x.v,I.m,I.Re),
       yrs:x.v/(E*12),pass:x.v*WD/12}))};
 }
 // Ngày vượt từng ngưỡng theo sheet Lịch sử; tốc độ thật (Tr/tháng) khi lịch sử đủ 30 ngày
-function msHist(base){
+function msHist(base,MS){
   const H=HIST.filter(h=>h.d).sort((a,b)=>a.d-b.d), val=h=>base==='avail'?h.avail:h.nw;
   const when=MS.map(x=>{const j=H.findIndex(h=>val(h)>=x.v);if(j<0)return null;return j===0?{d:H[0].d,before:true}:{d:H[j].d,before:false};});
   const span=H.length>1?H[H.length-1].d-H[0].d:0, vel=span>=30?(val(H[H.length-1])-val(H[0]))/span*30.4:null;
@@ -1794,8 +1812,8 @@ function msDyn(C){
   const side=CF.filter(x=>x.inc>0).slice(-3), sideAvg=side.length?sum(side,'inc2')/side.length:0, E=S.expense;
   const sc=[['Như hiện tại',M.m],['Chỉ freelance + affiliate',sideAvg-E]];
   if(DATA.cfg.salary)sc.push(['Chỉ dư từ lương tự trả',DATA.cfg.salary-E]);
-  const tgt=next?next.v:MS[MS.length-1].v;
-  return `${next?`<div class="chk ${next.n==null?'bad':'ok'}"><b>${ic('target','sm')} Ngưỡng ${next.i+1}: ${msVal(next.v)} sau khoảng ${ymTxt(next.n)}${next.n?' ('+msLab(C,next.n)+')':''}</b>
+  const tgt=next?next.v:M.top;
+  return `${next?`<div class="chk ${next.n==null?'bad':'ok'}"><b>${ic('target','sm')} Ngưỡng ${next.i+1} (${esc(next.name)}): ${msVal(next.v)} sau khoảng ${ymTxt(next.n)}${next.n?' ('+msLab(C,next.n)+')':''}</b>
       <span>Để dành ${tr(M.m)}/tháng, lợi nhuận ${nf(M.R*100,2)}%/năm${M.real?`, trừ lạm phát ${nf(M.inf*100,1)}% (lãi thực ${nf(M.Re*100,2)}%, tính theo sức mua hôm nay)`:''}. Còn thiếu <b class="amt y">${tr(next.left)}</b>.</span></div>`:''}
     <div class="ms-x">
       <div class="kpi"><div class="label">Lãi mỗi tháng bây giờ</div><div class="v">${tr(Math.max(0,M.P)*r)}</div><div class="s">so với ${tr(M.m)} bạn để dành</div></div>
@@ -1809,10 +1827,10 @@ function msDyn(C){
     <div class="label" style="margin:14px 0 6px">Từng ngưỡng</div>
     <div class="tablewrap ms-tab"><table><tr><th>Ngưỡng</th><th>Còn thiếu</th><th>Tiến độ</th><th>Dự kiến</th></tr>
     ${M.rows.map(x=>`<tr class="${x.done?'ms-ok':x.i===M.cur?'ms-cur':''}"><td><b>${x.i+1}</b> · ${msVal(x.v)}</td><td>${x.done?'0':tr(x.left)}</td><td>${pct(x.p,x.p<0.1?1:0)}</td><td>${x.done?'Đã đạt':msLab(C,x.n)}</td></tr>`).join('')}</table></div>
-    <p class="note">Toàn lộ trình (tới 10 tỷ): <b>${pct(M.all,1)}</b>. Dự báo giả định để dành và lợi nhuận đều mỗi tháng; chưa tính chi lớn bất thường hay thu nhập thay đổi.</p>`;
+    <p class="note">Toàn lộ trình (tới ${msVal(M.top)}): <b>${pct(M.all,1)}</b>. Dự báo giả định để dành và lợi nhuận đều mỗi tháng; chưa tính chi lớn bất thường hay thu nhập thay đổi.</p>`;
 }
 function msRev(C){
-  const M=msCalc(C), ti=FM.tgt!=null?+FM.tgt:Math.max(0,M.cur), T=MS[Math.min(MS.length-1,ti)].v, d=FM.date||'2028-06';
+  const M=msCalc(C), ti=FM.tgt!=null?+FM.tgt:Math.max(0,M.cur), T=(M.rows[Math.min(M.rows.length-1,ti)]||{v:M.top}).v, d=FM.date||'2028-06';
   const [y,mo]=d.split('-').map(Number), t=new Date(C.now+7*36e5), n=(y-t.getUTCFullYear())*12+(mo-1-t.getUTCMonth());
   if(!y||!mo||n<=0)return '<p class="note">Chọn một tháng trong tương lai.</p>';
   const need=needMonthly(Math.max(0,M.P),T,n,M.Re);
@@ -1820,15 +1838,15 @@ function msRev(C){
     <span>${need<=0?'Không cần để dành thêm: riêng lãi đã đưa tới mốc này.':`Cần để dành <b class="amt ${need<=M.m?'g':'r'}">${tr(need)}</b>/tháng, ${need<=M.m?'bạn đang để dành đủ ('+tr(M.m)+').':'gấp '+nf(need/Math.max(M.m,1),1)+' lần mức hiện tại ('+tr(M.m)+').'}`}</span></div>`;
 }
 function vFreedom(C){
-  const M=msCalc(C), Hs=msHist(M.base), nDone=M.rows.filter(x=>x.done).length, passNow=Math.max(0,M.P)*WD/12;
+  const M=msCalc(C), Hs=msHist(M.base,M.rows), nDone=M.rows.filter(x=>x.done).length, passNow=Math.max(0,M.P)*WD/12;
   // lộ trình đi lên: ngưỡng 8 ở trên, ngưỡng 1 ở dưới; mỗi ngưỡng đổi ra năm chi thiết yếu và thu nhập thụ động 4%
   const path=[...M.rows].reverse().map(x=>{const st=x.done?'ok':x.i===M.cur?'cur':'lock', w=Hs.when[x.i];
     return `<div class="ms ms-${st}"><span class="ms-dot">${st==='ok'?ic('check','sm'):st==='lock'?ic('clock','sm'):x.i+1}</span>
       <div class="ms-b"><div class="ms-h"><b>Ngưỡng ${x.i+1} · ${msVal(x.v)}</b><span class="num">${st==='ok'?'Đã đạt vạch':st==='cur'?pct(x.p,x.p<0.1?1:0):'Chưa mở'}</span></div>
-        <div class="ms-n">${x.name}</div>
+        <div class="ms-n">${esc(x.name)}</div>
         ${st==='cur'?`<div class="ms-bar"><i style="width:${(x.p*100).toFixed(1)}%"></i></div>`:''}
-        <div class="ms-f">≈ ${nf(x.yrs,x.yrs<10?1:0)} năm chi thiết yếu · ~${tr(x.pass)}/tháng thụ động${x.done&&w?' · '+(w.before?'đạt trước '+sdate(w.d):'đạt '+sdate(w.d)):''}</div>
-        ${st==='cur'?`<div class="ms-w">${x.why}</div>`:''}</div></div>`;}).join('');
+        <div class="ms-f">${esc(x.how)} · ~${tr(x.pass)}/tháng thụ động${x.done&&w?' · '+(w.before?'đạt trước '+sdate(w.d):'đạt '+sdate(w.d)):''}</div>
+        ${st==='cur'&&x.why?`<div class="ms-w">${esc(x.why)}</div>`:''}</div></div>`;}).join('');
   const sv=M.m/1e6, rv=M.R*100, iv=M.inf*100, nextIdx=Math.max(0,M.cur), dv=FM.date||'2028-06';
   const tModel=M.m+Math.max(0,M.P)*mRate(M.Re);
   return `
@@ -1836,13 +1854,14 @@ function vFreedom(C){
     <div class="l"><div>
       <div class="ms-seg" role="tablist"><button data-msbase="nw" aria-selected="${M.base==='nw'}">Tài sản ròng</button><button data-msbase="avail" aria-selected="${M.base==='avail'}">Khả dụng</button></div>
       <div class="label" style="margin-top:12px">${M.base==='avail'?'Khả dụng (trừ BHXH, BHTN chờ nhận, cho vay)':'Tài sản ròng'} so với lộ trình</div><div class="big">${tr(M.P)}</div>
-      <div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:8px">Đã qua <b style="color:var(--hero-ink)">${nDone}/8 ngưỡng</b>${M.rows[M.cur]?' · đang hướng tới '+msVal(M.rows[M.cur].v):''}</div></div>
+      <div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:8px">Đã qua <b style="color:var(--hero-ink)">${nDone}/${M.rows.length} ngưỡng</b>${M.rows[M.cur]?' · đang hướng tới '+esc(M.rows[M.cur].name)+' '+msVal(M.rows[M.cur].v):''}</div></div>
       <div class="stats">
         <div class="stat"><div class="label">Đủ sống không đi làm</div><div class="v">${nf(Math.max(0,M.P)/(M.E*12),1)} năm</div><div class="s">chi thiết yếu ${tr(M.E)}/tháng</div></div>
         <div class="stat"><div class="label">Thụ động (rút 4%/năm)</div><div class="v">${tr(passNow)}/th</div><div class="s">${pct(passNow/M.E,0)} chi thiết yếu · tự do ở ${msVal(Math.round(M.fi/1e8)*1e8)}</div></div>
       </div></div>
   </section>
-  ${card('Lộ trình 8 ngưỡng','flag',`<div class="ms-sky"><div class="ms-apex"><svg viewBox="-12 -12 24 24" aria-hidden="true"><path d="M0-11 2-2.2 11 0 2 2.2 0 11-2 2.2-11 0-2-2.2z" fill="#fff"/></svg><span>Đích: 10 tỷ · tự do tuyệt đối</span></div><div class="ms-path">${path}</div></div>`,nDone+'/8 đã đạt')}
+  ${card(`Lộ trình ${M.rows.length} ngưỡng`,'flag',`<div class="ms-sky"><div class="ms-apex"><svg viewBox="-12 -12 24 24" aria-hidden="true"><path d="M0-11 2-2.2 11 0 2 2.2 0 11-2 2.2-11 0-2-2.2z" fill="#fff"/></svg><span>Đích: ${msVal(M.top)} · ${esc((M.rows[M.rows.length-1]||{}).name||'')}</span></div><div class="ms-path">${path}</div></div>
+    <p class="note">${MSD.length?'Các ngưỡng lấy từ sheet <b>Ngưỡng</b> (sửa, thêm, xoá dòng ở đó).':'Mặc định theo chi thiết yếu '+tr(M.E)+'/tháng. Muốn đổi tên, số tiền hay thêm mốc riêng: sửa sheet <b>Ngưỡng</b>.'} Chi tiêu đổi thì ngưỡng tự đổi theo.</p>`,nDone+'/'+M.rows.length+' đã đạt')}
   ${card('Dự báo bằng lãi kép','calendar',`<div class="fm-in">
       <label><span>Để dành mỗi tháng (Tr)</span><input id="fmSave" type="number" inputmode="decimal" min="0" step="0.5" value="${+sv.toFixed(1)}"></label>
       <label><span>Lợi nhuận kỳ vọng/năm (%)</span><input id="fmRet" type="number" inputmode="decimal" min="0" max="30" step="0.25" value="${+rv.toFixed(2)}"></label>
@@ -1851,23 +1870,41 @@ function vFreedom(C){
     <div id="fmDyn">${msDyn(C)}</div>
     <p class="note">Mặc định: để dành = mức dư hằng tháng hiện tại, lợi nhuận = lãi tiết kiệm tham chiếu (Cấu hình B8), lạm phát 3,5%. Số bạn nhập chỉ lưu trên máy này.</p>`)}
   ${card('Tính ngược: cần để dành bao nhiêu','target',`<div class="fm-in">
-      <label><span>Ngưỡng muốn tới</span><select id="fmTgt">${MS.map((x,i)=>`<option value="${i}"${i===(FM.tgt!=null?+FM.tgt:nextIdx)?' selected':''}>Ngưỡng ${i+1} · ${msVal(x.v)}</option>`).join('')}</select></label>
+      <label><span>Ngưỡng muốn tới</span><select id="fmTgt">${M.rows.map((x,i)=>`<option value="${i}"${i===(FM.tgt!=null?+FM.tgt:nextIdx)?' selected':''}>${i+1} · ${esc(x.name)} · ${msVal(x.v)}</option>`).join('')}</select></label>
       <label><span>Vào tháng</span><input id="fmDate" type="month" value="${dv}"></label></div>
     <div id="fmRev">${msRev(C)}</div>`)}
   ${card('Tốc độ thật','pulse',Hs.vel==null?`<p class="note" style="margin:0">Cần ít nhất 30 ngày trong sheet Lịch sử để tính tốc độ thật (hiện có ${Hs.span} ngày${Hs.from?', từ '+sdate(Hs.from):''}). App chụp số liệu mỗi tối 22h.</p>`:
     `<div class="ms-x"><div class="kpi"><div class="label">Tăng thật mỗi tháng</div><div class="v ${cls(Hs.vel)}">${trs(Hs.vel)}</div><div class="s">theo Lịch sử ${Hs.span} ngày, từ ${sdate(Hs.from)}</div></div>
       <div class="kpi"><div class="label">Dự báo đang giả định</div><div class="v">${trs(tModel)}</div><div class="s">để dành + lãi mỗi tháng</div></div></div>
     <p class="note">${Hs.vel>=tModel?'Bạn đang đi nhanh hơn dự báo.':'Tốc độ thật chậm hơn dự báo: dự báo có thể quá lạc quan.'} Tốc độ thật gồm cả biến động giá cổ phiếu, khấu hao, góp vốn.</p>`)}
-  <p class="note" style="text-align:center">Các ngưỡng để tham khảo động lực, theo ý tưởng "những mốc dễ bỏ cuộc nhất" của Grant Sabatier; quy tắc rút 4%/năm là quy ước tham khảo. Không phải tư vấn đầu tư.</p>`;
+  ${vnRefCard(C,M)}
+  <p class="note" style="text-align:center">Các ngưỡng để tham khảo động lực; quy tắc rút 4%/năm là quy ước tham khảo. Không phải tư vấn đầu tư.</p>`;
+}
+// Khối tham khảo (Kai 08/11/2026): mốc theo số liệu kinh tế Việt Nam. Chỉ hiển thị, KHÔNG dùng trong bất kỳ phép tính nào.
+// Số liệu tra 08/11/2026, cập nhật tay khi có số mới.
+const VN_REF={at:'08/11/2026',inc:9.2e6,gdp:125.5e6,hcm:76e6,hn:86e6,area:70,
+  src:['Thu nhập bình quân lao động quý III/2026: 9,2 Tr/tháng (Cục Thống kê)','GDP bình quân đầu người 2025: 125,5 Tr ≈ 5.026 USD (Cục Thống kê, 01/2026)','Giá căn hộ sơ cấp trung bình: TP.HCM ~76 Tr/m² (CBRE, quý II/2026), Hà Nội ~86 Tr/m² (CBRE, quý III/2026), giá chào bán, chưa VAT']};
+function vnRefCard(C,M){
+  const R=VN_REF, P=Math.max(0,M.P), yInc=R.inc*12;
+  const it=[
+    {n:'Sống bằng thu nhập trung bình',v:yInc/WD,s:'rút 4%/năm = '+tr(R.inc)+'/tháng, bằng thu nhập bình quân một lao động'},
+    {n:'Sống bằng GDP đầu người',v:R.gdp/WD,s:'rút 4%/năm = '+tr(R.gdp/12)+'/tháng'},
+    {n:'Căn hộ '+R.area+' m² TP.HCM',v:R.hcm*R.area,s:'giá sơ cấp ~'+tr(R.hcm)+'/m²'},
+    {n:'Căn hộ '+R.area+' m² Hà Nội',v:R.hn*R.area,s:'giá sơ cấp ~'+tr(R.hn)+'/m²'}].sort((a,b)=>a.v-b.v);
+  return card('Mốc theo kinh tế Việt Nam','globe',`<div class="vnr-top"><b>${nf(P/yInc,1)} năm</b><span>${M.base==='avail'?'Tài sản khả dụng':'Tài sản ròng'} của bạn bằng chừng ấy năm thu nhập của một lao động bình quân (${tr(yInc)}/năm).</span></div>
+    <div class="vnr">${it.map(x=>{const p=Math.min(1,P/x.v);return `<div class="vnr-r"><div class="vnr-h"><b>${x.n}</b><span class="num">${msVal(Math.round(x.v/1e7)*1e7)}</span></div>
+      <div class="vnr-b"><i style="width:${(p*100).toFixed(1)}%"></i></div><div class="vnr-s">${x.s} · ${P>=x.v?'đã vượt':'đạt '+pct(p,0)+', còn '+msVal(x.v-P)}</div></div>`;}).join('')}</div>
+    <p class="note">Chỉ để xem cho biết, không dùng để tính lộ trình hay dự báo. Nguồn (tra ${R.at}): ${R.src.join('; ')}. Giá nhà mỗi đơn vị khảo sát một khác.</p>`,'tham khảo');
 }
 // Chúc mừng khi tài sản ròng vượt ngưỡng mới (so với lần mở trước trên máy này); lần đầu chỉ ghi nhớ, không chúc
 function msCelebrate(C){
-  const top=MS.filter(x=>C.nw>=x.v).length;let prev=null;
-  try{prev=localStorage.getItem(MS_TOP_KEY);localStorage.setItem(MS_TOP_KEY,String(top));}catch(_){return;}
-  if(prev==null||top<=+prev)return;
-  const x=MS[top-1];let el=document.getElementById('msToast');
+  const L=msList(C), done=L.filter(x=>C.nw>=x.v);let prev=null;
+  try{prev=JSON.parse(localStorage.getItem(MS_TOP_KEY)||'null');localStorage.setItem(MS_TOP_KEY,JSON.stringify(done.map(x=>x.name)));}catch(_){return;}
+  if(!Array.isArray(prev))return;
+  const nw=done.filter(x=>!prev.includes(x.name));if(!nw.length)return;
+  const x=nw[nw.length-1], i=L.indexOf(x), nx=L[i+1];let el=document.getElementById('msToast');
   if(!el){el=document.createElement('div');el.id='msToast';el.setAttribute('role','status');document.body.appendChild(el);}
-  el.innerHTML=`<b>🎉 Chúc mừng! Bạn đã qua Ngưỡng ${top}: ${msVal(x.v)}</b><span>${x.name}. ${MS[top]?'Ngưỡng tiếp theo: '+msVal(MS[top].v)+'.':'Bạn đã đi hết lộ trình.'}</span>`+
+  el.innerHTML=`<b>🎉 Chúc mừng! Bạn đã qua Ngưỡng ${i+1}: ${esc(x.name)} · ${msVal(x.v)}</b><span>${esc(x.why)} ${nx?'Ngưỡng tiếp theo: '+esc(nx.name)+' '+msVal(nx.v)+'.':'Bạn đã đi hết lộ trình.'}</span>`+
     (MOTION()?Array.from({length:24},(_,i)=>`<i class="cf" style="left:${(i*4.2)%100}%;background:var(--${['good','warn','info','bad'][i%4]});animation-delay:${(i%8)*0.08}s"></i>`).join(''):'');
   el.hidden=false;el.onclick=()=>{el.hidden=true;};setTimeout(()=>{el.hidden=true;},7000);
 }
@@ -1875,11 +1912,11 @@ function msCelebrate(C){
 // Câu tóm tắt đầu Tổng quan: thay đổi 30 ngày + khoản kéo nhiều nhất, còn bao nhiêu tới ngưỡng tài sản ròng kế tiếp, việc nên làm trước
 function briefCard(C){
   const mv=C.inNW.filter(a=>!a.sim&&Math.abs(a.chg30)>=1e5).sort((a,b)=>Math.abs(b.chg30)-Math.abs(a.chg30))[0];
-  const next=MS.find(x=>C.nw<x.v), todo=todoList(C).filter(i=>!(SNZ[todoKey(i)]>Date.now()))[0];
+  const next=msList(C).find(x=>C.nw<x.v), todo=todoList(C).filter(i=>!(SNZ[todoKey(i)]>Date.now()))[0];
   const strip=s=>String(s).replace(/<[^>]+>/g,'');
   const lines=[
     `30 ngày qua tài sản ròng <b class="${cls(C.chg30)}">${trs(C.chg30)}</b>${mv?`, kéo nhiều nhất bởi ${esc(mv.name)} (<b class="${cls(mv.chg30)}">${trs(mv.chg30)}</b>)`:''}.`,
-    next?`Còn <b class="amt y">${tr(next.v-C.nw)}</b> nữa tới mốc ${msVal(next.v)} (${pct(C.nw/next.v,0)}).`:'Bạn đã đi hết lộ trình 10 tỷ.',
+    next?`Còn <b class="amt y">${tr(next.v-C.nw)}</b> nữa tới mốc ${esc(next.name)} ${msVal(next.v)} (${pct(C.nw/next.v,0)}).`:'Bạn đã đi hết lộ trình tự do.',
     todo?`Việc nên làm trước: <b>${strip(todo.t)}</b>.`:'Không có việc gấp.'];
   return `<section class="card brief"><span class="brief-i">${ic('spark')}</span><div class="brief-t">${lines.map((l,i)=>`<p style="--i:${i}">${l}</p>`).join('')}</div></section>`;
 }
@@ -2334,12 +2371,13 @@ function parseSheet(res){
 }
 // Hai nguồn dữ liệu: artifact trên claude.ai đọc qua connector; bản website đọc Sheets API bằng token đăng nhập Google (chỉ đọc)
 const RANGES=["'Tài sản'!A5:O54","'Tài sản'!S5:V54","'Cấu hình'!A3:B29","'Tầng'!A3:D6","'Tầng'!A10:C19","'Giá CP'!A3:G12"];
-const HIST_RANGE="'Lịch sử'!A2:J2000", CF_RANGE="'Dòng tiền'!A3:L62", GOAL_RANGE="'Mục tiêu'!A3:F22", LOAN_RANGE="'Sổ nợ'!A3:J40";
+const MS_RANGE="'Ngưỡng'!A3:G22", HIST_RANGE="'Lịch sử'!A2:J2000", CF_RANGE="'Dòng tiền'!A3:L62", GOAL_RANGE="'Mục tiêu'!A3:F22", LOAN_RANGE="'Sổ nợ'!A3:J40";
 function rowsOf(res,title,r0,r1,read){const M=cellMap(res)[title]||{},out=[];for(let r=r0;r<r1;r++){const g=c=>M[r+','+c];const x=read(g);if(x)out.push(x);}return out;}
 const num=v=>typeof v==='number'?v:0;
 const parseCF=res=>rowsOf(res,'Dòng tiền',2,62,g=>{if(typeof g(0)!=='number')return null;const inc1=num(g(1)),inc2=num(g(2)),plan=num(g(11));let fixed=num(g(3)),personal=num(g(4)),other=num(g(5));
   const planned=fixed+personal+other===0&&plan>0;if(planned)personal=plan;   // chưa có số chi thật: dùng chi dự kiến
   return {m:g(0),inc1,inc2,inc:inc1+inc2,fixed,personal,other,exp:fixed+personal+other,plan,planned,note:g(10)||''};}).sort((a,b)=>a.m-b.m);
+const parseMS=res=>rowsOf(res,'Ngưỡng',2,22,g=>g(0)?{name:String(g(0)).trim(),mo:num(g(1)),k:num(g(2)),sp:num(g(3)),fix:num(g(4)),why:g(5)?String(g(5)):''}:null);
 const parseGoals=res=>rowsOf(res,'Mục tiêu',2,22,g=>g(0)?{name:String(g(0)),need:num(g(1)),due:num(g(2))||null,have:num(g(3)),prio:num(g(4))||null,note:g(5)||''}:null);
 // Cột I là ô tick "Đã trả": tick thì coi như trả đủ dù cột D chưa cộng hết
 const parseLoans=res=>rowsOf(res,'Sổ nợ',2,40,g=>{if(!g(0))return null;const amt=num(g(2)),paid=g(8)===true?amt:num(g(3));
@@ -2384,8 +2422,8 @@ function parseKai(res){
 }
 // Lưu số liệu lần đọc gần nhất trên máy: mở app là thấy ngay, đăng nhập chỉ để làm mới. Đăng xuất thì xoá.
 const CACHE_KEY='thaptaisan.data', PRIV_KEY='thaptaisan.priv';
-function saveCache(){try{localStorage.setItem(CACHE_KEY,JSON.stringify({d:DATA,h:HIST,c:CF,g:GOALS,l:LOANS,k:KAI,at:LIVE.at}));}catch(_){}}
-function loadCache(){try{const c=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');if(c&&c.d&&c.d.rows){HIST=c.h||[];CF=c.c||[];GOALS=c.g||[];LOANS=c.l||[];KAI=c.k||null;applyData(c.d);LIVE.at=c.at||0;return true;}}catch(_){}return false;}
+function saveCache(){try{localStorage.setItem(CACHE_KEY,JSON.stringify({d:DATA,h:HIST,c:CF,g:GOALS,l:LOANS,k:KAI,m:MSD,at:LIVE.at}));}catch(_){}}
+function loadCache(){try{const c=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');if(c&&c.d&&c.d.rows){HIST=c.h||[];CF=c.c||[];GOALS=c.g||[];LOANS=c.l||[];KAI=c.k||null;MSD=c.m||[];applyData(c.d);LIVE.at=c.at||0;return true;}}catch(_){}return false;}
 try{PRIV=localStorage.getItem(PRIV_KEY)==='1';}catch(_){}
 const IS_WEB=typeof WEB_CFG!=='undefined';
 const TOKEN_KEY='thaptaisan.token';
@@ -2429,7 +2467,7 @@ function signOut(){
   PW=null;try{localStorage.removeItem(PW_KEY);}catch(_){}
   try{if(t&&window.google)window.google.accounts.oauth2.revoke(t,()=>{});}catch(_){}
   try{localStorage.removeItem(CACHE_KEY);}catch(_){}
-  HIST=[];CF=[];GOALS=[];LOANS=[];KAI=null;LIVE.at=0;applyData(SNAP);LIVE.state='login';render();
+  HIST=[];CF=[];GOALS=[];LOANS=[];KAI=null;MSD=[];LIVE.at=0;applyData(SNAP);LIVE.state='login';render();
 }
 async function fetchSheet(ranges,id=SHEET_ID){
   if(IS_WEB){
@@ -2454,16 +2492,16 @@ async function loadSheet(manual){
   try{
     if(IS_WEB&&PW&&WEB_CFG.api){
       const j=await fetchByPw(), main=parseSheet(j.main);
-      if(j.hist)HIST=parseHist(j.hist);if(j.cf)CF=parseCF(j.cf);if(j.goals)GOALS=parseGoals(j.goals);if(j.loans)LOANS=parseLoans(j.loans);
+      if(j.hist)HIST=parseHist(j.hist);if(j.cf)CF=parseCF(j.cf);if(j.goals)GOALS=parseGoals(j.goals);if(j.loans)LOANS=parseLoans(j.loans);if(j.ms)MSD=parseMS(j.ms);
       if(j.kai&&j.kai.sheets){try{KAI=parseKai(j.kai);KAI_ERR='';}catch(e){KAI_ERR=e.message;}}else KAI_ERR=(j.kai&&j.kai.err)||'Không đọc được sheet Kai Café';
       applyData(main);LIVE.state='ok';LIVE.at=Date.now();LIVE.msg='';LIVE.pwErr=false;saveCache();busy=false;render();return;
     }
     const main=parseSheet(await fetchSheet(RANGES));
     // các sheet phụ đọc riêng: thiếu sheet nào thì giữ số cũ của sheet đó
-    const extra=await Promise.allSettled([...[HIST_RANGE,CF_RANGE,GOAL_RANGE,LOAN_RANGE].map(r=>fetchSheet([r])),fetchSheet(KAI_RANGES,KAI_ID)]);
+    const extra=await Promise.allSettled([...[HIST_RANGE,CF_RANGE,GOAL_RANGE,LOAN_RANGE].map(r=>fetchSheet([r])),fetchSheet(KAI_RANGES,KAI_ID),fetchSheet([MS_RANGE])]);
     if(extra.some(x=>x.status==='rejected'&&x.reason&&x.reason.code==='needs_login'))throw extra.find(x=>x.reason&&x.reason.code==='needs_login').reason;
     const ok=(i,f)=>{if(extra[i].status==='fulfilled')return f(extra[i].value);};
-    ok(0,v=>HIST=parseHist(v));ok(1,v=>CF=parseCF(v));ok(2,v=>GOALS=parseGoals(v));ok(3,v=>LOANS=parseLoans(v));ok(4,v=>{try{KAI=parseKai(v);KAI_ERR='';}catch(e){KAI_ERR=e.message;}});
+    ok(0,v=>HIST=parseHist(v));ok(1,v=>CF=parseCF(v));ok(2,v=>GOALS=parseGoals(v));ok(3,v=>LOANS=parseLoans(v));ok(4,v=>{try{KAI=parseKai(v);KAI_ERR='';}catch(e){KAI_ERR=e.message;}});ok(5,v=>MSD=parseMS(v));
     if(extra[4].status==='rejected')KAI_ERR=(extra[4].reason&&extra[4].reason.message)||'Không đọc được sheet Kai Café';
     applyData(main);
     LIVE.state='ok';LIVE.at=Date.now();saveCache();
@@ -2487,8 +2525,9 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=35, SEEN_KEY='thaptaisan.seen';
+const APP_VER=36, SEEN_KEY='thaptaisan.seen';
 const CHANGES=[
+  [36,'08/11/2026',['<b>Ngưỡng tự do theo chi tiêu của bạn</b>: quỹ khẩn cấp 6 tháng, an toàn 1 năm, tự chủ 3 năm, tự do tối giản, tự do tài chính, tự do thoải mái; chi tiêu đổi thì ngưỡng tự đổi','Sửa tên, số tiền, thêm mốc riêng ở sheet <b>Ngưỡng</b>','Khối <b>Mốc theo kinh tế Việt Nam</b> (thu nhập bình quân, GDP đầu người, giá căn hộ): chỉ để xem, không tính vào lộ trình']],
   [35,'08/11/2026',['<b>Câu tóm tắt</b> đầu Tổng quan: 30 ngày qua thay đổi vì đâu, còn bao nhiêu tới mốc kế tiếp, việc nên làm trước','<b>Tiền tự sinh ra</b> (Hiệu suất): lãi sổ, ví đã tích lũy, mỗi tháng, mỗi năm','Biểu đồ tài sản ròng có nút <b>1T / 6T / 1N / Tất cả</b>; thẻ tài sản có đường mini','<b>Đồng hồ sức khỏe</b> 5 vòng phát sáng; icon tự vẽ nét','App nhẹ hơn: logo nhỏ lại, bớt phông, hiệu ứng tự dừng khi ra khỏi màn hình']],
   [34,'08/11/2026',['<b>Giao diện mới toàn app</b>: nền bảng mạch xanh đêm, mọi thẻ là tấm kính phát sáng, vạch sáng chạy trên mép thẻ, phông kỹ thuật','App dùng một giao diện tối duy nhất cho đồng bộ']],
   [33,'08/11/2026',['Bảng điều khiển đổi sang nền <b>bảng mạch điện tử</b> xanh: đường mạch, chân hàn, chip, đốm sáng chạy theo mạch']],
