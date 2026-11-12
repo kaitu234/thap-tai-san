@@ -801,6 +801,24 @@ tbody tr:nth-child(even) td,tr:nth-child(even) td{background:rgba(255,255,255,.0
 .fbtn{background:rgba(255,255,255,.07);border-color:rgba(110,215,255,.3)}
 .sh,.zm{background:linear-gradient(160deg,#1A3878,#0E2250)}
 #updToast{background:rgba(16,38,86,.95)}
+/* ==== Điện thoại (12/11/2026): nút dễ bấm (≥ 36px), chữ biểu đồ không nhỏ hơn ~10px khi thu nhỏ, mục Phân tích thu gọn được ==== */
+.snz{min-height:36px;padding:6px 12px;font-size:12.5px;display:inline-flex;align-items:center}
+.rng button{min-height:34px;padding:6px 14px}
+.fbtn{min-height:36px}
+@media (max-width:520px){
+  svg.chart text{font-size:12.5px}
+  .hp .tv{font-size:13.5px}
+  .glass .g2{font-size:12.5px}
+}
+details.fold{margin:0}
+details.fold>summary{list-style:none;cursor:pointer}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary .card-h{margin-bottom:0}
+details.fold[open]>summary .card-h{margin-bottom:12px}
+details.fold .fold-i{margin-left:auto;display:inline-flex;transition:transform .2s;color:var(--accent)}
+details.fold[open] .fold-i{transform:rotate(180deg)}
+details.fold .fold-hint{font-size:12px;color:var(--muted);margin:6px 0 0}
+details.fold[open] .fold-hint{display:none}
 </style>
 
 <div id="splash" aria-hidden="true"><div class="sp-in"><svg viewBox="0 0 120 124" class="sp-logo" aria-hidden="true">
@@ -1073,17 +1091,20 @@ function health(rows,runway,debt,nw,targetM,sr,insured){
   const tsum=sum(rows,'target')||100;
   const tv=.5*rows.reduce((s,r)=>s+Math.abs(r.share-r.target/tsum),0);
   const alloc=25*(1-tv);
-  const t3=rows.find(r=>r.id===3), t3v=t3.value;
+  // Đa dạng hóa (Kai 12/11/2026): chỉ số tập trung HHI trên TOÀN BỘ tài sản trong tháp, không chỉ tầng cổ phiếu
+  // (Kai đã chọn không mua thêm mã, nên chấm theo số mã trong T3 là phạt vĩnh viễn). HHI ≤ 0,15 đủ điểm, ≥ 0,5 không điểm.
+  const t3=rows.find(r=>r.id===3), t3v=t3.value, all=rows.flatMap(r=>r.items).filter(a=>a.value>0), av=sum(all,'value');
   const hhi=t3v>0?t3.items.reduce((s,a)=>s+Math.pow(a.value/t3v,2),0):1;
-  const conc=15*(1-hhi);
+  const hhiAll=av>0?all.reduce((s,a)=>s+Math.pow(a.value/av,2),0):1, top=[...all].sort((a,b)=>b.value-a.value)[0];
+  const conc=15*Math.max(0,Math.min(1,(0.5-hhiAll)/0.35));
   const debtS=debt>0?Math.max(0,10*(1-debt/Math.max(nw,1))):10, prot=insured==='Có'?5:0;
   const total=res+flow+alloc+conc+debtS+prot;
   const label=total>=80?'Tốt':total>=60?'Khá':total>=40?'Trung bình':'Yếu';
-  return {total,label,tv,hhi,parts:[
+  return {total,label,tv,hhi,hhiAll,parts:[
     {k:'Dự phòng',v:res,max:25,note:'Đủ '+nf(runway,1)+' tháng chi thiết yếu, mục tiêu '+targetM+' tháng'},
     {k:'Dòng tiền',v:flow,max:20,note:'Để dành '+pct(sr,0)+' thu nhập, đủ điểm từ 20%'},
     {k:'Phân bổ tháp',v:alloc,max:25,note:'Lệch '+pct(tv,0)+' so với mục tiêu các tầng'},
-    {k:'Đa dạng hóa',v:conc,max:15,note:t3v>0?'Chỉ số tập trung tầng Tăng trưởng '+nf(hhi,2)+' (1,00 là một mã duy nhất)':'Chưa có tài sản tăng trưởng'},
+    {k:'Đa dạng hóa',v:conc,max:15,note:top?'Tài sản lớn nhất ('+esc(top.name)+') chiếm '+pct(top.value/av,0)+' tháp · chỉ số tập trung '+nf(hhiAll,2)+' (đủ điểm từ 0,15 trở xuống)':'Chưa có tài sản'},
     {k:'Nợ & bảo vệ',v:debtS+prot,max:15,note:(debt>0?'Nợ '+tr(debt):'Không nợ')+' · '+(insured==='Có'?'có bảo hiểm sức khỏe/tai nạn':insured==='Không'?'chưa có bảo hiểm sức khỏe/tai nạn riêng':'chưa ghi bảo hiểm ở Cấu hình B15')}
   ]};
 }
@@ -1212,6 +1233,8 @@ const tcol=id=>`var(--c${id})`;
 const tierName=t=>t===0?'Ngoài tháp':'T'+t+' '+((TIERS0[t-1]||{}).short||'');
 // Thẻ biểu đồ lớn vẽ trên nền trời đêm kiểu bảng điều khiển viễn tưởng (class sky)
 const SKY_CARDS=/^(Tiền tự sinh ra|Sức khỏe tài chính|12 tháng tới|Cơ cấu tài sản|30 ngày qua|Tài sản ròng theo thời gian|Cổ phiếu|Tháp so với mục tiêu|Lộ trình \d+ ngưỡng|Dự báo bằng lãi kép)/;
+// thẻ thu gọn được (Kai 12/11/2026: tab Phân tích quá dài trên điện thoại): bấm tiêu đề để mở; hint hiện khi đang gọn
+const foldCard=(title,icon,body,aside='',hint='')=>`<details class="card fold"><summary><div class="card-h"><span class="ico">${ic(icon)}</span><h2>${title}</h2>${aside?`<span class="aside">${aside}</span>`:''}<span class="fold-i" aria-hidden="true"><svg class="i sm" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></div>${hint?`<p class="fold-hint">${hint}</p>`:''}</summary>${body}</details>`;
 const card=(title,icon,body,aside='',extra='')=>`<section class="card ${extra}${SKY_CARDS.test(title)?' sky':''}"><div class="card-h"><span class="ico">${ic(icon)}</span><h2>${title}</h2>${aside?`<span class="aside">${aside}</span>`:''}</div>${body}</section>`;
 
 // ---- biểu đồ
@@ -1496,7 +1519,8 @@ function insights(C){
   const L=[], E=S.expense, inc=INCOME, net=inc-E, cfg=DATA.cfg;
   const tm=C.targetM, why=cfg.gap>=cfg.emin?` (bằng khoảng nghỉ việc dài nhất bạn từng có)`:'';
   if(C.runway<tm) L.push({sev:C.runway<cfg.emin?'bad':'warn',prio:1,icon:'shield',t:`Quỹ khẩn cấp đủ ${nf(C.runway,1)} tháng, mục tiêu ${tm} tháng`,d:`Thanh khoản ${tr(C.liquid)} (cổ phiếu tính ${pct(cfg.haircut,0)}), chi thiết yếu ${tr2(C.essential)}/tháng. Mục tiêu ${tm} tháng${why} là ${tr(C.emTarget)}.`,a:`Dồn phần dư hằng tháng vào T1 cho đến khi đủ ${tr(C.emTarget)}, còn thiếu ${tr(C.emTarget-C.liquid)}.`});
-  else if(C.runway>tm*1.5) L.push({sev:'warn',prio:3,icon:'shield',t:`Thanh khoản ${nf(C.runway,1)} tháng, gấp ${nf(C.runway/tm,1)} lần mục tiêu`,d:`Mục tiêu ${tm} tháng chi thiết yếu${why} là ${tr(C.emTarget)}. Bạn đang có ${tr(C.liquid)}, dư khoảng ${tr(C.liquid-C.emTarget)}.`,a:`Phần dư có thể chuyển dần sang tầng còn thiếu. Thử con số ở mục Mô phỏng của tab Tháp.`});
+  else if(C.runway>tm*1.5){const nowM=C.L.now/Math.max(C.essential,1);
+    L.push({sev:'info',prio:9,icon:'shield',t:`Quỹ khẩn cấp dư: đủ ${nf(C.runway,1)} tháng, mục tiêu ${tm} tháng`,d:`Gồm tiền dùng ngay ${tr(C.L.now)} (đủ ${nf(nowM,1)} tháng)${C.L.soon?', rút sớm sổ '+tr(C.L.soon):''}${C.L.market?', cổ phiếu tính '+pct(cfg.haircut,0)+' '+tr(C.L.market):''}. Mục tiêu ${tm} tháng${why} là ${tr(C.emTarget)}, dư khoảng ${tr(C.liquid-C.emTarget)}.`});}
   else L.push({sev:'good',prio:20,icon:'shield',t:`Quỹ khẩn cấp ổn: ${nf(C.runway,1)} tháng`,d:`Đạt mục tiêu ${tm} tháng chi thiết yếu${why}.`});
 
   if(inc<=0) L.push({sev:'info',prio:6,icon:'flow',t:'Chưa có thu nhập tháng',d:'Nhập thu nhập ở sheet Cấu hình để tính tỷ lệ để dành.'});
@@ -1509,8 +1533,10 @@ function insights(C){
 
   const t3=C.rows.find(r=>r.id===3);
   if(t3&&t3.items.length===1&&!t3.items[0].sim){const a=t3.items[0], p=a.cost>0?(a.value-a.cost)/a.cost:0;
-    L.push({sev:'bad',prio:2,icon:'pie',t:`Tầng Tăng trưởng chỉ có một mã: ${esc(a.name)}`,d:`${esc(a.name)} chiếm toàn bộ tầng T3 và ${pct(a.value/C.nw,0)} tài sản ròng, đang ${pcts(p)} so với vốn.`,a:'Đa dạng hóa: thêm chứng chỉ quỹ chỉ số (ETF) hoặc vài mã ở ngành khác, để kết quả của tầng không phụ thuộc một doanh nghiệp.'});}
-  else if(t3&&C.h.hhi>0.5) L.push({sev:'warn',prio:4,icon:'pie',t:'Tầng Tăng trưởng còn tập trung',d:`Chỉ số tập trung ${nf(C.h.hhi,2)}. Một mã đang chiếm phần lớn tầng.`,a:'Phân bổ đều hơn giữa các mã hoặc thêm quỹ chỉ số.'});
+    // Kai chọn giữ MSN, không mua thêm cổ phiếu (28/10/2026): chỉ ghi để biết rủi ro tập trung, không đưa vào Việc cần làm
+    const sp=(DATA.prices||{})[String(a.sym||'').toUpperCase()];
+    L.push({sev:'info',prio:8,icon:'pie',t:`Tầng Tăng trưởng chỉ có ${esc(a.name)}`,d:`${esc(a.name)} chiếm ${pct(a.value/C.nw,0)} tài sản ròng, đang ${pcts(p)} so với vốn. Bạn đã chọn giữ, không mua thêm cổ phiếu, nên kết quả tầng này phụ thuộc một doanh nghiệp${sp&&sp.sell?`; giá cân nhắc bán bạn đặt là ${nf(sp.sell,0)}đ`:''}.`});}
+  else if(t3&&C.h.hhi>0.5) L.push({sev:'info',prio:8,icon:'pie',t:'Tầng Tăng trưởng còn tập trung',d:`Chỉ số tập trung ${nf(C.h.hhi,2)}. Một mã đang chiếm phần lớn tầng.`});
 
   const tw=C.tw||1, def=[...C.rows].filter(r=>r.gap<-0.02*tw).sort((a,b)=>a.gap-b.gap), sur=[...C.rows].filter(r=>r.gap>0.02*tw).sort((a,b)=>b.gap-a.gap);
   if(def.length){const d=def[0];
@@ -1563,7 +1589,8 @@ function insights(C){
   if(C.recV>0.1*Math.max(C.nwAvail+C.recV,1)) L.push({sev:'info',prio:7,icon:'handshake',t:`Cho vay ${tr(C.recV)}, bằng ${pct(C.recV/Math.max(C.nwAvail+C.recV,1),0)} tài sản khả dụng`,d:'Khoản cho vay cá nhân không có tài sản đảm bảo và khó đòi sớm khi cần.',a:'Nên đặt hạn trả cho từng khoản để app nhắc qua email.'});
   for(const l of openL.filter(l=>l.dir==='borrow')) L.push({sev:l.due&&l.due-today<=30?'warn':'info',prio:3,icon:'coins',t:`Đang nợ ${esc(l.who)} ${tr(l.left)}`,d:(l.due?'Hạn trả '+sdate(l.due)+'. ':'')+(l.rate?'Lãi '+nf(l.rate*100,1)+'%/năm.':'Không ghi lãi.'),a:l.rate*100>REF_RATE?'Lãi vay cao hơn lãi tiết kiệm: ưu tiên trả sớm khoản này.':''});
   const G=C.goals;
-  if(G.monthly>Math.max(0,C.net)+0.5) L.push({sev:'warn',prio:4,icon:'flag',t:`Mục tiêu cần ${tr2(G.monthly)}/tháng, vượt mức dư ${trs(C.net)}`,d:'Theo thứ tự ưu tiên, các mục tiêu đánh dấu "Vượt mức dư" sẽ không kịp hạn nếu giữ mức để dành hiện tại.',a:'Lùi hạn hoặc giảm số tiền của mục tiêu ưu tiên thấp, hoặc tăng phần để dành.'});
+  // nói thẳng một lần ở tab Phân tích; không đưa vào Việc cần làm để khỏi nhắc mãi (Kai 12/11/2026)
+  if(G.monthly>Math.max(0,C.net)+0.5) L.push({sev:'warn',prio:4,icon:'flag',t:`Mục tiêu cần ${tr2(G.monthly)}/tháng, vượt mức dư ${trs(C.net)}`,d:'Theo thứ tự ưu tiên, các mục tiêu đánh dấu "Vượt mức dư" sẽ không kịp hạn nếu giữ mức để dành hiện tại. Muốn kịp: lùi hạn, giảm số tiền mục tiêu ưu tiên thấp, hoặc tăng phần để dành.'});
   const lateG=G.list.filter(g=>g.st==='late');
   if(lateG.length) L.push({sev:'warn',prio:4,icon:'flag',t:`${lateG.length} mục tiêu đã quá hạn`,d:lateG.map(g=>esc(g.name)+' còn thiếu '+tr(g.left)).join('; ')+'.',a:'Đặt hạn mới ở sheet Mục tiêu.'});
   if(DATA.cfg.insured!=='Có') L.push({sev:'info',prio:7,icon:'shield',t:DATA.cfg.insured==='Không'?'Chưa có bảo hiểm sức khỏe/tai nạn riêng':'Chưa ghi thông tin bảo hiểm',d:'Bạn từng có nhiều khoảng nghỉ việc; khi nghỉ, bảo hiểm y tế qua công ty cũng dừng. Một khoản viện phí lớn có thể lấy mất quỹ khẩn cấp.',a:DATA.cfg.insured==='Không'?'Cân nhắc một gói bảo hiểm sức khỏe/tai nạn cơ bản, rồi đổi Cấu hình B15 thành Có.':'Chọn Có hoặc Không ở Cấu hình B15.'});
@@ -2441,8 +2468,9 @@ function rulesCheck(C){
 }
 function vRules(C){
   const rs=rulesCheck(C), ok=rs.filter(r=>r[2][0]==='good').length;
-  return card('Nguyên tắc vàng','shield',`<div class="alist">${rs.map(r=>`<div class="arow" style="grid-template-columns:auto minmax(0,1fr) auto"><span class="logo sm" style="--lc:var(--accent)">${r[0]}</span><div style="min-width:0"><div class="nm">${r[1]}</div><div class="sb">${r[3]}</div></div><span class="chip ${r[2][0]}">${r[2][1]}</span></div>`).join('')}</div>
-    <p class="note">Theo plan tài chính 16/06/2026. Nguyên tắc 02 (chia lương 15/35) không theo dõi vì bạn tự quy tài sản. Nguyên tắc 07–09 bạn thêm ngày 28/10/2026.</p>`,ok+'/'+rs.length+' đạt');
+  const bad=rs.filter(r=>r[2][0]!=='good');
+  return foldCard('Nguyên tắc vàng','shield',`<div class="alist">${rs.map(r=>`<div class="arow" style="grid-template-columns:auto minmax(0,1fr) auto"><span class="logo sm" style="--lc:var(--accent)">${r[0]}</span><div style="min-width:0"><div class="nm">${r[1]}</div><div class="sb">${r[3]}</div></div><span class="chip ${r[2][0]}">${r[2][1]}</span></div>`).join('')}</div>
+    <p class="note">Theo plan tài chính 16/06/2026. Nguyên tắc 02 (chia lương 15/35) không theo dõi vì bạn tự quy tài sản. Nguyên tắc 07–09 bạn thêm ngày 28/10/2026.</p>`,ok+'/'+rs.length+' đạt',(bad.length?'Chưa đạt: '+bad.map(r=>r[0]+' '+String(r[1]).replace(/<[^>]+>/g,'')).join(' · ')+'. ':'Tất cả đều đạt. ')+'Bấm để xem.');
 }
 function vAnalysis(C){
   const ins=insights(C), plan=ins.filter(i=>i.a&&i.sev!=='good').slice(0,3), net=INCOME-S.expense;
@@ -2468,7 +2496,7 @@ function vAnalysis(C){
   ${vGoals(C)}
   ${vRules(C)}
   ${card('Kế hoạch 3 bước','target',plan.length?`<ol class="plan">${plan.map(i=>`<li><div><b>${i.t}</b><span>${i.a}</span></div></li>`).join('')}</ol>`:'<p class="muted">Không có việc cần làm ngay.</p>')}
-  ${card('Đánh giá chi tiết','bulb',`<div class="insights">${ins.map(insCard).join('')}</div>`,ins.length+' mục')}
+  ${foldCard('Đánh giá chi tiết','bulb',`<div class="insights">${ins.map(insCard).join('')}</div>`,ins.length+' mục',(()=>{const n={bad:0,warn:0,good:0,info:0};ins.forEach(i=>n[i.sev]=(n[i.sev]||0)+1);return [n.bad?n.bad+' cần xử lý':'',n.warn?n.warn+' nên chú ý':'',n.good?n.good+' tốt':'',n.info?n.info+' thông tin':''].filter(Boolean).join(' · ')+'. Bấm để xem.';})())}
   <div class="disclaimer">${ic('info','sm')}<span>Phân tích tạo tự động từ số liệu trong Google Sheet và mục tiêu bạn tự đặt, theo các nguyên tắc tài chính cá nhân phổ biến (quỹ khẩn cấp, tỷ lệ để dành, đa dạng hóa). Đây không phải tư vấn đầu tư.</span></div>`;
 }
 function vPerf(C){
@@ -2723,7 +2751,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=39, SEEN_KEY='thaptaisan.seen';
+const APP_VER=40, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -2740,6 +2768,7 @@ async function checkUpdate(){
 }
 if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
 const CHANGES=[
+  [40,'12/11/2026',['<b>Điểm đa dạng hóa</b> tính trên toàn bộ tài sản, không còn trừ điểm vì bạn chọn chỉ giữ MSN','"Tầng Tăng trưởng chỉ có MSN" chỉ còn là thông tin, không còn nằm ở Việc cần làm và không gợi ý mua thêm cổ phiếu','Mục tiêu vượt mức dư chỉ nhắc ở tab Phân tích; quỹ khẩn cấp dư ghi rõ gồm tiền rút sớm sổ','Trên điện thoại: nút bấm to hơn, chữ biểu đồ to hơn; <b>Nguyên tắc vàng</b> và <b>Đánh giá chi tiết</b> thu gọn, bấm để mở']],
   [39,'12/11/2026',['Giao diện <b>sáng hơn</b>: nền và thẻ sáng lên một bậc, chữ phụ rõ hơn, vẫn giữ tông xanh bảng mạch']],
   [38,'12/11/2026',['Tab Tự do có thêm mục <b>Thị trường</b>: giá vàng Bảo Tín Mạnh Hải, Huy Thanh, vàng thế giới, đô la Vietcombank, xăng dầu, dầu Brent, VN-Index, Bitcoin (tự cập nhật mỗi giờ)','<b>Mua vàng ở đâu lợi nhất</b>: so giá mua, giá bán lại, chênh lệch và giá thế giới; thử với số tiền của bạn','<b>Các kênh 1 năm qua</b> (tiết kiệm, vàng, VN-Index, đô, Bitcoin) kèm mức sụt sâu nhất; <b>gợi ý</b> theo ưu tiên an toàn']],
   [37,'09/11/2026',['Trên máy tính: <b>thanh trên và thanh tab luôn ghim ở đầu trang</b> khi kéo xuống, chuyển tab không cần cuộn lên']],
