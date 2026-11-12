@@ -909,6 +909,10 @@ body{background-color:#0F1728;background-image:radial-gradient(90% 60% at 15% 0%
 body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.4;
   background:linear-gradient(140deg,#4E9BFF 0%,#7C7CFF 35%,#B08CFF 55%,#E0A960 100%);
   -webkit-mask-image:var(--doodle);mask-image:var(--doodle);-webkit-mask-size:420px 420px;mask-size:420px 420px;-webkit-mask-repeat:repeat;mask-repeat:repeat}
+/* Thẻ hơi trong suốt (Kai 12/11/2026): thấy hoạ tiết nền mờ xuyên qua; thẻ đầu và biểu đồ lớn trong suốt ít hơn để chữ, số vẫn rõ */
+.card{background:linear-gradient(160deg,rgba(29,40,62,.74),rgba(23,32,51,.80))}
+.hero,.card.sky{background:radial-gradient(120% 90% at 85% -10%,rgba(56,96,160,.45) 0%,rgba(56,96,160,0) 58%),linear-gradient(160deg,rgba(26,39,64,.86) 0%,rgba(17,26,44,.90) 100%)}
+.sh,.zm{background:#1A2438}
 </style>
 
 <div id="splash" aria-hidden="true"><div class="sp-in"><svg viewBox="0 0 120 124" class="sp-logo" aria-hidden="true">
@@ -3064,7 +3068,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=45, SEEN_KEY='thaptaisan.seen';
+const APP_VER=46, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3081,6 +3085,7 @@ async function checkUpdate(){
 }
 if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
 const CHANGES=[
+  [46,'12/11/2026',['Thẻ <b>hơi trong suốt</b>, thấy hoạ tiết nền mờ xuyên qua; thẻ đầu và biểu đồ lớn vẫn đậm để số rõ']],
   [45,'12/11/2026',['Nền mới kiểu <b>hoạ tiết</b>: nhiều biểu tượng tài chính nét mảnh (đồng xu, tháp, heo đất, ví, ngân hàng, vàng, ly cà phê…) phủ màu chuyển xanh dương → tím → vàng']],
   [44,'12/11/2026',['<b>Lịch tăng giảm từng ngày</b> và <b>Sụt so với đỉnh</b> (drawdown) ở tab Hiệu suất','<b>Nếu mất thu nhập từ hôm nay</b> (Phân tích): thanh khoản 3 lớp cạn dần theo tháng','Thu chi theo tháng dạng đối xứng kèm <b>tỷ lệ để dành</b>; Phân bổ dạng <b>bullet</b> có vùng ổn ±5 điểm','Kai Café: <b>doanh thu theo thứ trong tuần</b>']],
   [43,'12/11/2026',['<b>Tiền đi đâu mỗi tháng</b> (Tổng quan): sơ đồ dòng chảy từ thu nhập sang các khoản chi và để dành, chọn từng tháng','<b>Các tầng theo thời gian</b> (Tháp): vùng xếp chồng T1–T4, xem giá trị hoặc tỷ trọng % so với mục tiêu','Dự phóng mục tiêu dạng <b>quạt</b> với dải 68% và 95% (chuyển sang tab Tự do)','<b>Lịch đáo hạn</b> dạng Gantt: mỗi sổ một thanh, vạch hôm nay, sổ kế tiếp dự kiến']],
