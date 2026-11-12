@@ -1196,11 +1196,17 @@ const MARKS={
     disc=(r,cr,f)=>P.map(p=>'<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+r+'" fill="'+f+'"/>').join('')+'<circle cx="50" cy="47" r="'+cr+'" fill="'+f+'"/>';
     return disc(16,21,'#fff')+disc(11,16,'#00A6E6');})()+
     '<path d="M33 31 50 53 67 31M50 53v34" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="51" cy="37.5" r="6" fill="#fff"/></g>'],
+  // BHTN: hai bàn tay (cổ tay áo đỏ) đỡ đồng xu vàng ký hiệu $, theo ảnh Kai gửi 12/11/2026
+  bhtn:['#FFFFFF','<g stroke="#111" stroke-width=".8" stroke-linejoin="round" stroke-linecap="round">'+
+    '<rect x="1.6" y="2.6" width="3.2" height="6" rx=".5" fill="#C8423A"/><path d="M4.8 3.4h5.6c1 0 1.3.6 1.9 1.1l1 .9h6.4c.9 0 .9 1.2 0 1.3l-6.3.6-1.8.1c-1 0-1.2-.6-1.3-1M8.4 7.7h-3.6" fill="#F8B88B"/>'+
+    '<rect x="19.2" y="15.4" width="3.2" height="6" rx=".5" fill="#C8423A"/><path d="M19.2 20.6h-5.6c-1 0-1.3-.6-1.9-1.1l-1-.9H4.3c-.9 0-.9-1.2 0-1.3l6.3-.6 1.8-.1c1 0 1.2.6 1.3 1M15.6 16.3h3.6" fill="#F8B88B"/>'+
+    '<circle cx="12" cy="12" r="4.1" fill="#F6C21C" stroke-width=".9"/></g>'+
+    '<text x="12" y="14.4" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="6.4" fill="#111">$</text>'],
   bhyt:['#FFFFFF','<rect x="3.5" y="2.8" width="17" height="12.4" rx="1.8" fill="#D7261E" stroke="#222" stroke-width=".9"/>'+
     '<path d="M10.6 4.9h2.8v2.2h2.2v2.8h-2.2v2.2h-2.8v-2.2H8.4V7.1h2.2z" fill="#fff" stroke="#222" stroke-width=".6"/>'+
     '<path d="M5.3 6h2.4M5.3 8.2h2.4M5.3 10.4h2.4M16.3 6h2.4M16.3 8.2h2.4M16.3 10.4h2.4" stroke="#fff" stroke-width="1" stroke-linecap="round"/>'+
     '<path d="M2.4 17.6 5.5 15c1.2-1 2.5-1.3 4-1.1h5.4c1 0 1.5.9 1.1 1.7-.3.6-.9.9-1.6.9h-3.2l4.7.1 4.3-2.4c.9-.5 1.9.6 1.2 1.4l-4.4 4.4c-.7.7-1.6 1-2.6 1H7.6L5 21.8z" fill="#fff" stroke="#222" stroke-width=".9" stroke-linejoin="round"/>']};
-const DEV_BRANDS=[[/bhxh|bảo hiểm xã hội/,'bhxh'],[/bhyt|y tế|bhtn|thất nghiệp/,'bhyt'],[/zalo/,'zalopay'],[/honda|airblade|vision|\bwave\b|\bsh\b|\blead\b|winner/,'honda'],[/acer|nitro|predator|aspire/,'acer'],[/huawei|matepad/,'huawei'],[/poco/,'poco'],[/xiaomi|redmi|\bmi\b/,'xiaomi']];
+const DEV_BRANDS=[[/bhxh|bảo hiểm xã hội/,'bhxh'],[/bhtn|thất nghiệp/,'bhtn'],[/bhyt|y tế/,'bhyt'],[/zalo/,'zalopay'],[/honda|airblade|vision|\bwave\b|\bsh\b|\blead\b|winner/,'honda'],[/acer|nitro|predator|aspire/,'acer'],[/huawei|matepad/,'huawei'],[/poco/,'poco'],[/xiaomi|redmi|\bmi\b/,'xiaomi']];
 function brandOf(a){
   const n=a.name.toLowerCase();
   for(const [re,k] of DEV_BRANDS) if(re.test(n)) return {color:MARKS[k][0],mark:k};
@@ -2330,7 +2336,7 @@ function vSavingsPlan(C){
   const so=C.inNW.filter(a=>a.kind==='savings'&&!a.sv.done).sort((a,b)=>a.sv.mat-b.sv.mat), n=so.length, a=C.acc;
   // bậc thang: mỗi bậc một sổ, cao dần; sổ đã có tô đầy, bậc kế tiếp lấp theo ví tích lũy
   const steps=[...so.map(s=>({f:Math.min(1,s.principal/size),col:'var(--c2)',top:logo(s),t:esc(s.name),s:tr(s.principal)+' · '+nf(s.rate,2)+'%',d:'đáo hạn '+fmtD(s.sv.mat)})),
-    ...Array.from({length:Math.max(0,want-n)},(_,i)=>i===0&&a?{f:Math.min(1,a.have/size),col:'var(--c1)',top:'',t:a.ready?'Mở ngay':esc(a.w.name),s:tr(a.have)+' / '+tr(size),d:a.ready?'đủ tiền':a.eta?'~'+a.eta:'',next:1}:{f:0,t:'Kế hoạch',s:'',d:''})].slice(0,Math.max(want,n));
+    ...Array.from({length:Math.max(0,want-n)},(_,i)=>i===0&&a?{f:Math.min(1,a.have/size),col:'var(--c1)',top:logo(a.w),t:a.ready?'Mở ngay':esc(a.w.name),s:tr(a.have)+' / '+tr(size),d:a.ready?'đủ tiền':a.eta?'~'+a.eta:'',next:1}:{f:0,t:'Kế hoạch',s:'',d:''})].slice(0,Math.max(want,n));
   const hs=i=>40+i*(60/Math.max(1,steps.length-1));
   const slots=steps.map((st,i)=>`<div class="lad-c${st.next?' next':''}" data-tip="Sổ #${i+1}: ${st.t}${st.s?' · '+st.s:''}${st.d?' · '+st.d:''}"><div class="lad-b${st.f>=1?' full':''}" style="height:${hs(i)}%"><i style="height:${st.f*100}%;background:${st.col||'transparent'}"></i>${st.top?'<span class="lad-lg">'+st.top+'</span>':''}<b>#${i+1}</b></div>
     <div class="lad-t">${st.t}</div><div class="lad-s num">${st.s}</div><div class="lad-s">${st.d}</div></div>`);
@@ -2751,7 +2757,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=40, SEEN_KEY='thaptaisan.seen';
+const APP_VER=41, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -2768,6 +2774,7 @@ async function checkUpdate(){
 }
 if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
 const CHANGES=[
+  [41,'12/11/2026',['Biểu tượng <b>BHTN</b> mới: hai bàn tay đỡ đồng xu','Bậc sổ kế tiếp trong Kế hoạch sổ tiết kiệm hiện lại <b>logo Zalopay</b>']],
   [40,'12/11/2026',['<b>Điểm đa dạng hóa</b> tính trên toàn bộ tài sản, không còn trừ điểm vì bạn chọn chỉ giữ MSN','"Tầng Tăng trưởng chỉ có MSN" chỉ còn là thông tin, không còn nằm ở Việc cần làm và không gợi ý mua thêm cổ phiếu','Mục tiêu vượt mức dư chỉ nhắc ở tab Phân tích; quỹ khẩn cấp dư ghi rõ gồm tiền rút sớm sổ','Trên điện thoại: nút bấm to hơn, chữ biểu đồ to hơn; <b>Nguyên tắc vàng</b> và <b>Đánh giá chi tiết</b> thu gọn, bấm để mở']],
   [39,'12/11/2026',['Giao diện <b>sáng hơn</b>: nền và thẻ sáng lên một bậc, chữ phụ rõ hơn, vẫn giữ tông xanh bảng mạch']],
   [38,'12/11/2026',['Tab Tự do có thêm mục <b>Thị trường</b>: giá vàng Bảo Tín Mạnh Hải, Huy Thanh, vàng thế giới, đô la Vietcombank, xăng dầu, dầu Brent, VN-Index, Bitcoin (tự cập nhật mỗi giờ)','<b>Mua vàng ở đâu lợi nhất</b>: so giá mua, giá bán lại, chênh lệch và giá thế giới; thử với số tiền của bạn','<b>Các kênh 1 năm qua</b> (tiết kiệm, vàng, VN-Index, đô, Bitcoin) kèm mức sụt sâu nhất; <b>gợi ý</b> theo ưu tiên an toàn']],
