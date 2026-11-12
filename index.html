@@ -921,6 +921,14 @@ table.gm td.gm-best{background:rgba(79,216,138,.08)!important;box-shadow:inset 0
 .gh-r{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(170,190,225,.13)}
 .gh-b{display:grid;gap:4px;font-size:13px}
 .gh-k{display:flex;flex-wrap:wrap;gap:4px 14px}
+/* ==== Chip số nổi bật (Kai 12/11/2026): xanh lá tốt → cam → đỏ → đỏ đậm tệ nhất; xanh dương, vàng, tím trung tính ==== */
+b.amt.o{color:var(--warn);background:var(--warn-soft);box-shadow:none}
+b.amt.rr{color:#fff;background:#C62B31;box-shadow:none}
+b.amt.y{color:#FFD166;background:rgba(255,209,102,.15);box-shadow:none}
+b.amt.b{color:#7FB8FF;background:rgba(78,155,255,.17);box-shadow:none}
+b.amt.v{color:#C9AEFF;background:rgba(176,140,255,.17);box-shadow:none}
+.hero b.amt,.hgoal b.amt{font-size:inherit}
+.hg-h b.amt{font:700 15px var(--f-disp);padding:1px 8px}
 </style>
 
 <div id="splash" aria-hidden="true"><div class="sp-in"><svg viewBox="0 0 120 124" class="sp-logo" aria-hidden="true">
@@ -1697,7 +1705,11 @@ function insights(C){
 }
 const SEV={bad:['Ưu tiên','alert'],warn:['Cần chú ý','alert'],info:['Gợi ý','bulb'],good:['Tốt','check']};
 // Làm bật số tiền trong câu chữ (Việc cần làm, nhận xét): bọc "12,5 Tr", "2.000 tỷ", "74.100đ" bằng <b class="amt">, bỏ qua thẻ HTML
-const AMT_TONE={bad:'r',warn:'y',info:'b',good:'g'};
+const AMT_TONE={worst:'rr',bad:'r',warn:'o',info:'b',good:'g'};
+// chip số nổi bật: g xanh lá (tốt) · o cam · r đỏ · rr đỏ đậm (tệ nhất) · b xanh dương · y vàng · v tím (trung tính) · n xám
+const chip=(t,c)=>`<b class="amt ${c||'n'}">${t}</b>`;
+// thang 4 mức, số càng lớn càng tốt: ≥ g xanh lá, ≥ o cam, ≥ r đỏ, còn lại đỏ đậm
+const tone4=(v,g,o,r)=>v>=g?'g':v>=o?'o':v>=r?'r':'rr';
 const hiAmt=(s,sev)=>{const t=AMT_TONE[sev]||sev||'n';return String(s==null?'':s).split(/(<[^>]+>)/).map(p=>p.charAt(0)==='<'?p:p.replace(/(\d[\d.,]*\s?(?:Tr|tỷ|triệu|đ))(?![\p{L}])/gu,'<b class="amt '+t+'">$1</b>')).join('');};
 const insCard=i=>`<div class="ins ${i.sev}"><span class="ii">${ic(i.icon||SEV[i.sev][1])}</span><div><div class="chips" style="margin:0 0 4px"><span class="chip ${i.sev}">${SEV[i.sev][0]}</span></div><b>${hiAmt(i.t,i.sev)}</b><p>${hiAmt(i.d,i.sev)}</p>${i.a?`<div class="act">${ic('bulb','sm')}<span>${hiAmt(i.a,i.sev)}</span></div>`:''}</div></div>`;
 
@@ -1771,9 +1783,10 @@ const mLab=(C,m)=>{const t=new Date(C.now+7*36e5);t.setUTCMonth(t.getUTCMonth()+
 // Câu nói thẳng: theo mức dư hiện tại có kịp mục tiêu không, nếu không thì tới hạn đạt bao nhiêu, bao giờ đủ
 function goalVerdict(R){
   if(!R)return '';
-  if(!R.late)return R.base.eta?`Theo mức dư hiện tại: <b>kịp hạn</b>, sau khoảng ${R.base.eta} tháng.`:'Đã đạt mục tiêu.';
+  if(!R.late)return R.base.eta?`Theo mức dư hiện tại: ${chip('kịp hạn','g')}, sau khoảng ${chip(R.base.eta+' tháng','b')}.`:'Đã đạt mục tiêu.';
   const x=R.base.save>0?R.needMonthly/R.base.save:null;
-  return `Theo mức dư hiện tại: <b>không kịp</b>. Tới hạn đạt khoảng ${tr(R.base.end)} (${pct(R.base.end/R.need,0)} mục tiêu)${R.eta?', đủ '+tr(R.need)+' vào khoảng '+R.eta:''}.${x&&x>=1.5?' Số cần để dành gấp khoảng '+nf(x,0)+' lần mức dư hiện tại.':''}`;
+  const vt=tone4(R.base.end/R.need,1,.85,.6), et=R.base.eta!=null&&R.base.eta-R.months<=6?'o':R.base.eta!=null&&R.base.eta-R.months<=18?'r':'rr';
+  return `Theo mức dư hiện tại: <b>không kịp</b>. Tới hạn đạt khoảng ${chip(tr(R.base.end),vt)} (${chip(pct(R.base.end/R.need,0),vt)} mục tiêu)${R.eta?', đủ '+tr(R.need)+' vào khoảng '+chip(R.eta,et):''}.${x&&x>=1.5?' Số cần để dành gấp khoảng '+nf(x,0)+' lần mức dư hiện tại.':''}`;
 }
 function vScenarios(C){
   const R=goalScenarios(C);
@@ -2030,11 +2043,13 @@ function heroGoal(C){
   if(pts.length>=3){const W=120,H=34,vs=pts.map(q=>q.v),lo=Math.min(...vs),hi=Math.max(...vs),d0=pts[0].d;
     const x=d=>(d-d0)/((today-d0)||1)*(W-4)+2, y=v=>H-4-(v-lo)/((hi-lo)||1)*(H-8);
     spark=`<svg class="spark" viewBox="0 0 ${W} ${H}" aria-label="Tài sản ròng ${pts.length} ngày gần nhất"><path d="${pts.map((q,i)=>(i?'L':'M')+x(q.d).toFixed(1)+','+y(q.v).toFixed(1)).join('')}" fill="none" stroke="var(--hero-ink)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${x(today)}" cy="${y(C.nw)}" r="2.8" fill="var(--hero-ink)"/></svg>`;}
-  return `<div class="hgoal" data-goto="analysis" role="button" tabindex="0" title="Xem 3 kịch bản ở tab Phân tích">
-    <div class="hg-h"><span>${esc(g.name)} · hạn ${sdate(g.due)}</span><b class="num">${pct(p,0)}</b></div>
+  const R=goalScenarios(C), net=INCOME-S.expense, pt=R?(R.late?tone4(R.base.end/R.need,1,.85,.6):'g'):'v', pc=per<=0?'g':net<=0?'rr':tone4(net/per,1,.6,.35);
+  const lt=R&&R.base.eta!=null?(R.base.eta-R.months<=6?'o':R.base.eta-R.months<=18?'r':'rr'):'rr';
+  return `<div class="hgoal" data-goto="freedom" role="button" tabindex="0" title="Xem dự phóng dạng quạt ở tab Tự do">
+    <div class="hg-h"><span>${esc(g.name)} · hạn ${sdate(g.due)}</span>${chip(pct(p,0),pt)}</div>
     <div class="hg-t" role="progressbar" aria-valuenow="${Math.round(p*100)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${p*100}%"></i></div>
-    <div class="hg-s"><span>Còn ${tr(left)} · ${nf(months,0)} tháng · cần để dành ~${tr(per)}/tháng</span>${spark}</div>
-    ${(()=>{const R=goalScenarios(C);return R&&R.late?`<div class="hg-v">Không kịp với mức dư hiện tại: tới hạn đạt ~${tr(R.base.end)}${R.eta?', đủ vào khoảng '+R.eta:''}.</div>`:'';})()}</div>`;
+    <div class="hg-s"><span>Còn ${chip(tr(left),'y')} · ${chip(nf(months,0)+' tháng','b')} · cần để dành ~${chip(tr(per)+'/tháng',pc)}</span>${spark}</div>
+    ${R&&R.late?`<div class="hg-v">Không kịp với mức dư hiện tại: tới hạn đạt ~${chip(tr(R.base.end),pt)}${R.eta?', đủ vào khoảng '+chip(R.eta,lt):''}.</div>`:''}</div>`;
 }
 // Thác nước: tài sản ròng 30 ngày trước → từng khoản tăng/giảm → hôm nay (trục phóng to quanh tài sản ròng)
 const WHY={savings:'lãi sổ',flex:'lãi ví',durable:'khấu hao',stock:'giá cổ phiếu',biz:'kinh doanh',gold:'giá vàng',crypto:'giá crypto'};
@@ -2564,8 +2579,8 @@ function briefCard(C){
   const next=msList(C).find(x=>C.nw<x.v), todo=todoList(C).filter(i=>!(SNZ[todoKey(i)]>Date.now()))[0];
   const strip=s=>String(s).replace(/<[^>]+>/g,'');
   const lines=[
-    `30 ngày qua tài sản ròng <b class="${cls(C.chg30)}">${trs(C.chg30)}</b>${mv?`, kéo nhiều nhất bởi ${esc(mv.name)} (<b class="${cls(mv.chg30)}">${trs(mv.chg30)}</b>)`:''}.`,
-    next?`Còn <b class="amt y">${tr(next.v-C.nw)}</b> nữa tới mốc ${esc(next.name)} ${msVal(next.v)} (${pct(C.nw/next.v,0)}).`:'Bạn đã đi hết lộ trình tự do.',
+    `30 ngày qua tài sản ròng ${chip(trs(C.chg30),tone4(C.chg30/(C.nw||1),0,-.01,-.05))}${mv?`, kéo nhiều nhất bởi ${esc(mv.name)} (${chip(trs(mv.chg30),tone4(mv.chg30/(C.nw||1),0,-.01,-.05))})`:''}.`,
+    next?`Còn ${chip(tr(next.v-C.nw),'y')} nữa tới mốc ${esc(next.name)} ${chip(msVal(next.v),'v')} (${chip(pct(C.nw/next.v,0),'b')}).`:'Bạn đã đi hết lộ trình tự do.',
     todo?`Việc nên làm trước: <b>${strip(todo.t)}</b>.`:'Không có việc gấp.'];
   return `<section class="card brief"><span class="brief-i">${ic('spark')}</span><div class="brief-t">${lines.map((l,i)=>`<p style="--i:${i}">${l}</p>`).join('')}</div></section>`;
 }
@@ -2623,8 +2638,8 @@ function vOverview(C){
       <span class="chip-chg ${C.chg30>=0?'up':'dn'}">${ic(C.chg30>=0?'up':'down','sm')} ${trs(C.chg30)} · ${pcts(C.chgPct,2)} trong 30 ngày</span>
       ${heroGoal(C)}
       <div class="stats">
-        <div class="stat"><div class="label">Thanh khoản</div><div class="v">${tr(C.liquid)}</div><div class="s">Đủ ${nf(C.runway,1)} tháng chi thiết yếu</div></div>
-        <div class="stat"><div class="label">Dư mỗi tháng</div><div class="v ${net>=0?'up':'dn'}">${trs(net)}</div><div class="s">Để dành ${INCOME>0?pct(net/INCOME,0):'–'} thu nhập</div></div>
+        <div class="stat"><div class="label">Thanh khoản</div><div class="v">${tr(C.liquid)}</div><div class="s">Đủ ${chip(nf(C.runway,1)+' tháng',tone4(C.runway/(C.targetM||12),1,.5,.25))} chi thiết yếu</div></div>
+        <div class="stat"><div class="label">Dư mỗi tháng</div><div class="v ${net>=0?'up':'dn'}">${trs(net)}</div><div class="s">Để dành ${INCOME>0?chip(pct(net/INCOME,0),tone4(net/INCOME,.2,.1,0)):'–'} thu nhập</div></div>
       </div>
     </div>
     <div>${heroPyramid(C.rows)}</div>
@@ -3180,7 +3195,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=49, SEEN_KEY='thaptaisan.seen';
+const APP_VER=50, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3197,6 +3212,7 @@ async function checkUpdate(){
 }
 if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
 const CHANGES=[
+  [50,'12/11/2026',['Số nổi bật thành <b>chip màu</b>: xanh lá tốt, cam, đỏ, đỏ đậm là tệ nhất; xanh dương, vàng, tím cho số trung tính','Thẻ mục tiêu ở đầu trang: % đạt, số tiền cần để dành mỗi tháng, ngày dự kiến đủ đều tô theo mức kịp hay trễ']],
   [49,'12/11/2026',['Thẻ trong suốt hơn nữa (đục khoảng 65%), hoạ tiết nền rõ hơn']],
   [48,'12/11/2026',['Tab mới <b>Vàng 24K</b> (Tự do): giá Kim Gia Bảo và Huy Thanh theo ngày, dải chênh mua – bán, % cao hơn thế giới','<b>Mua ở đâu, bán ở đâu</b>: bảng 2×2 mất bao nhiêu, giá phải tăng bao nhiêu mới hoà vốn','<b>Vàng bạn đang có</b>: ghi số chỉ ở sheet Tài sản, app tự định giá theo giá mua vào của đúng nhà','Thị trường thêm <b>Ethereum</b>, <b>bạc thế giới</b> và <b>bạc Phú Quý</b>']],
   [47,'12/11/2026',['Thẻ trong suốt hơn (đục khoảng 69%), hoạ tiết nền hiện rõ hơn']],
@@ -3344,7 +3360,7 @@ document.addEventListener('click',e=>{
   const hb=e.target.closest('[data-hr]');if(hb){S.hr=hb.dataset.hr;const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const tb=e.target.closest('[data-tab]');if(tb){go(tb.dataset.tab);return;}
   if(e.target.closest('#privacy')){PRIV=!PRIV;try{localStorage.setItem(PRIV_KEY,PRIV?'1':'0');}catch(_){}render();return;}
-  const gt=e.target.closest('[data-goto]');if(gt){go(gt.dataset.goto);return;}
+  const gt=e.target.closest('[data-goto]');if(gt){if(gt.classList.contains('hgoal')){FM.sub='road';saveFM();}go(gt.dataset.goto);return;}
   const sz=e.target.closest('[data-snooze]');if(sz){snooze(decodeURIComponent(sz.dataset.snooze),+sz.dataset.days||30);const y=window.scrollY, it=sz.closest('.todo-i'), done=()=>{render();window.scrollTo(0,y);};
     if(it&&MOTION()){it.classList.add('out');setTimeout(done,180);}else done();return;}
   const fb=e.target.closest('[data-filter]');if(fb){S.filter=fb.dataset.filter;render();return;}
