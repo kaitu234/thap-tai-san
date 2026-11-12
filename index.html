@@ -781,6 +781,26 @@ nav.tabs button[aria-selected="true"]{color:#5ED0FF}
 .mk-yr-b>i.neg{background:linear-gradient(90deg,var(--bad),#B8475A);box-shadow:0 0 8px rgba(255,122,144,.45)}
 .mk-yr-b>u{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--warn);border-radius:2px;text-decoration:none}
 .mk-yr-s{font-size:11.5px;color:var(--muted)} .mk-yr-s b.neg{color:var(--bad);display:inline;font-weight:600}
+/* ==== Sáng hơn (Kai 12/11/2026: "hơi tối khó nhìn"): giữ tông xanh bảng mạch, nền + thẻ sáng lên một bậc, chữ phụ rõ hơn ==== */
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"],:root[data-theme="light"]{
+  --bg:#0C1E48; --surface:#16306A; --surface2:#1C3B80; --ink:#F3F8FF; --muted:#B6C6E8; --line:rgba(120,215,255,.28);
+  --hero-mute:#C2D0EE}
+html{background:#0A1A40}
+body{background-color:#0C1E48}
+.appbar{background:color-mix(in srgb,#0C1E48 82%,transparent)}
+@media (max-width:760px){nav.tabs{background:color-mix(in srgb,#12295E 88%,transparent)}}
+.card{background:linear-gradient(160deg,rgba(36,74,150,.82),rgba(16,36,84,.9));border-color:rgba(110,215,255,.3)}
+.hero,.card.sky{--hero-mute:#C2D0EE; --muted:#B6C6E8; --ink:#F3F8FF;
+  background:radial-gradient(120% 90% at 85% -10%,#1E64C0 0%,rgba(30,100,192,0) 58%),radial-gradient(90% 80% at 0% 110%,#17508F 0%,rgba(23,80,143,0) 60%),linear-gradient(160deg,#123266 0%,#0A1A40 100%)}
+.hero .stat,.card.sky .kpi,.mk-t{background:linear-gradient(160deg,rgba(26,62,128,.88),rgba(13,32,74,.9))}
+.hero .chip-chg{background:rgba(16,40,90,.85)}
+.kpi{background:linear-gradient(160deg,rgba(94,208,255,.12),rgba(47,123,255,.08))}
+.ins,.todo-i{background:rgba(255,255,255,.05)}
+tbody tr:nth-child(even) td,tr:nth-child(even) td{background:rgba(255,255,255,.04)}
+.iconbtn{background:rgba(24,52,110,.85);color:#E2F0FF}
+.fbtn{background:rgba(255,255,255,.07);border-color:rgba(110,215,255,.3)}
+.sh,.zm{background:linear-gradient(160deg,#1A3878,#0E2250)}
+#updToast{background:rgba(16,38,86,.95)}
 </style>
 
 <div id="splash" aria-hidden="true"><div class="sp-in"><svg viewBox="0 0 120 124" class="sp-logo" aria-hidden="true">
@@ -2703,7 +2723,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=38, SEEN_KEY='thaptaisan.seen';
+const APP_VER=39, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -2720,6 +2740,7 @@ async function checkUpdate(){
 }
 if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
 const CHANGES=[
+  [39,'12/11/2026',['Giao diện <b>sáng hơn</b>: nền và thẻ sáng lên một bậc, chữ phụ rõ hơn, vẫn giữ tông xanh bảng mạch']],
   [38,'12/11/2026',['Tab Tự do có thêm mục <b>Thị trường</b>: giá vàng Bảo Tín Mạnh Hải, Huy Thanh, vàng thế giới, đô la Vietcombank, xăng dầu, dầu Brent, VN-Index, Bitcoin (tự cập nhật mỗi giờ)','<b>Mua vàng ở đâu lợi nhất</b>: so giá mua, giá bán lại, chênh lệch và giá thế giới; thử với số tiền của bạn','<b>Các kênh 1 năm qua</b> (tiết kiệm, vàng, VN-Index, đô, Bitcoin) kèm mức sụt sâu nhất; <b>gợi ý</b> theo ưu tiên an toàn']],
   [37,'09/11/2026',['Trên máy tính: <b>thanh trên và thanh tab luôn ghim ở đầu trang</b> khi kéo xuống, chuyển tab không cần cuộn lên']],
   [36,'08/11/2026',['<b>Ngưỡng tự do theo chi tiêu của bạn</b>: quỹ khẩn cấp 6 tháng, an toàn 1 năm, tự chủ 3 năm, tự do tối giản, tự do tài chính, tự do thoải mái; chi tiêu đổi thì ngưỡng tự đổi','Sửa tên, số tiền, thêm mốc riêng ở sheet <b>Ngưỡng</b>','Khối <b>Mốc theo kinh tế Việt Nam</b> (thu nhập bình quân, GDP đầu người, giá căn hộ): chỉ để xem, không tính vào lộ trình']],
