@@ -910,7 +910,7 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
   background:linear-gradient(140deg,#4E9BFF 0%,#7C7CFF 35%,#B08CFF 55%,#E0A960 100%);
   -webkit-mask-image:var(--doodle);mask-image:var(--doodle);-webkit-mask-size:420px 420px;mask-size:420px 420px;-webkit-mask-repeat:repeat;mask-repeat:repeat}
 /* Thẻ hơi trong suốt (Kai 12/11/2026): thấy hoạ tiết nền mờ xuyên qua; thẻ đầu và biểu đồ lớn trong suốt ít hơn để chữ, số vẫn rõ */
-.card{background:linear-gradient(160deg,rgba(29,40,62,.66),rgba(23,32,51,.72))}
+.card{background:linear-gradient(160deg,rgba(29,40,62,.62),rgba(23,32,51,.68))}
 .hero,.card.sky{background:radial-gradient(120% 90% at 85% -10%,rgba(56,96,160,.45) 0%,rgba(56,96,160,0) 58%),linear-gradient(160deg,rgba(26,39,64,.86) 0%,rgba(17,26,44,.90) 100%)}
 .sh,.zm{background:#1A2438}
 /* ==== Vàng 24K (12/11/2026): hai nhà, bảng mua ở đâu bán ở đâu, vàng đang có ==== */
@@ -3180,7 +3180,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=48, SEEN_KEY='thaptaisan.seen';
+const APP_VER=49, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3197,6 +3197,7 @@ async function checkUpdate(){
 }
 if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
 const CHANGES=[
+  [49,'12/11/2026',['Thẻ trong suốt hơn nữa (đục khoảng 65%), hoạ tiết nền rõ hơn']],
   [48,'12/11/2026',['Tab mới <b>Vàng 24K</b> (Tự do): giá Kim Gia Bảo và Huy Thanh theo ngày, dải chênh mua – bán, % cao hơn thế giới','<b>Mua ở đâu, bán ở đâu</b>: bảng 2×2 mất bao nhiêu, giá phải tăng bao nhiêu mới hoà vốn','<b>Vàng bạn đang có</b>: ghi số chỉ ở sheet Tài sản, app tự định giá theo giá mua vào của đúng nhà','Thị trường thêm <b>Ethereum</b>, <b>bạc thế giới</b> và <b>bạc Phú Quý</b>']],
   [47,'12/11/2026',['Thẻ trong suốt hơn (đục khoảng 69%), hoạ tiết nền hiện rõ hơn']],
   [46,'12/11/2026',['Thẻ <b>hơi trong suốt</b>, thấy hoạ tiết nền mờ xuyên qua; thẻ đầu và biểu đồ lớn vẫn đậm để số rõ']],
