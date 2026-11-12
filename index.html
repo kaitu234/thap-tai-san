@@ -929,6 +929,12 @@ b.amt.b{color:#7FB8FF;background:rgba(78,155,255,.17);box-shadow:none}
 b.amt.v{color:#C9AEFF;background:rgba(176,140,255,.17);box-shadow:none}
 .hero b.amt,.hgoal b.amt{font-size:inherit}
 .hg-h b.amt{font:700 15px var(--f-disp);padding:1px 8px}
+/* Số +/− trong câu, chú thích, bảng thành chip xanh lá / đỏ (Kai 12/11/2026); số lớn ở .v, .big giữ chữ màu */
+:is(b,span).pos:not(.v):not(.v *):not(.big *):not(.chip):not(.amt):not(svg *),:is(b,span).neg:not(.v):not(.v *):not(.big *):not(.chip):not(.amt):not(svg *){display:inline-block;padding:0 5px;border-radius:5px;line-height:1.45;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+:is(b,span).pos:not(.v):not(.v *):not(.big *):not(.chip):not(.amt):not(svg *){color:var(--good);background:var(--good-soft)}
+:is(b,span).neg:not(.v):not(.v *):not(.big *):not(.chip):not(.amt):not(svg *){color:var(--bad);background:var(--bad-soft)}
+.kpi .v b.amt{font-size:inherit;padding:0 8px}
+.part .row b.amt{font-size:12px}
 </style>
 
 <div id="splash" aria-hidden="true"><div class="sp-in"><svg viewBox="0 0 120 124" class="sp-logo" aria-hidden="true">
@@ -1385,7 +1391,7 @@ function heroPyramid(rows){
       <text class="gl" x="${cx}" y="${yc+5}" text-anchor="middle"${r.ratio<.55?' style="fill:var(--hero-ink)"':''}>T${id}</text>
       <line x1="${cx+hw(yc)+dx+4}" y1="${yc-dy/2}" x2="252" y2="${yc-dy/2}" stroke="var(--hero-mute)" stroke-opacity=".45" stroke-dasharray="2 3"/>
       <text class="tn" x="260" y="${yc-dy/2-2}">${esc(r.short)}</text>
-      <text class="tv" x="260" y="${yc-dy/2+14}">${pct(r.share,0)} · mục tiêu ${r.target}%</text>
+      <text class="tv" x="260" y="${yc-dy/2+14}"><tspan style="fill:${TONE_FILL[toneDev(r.share*100-r.target)]};font-weight:700">${pct(r.share,0)}</tspan> · mục tiêu ${r.target}%</text>
     </g>`;
   });
   const ax=cx+dx/2, ay=top-dy/2+2;
@@ -1420,7 +1426,7 @@ function glassPyramid(rows){
     </g>`;
     labels+=`<g class="gl-lb${on?' on':''}"><line x1="${(b.r[0]+6).toFixed(1)}" y1="${ym.toFixed(1)}" x2="244" y2="${ym.toFixed(1)}" stroke="${on?col:'#fff'}" stroke-opacity="${on?.9:.25}" stroke-dasharray="2 3"/>
       <text x="250" y="${(ym-9).toFixed(1)}" class="g1" style="fill:${on?col:'#F1EEFF'}">T${id} ${esc(r.short||r.name)}</text>
-      <text x="250" y="${(ym+5).toFixed(1)}" class="g2">${pct(r.share,0)} · mục tiêu ${r.target}%</text><text x="250" y="${(ym+18).toFixed(1)}" class="g2"><tspan style="fill:${dv>0.5?'#7DE3A0':dv<-0.5?'#FF9A8A':'#C9C4EE'}">${dv>=0?'+':'−'}${nf(Math.abs(dv),0)} điểm</tspan></text></g>`;
+      <text x="250" y="${(ym+5).toFixed(1)}" class="g2">${pct(r.share,0)} · mục tiêu ${r.target}%</text><text x="250" y="${(ym+18).toFixed(1)}" class="g2"><tspan style="fill:${TONE_FILL[toneDev(dv)]};font-weight:700">${dv>=0?'+':'−'}${nf(Math.abs(dv),0)} điểm</tspan></text></g>`;
   });
   const A=[cx,yT], B=P(1);
   const frame=`<g filter="url(#gglow)" fill="none" stroke="#fff"><polyline points="${pp([B.l,A,B.r])}" stroke-opacity=".6" stroke-width="1.2"/><line x1="${cx}" y1="${yT}" x2="${cx}" y2="${B.f[1]}" stroke-opacity=".5"/>
@@ -1475,9 +1481,9 @@ function accCard(C){
   const a=C.acc, p=Math.min(1,a.have/a.goal), cash=C.inNW.filter(x=>x.kind==='cash');
   const lm=a.last?(()=>{const t=new Date((a.last.m-25569)*DAY);return (t.getUTCMonth()+1)+'/'+t.getUTCFullYear();})():'';
   return `<div class="kpis" style="margin-bottom:12px">
-      <div class="kpi"><div class="label">${esc(a.w.name)}</div><div class="v">${tr(a.have)}</div><div class="s">${pct(p,0)} của ${tr(a.goal)}</div></div>
+      <div class="kpi"><div class="label">${esc(a.w.name)}</div><div class="v">${tr(a.have)}</div><div class="s">${chip(pct(p,0),'b')} của ${tr(a.goal)}</div></div>
       <div class="kpi"><div class="label">Dư ${lm?'tháng '+lm:'mỗi tháng'}</div><div class="v ${cls(a.surplus)}">${trs(a.surplus)}</div><div class="s">${a.last?(a.last.planned?'thu − chi dự kiến':'thu − chi'):'theo Cấu hình'} → chuyển vào ví</div></div>
-      <div class="kpi"><div class="label">${a.ready?'Đã đủ':'Còn thiếu'}</div><div class="v">${a.ready?'Mở sổ':tr(a.left)}</div><div class="s">${a.ready?'Theo quy tắc của bạn':a.months?'Khoảng '+a.months+' tháng, tới '+a.eta:'Cần tháng có tiền dư'}</div></div>
+      <div class="kpi"><div class="label">${a.ready?'Đã đủ':'Còn thiếu'}</div><div class="v">${a.ready?'Mở sổ':tr(a.left)}</div><div class="s">${a.ready?'Theo quy tắc của bạn':a.months?'Khoảng '+chip(a.months+' tháng','y')+', tới '+chip(a.eta,'v'):chip('Cần tháng có tiền dư','o')}</div></div>
       ${cash.length?`<div class="kpi"><div class="label">Tiền mặt chi tiêu</div><div class="v">${tr(sum(cash,'value'))}</div><div class="s">Trích ra sau khi nhận lương</div></div>`:''}
     </div>
     <div class="bar" style="height:12px"><i style="width:${p*100}%;background:${a.ready?'var(--good)':'var(--c2)'}"></i></div>
@@ -1535,11 +1541,11 @@ function emergency(C){
   const n=S.gap||tm, g=gapSim(C,n);
   const stack=LAYERS.filter(l=>C.L[l[0]]>0).map(l=>`<i style="width:${C.L[l[0]]/C.L.total*100}%;background:${l[2]}" data-tip="${l[1]}: ${tr(C.L[l[0]])} · ${nf(C.L[l[0]]/E,1)} tháng"></i>`).join('');
   let story=`Cần ${tr(g.need)} cho ${n} tháng chi thiết yếu. `;
-  if(g.short>0) story+=`Thiếu ${tr(g.short)}: thanh khoản chỉ đủ ${nf(C.runway,1)} tháng.`;
+  if(g.short>0) story+=`Thiếu ${chip(tr(g.short),g.short>g.need*.5?'rr':'r')}: thanh khoản chỉ đủ ${chip(nf(C.runway,1)+' tháng','o')}.`;
   else{
     story+=g.soonFrom?`Ví và tiền mặt đủ ${g.soonFrom-1} tháng, từ tháng ${g.soonFrom} phải rút sổ tiết kiệm`:`Chỉ dùng ví và tiền mặt là đủ`;
     story+=g.marketFrom?`, từ tháng ${g.marketFrom} phải bán cổ phiếu`:'';
-    story+=`. Sau ${n} tháng còn khoảng ${tr(g.left)} thanh khoản.`;
+    story+=`. Sau ${n} tháng còn khoảng ${chip(tr(g.left),'g')} thanh khoản.`;
   }
   return `<div class="kpis" style="margin-bottom:12px">
       <div class="kpi"><div class="label">Đủ sống</div><div class="v">${nf(C.runway,1)} th</div><div class="s">Mục tiêu ${tm} tháng</div></div>
@@ -1710,6 +1716,8 @@ const AMT_TONE={worst:'rr',bad:'r',warn:'o',info:'b',good:'g'};
 const chip=(t,c)=>`<b class="amt ${c||'n'}">${t}</b>`;
 // thang 4 mức, số càng lớn càng tốt: ≥ g xanh lá, ≥ o cam, ≥ r đỏ, còn lại đỏ đậm
 const tone4=(v,g,o,r)=>v>=g?'g':v>=o?'o':v>=r?'r':'rr';
+const toneDev=d=>{d=Math.abs(d);return d<=5?'g':d<=10?'o':d<=20?'r':'rr';};
+const TONE_FILL={g:'#4FD88A',o:'#FF9F43',r:'#FF5A5F',rr:'#FF2E38',b:'#7FB8FF',y:'#FFD166',v:'#C9AEFF'};
 const hiAmt=(s,sev)=>{const t=AMT_TONE[sev]||sev||'n';return String(s==null?'':s).split(/(<[^>]+>)/).map(p=>p.charAt(0)==='<'?p:p.replace(/(\d[\d.,]*\s?(?:Tr|tỷ|triệu|đ))(?![\p{L}])/gu,'<b class="amt '+t+'">$1</b>')).join('');};
 const insCard=i=>`<div class="ins ${i.sev}"><span class="ii">${ic(i.icon||SEV[i.sev][1])}</span><div><div class="chips" style="margin:0 0 4px"><span class="chip ${i.sev}">${SEV[i.sev][0]}</span></div><b>${hiAmt(i.t,i.sev)}</b><p>${hiAmt(i.d,i.sev)}</p>${i.a?`<div class="act">${ic('bulb','sm')}<span>${hiAmt(i.a,i.sev)}</span></div>`:''}</div></div>`;
 
@@ -2271,7 +2279,7 @@ function vRoad(C){
     <div class="l"><div>
       <div class="ms-seg" role="tablist"><button data-msbase="nw" aria-selected="${M.base==='nw'}">Tài sản ròng</button><button data-msbase="avail" aria-selected="${M.base==='avail'}">Khả dụng</button></div>
       <div class="label" style="margin-top:12px">${M.base==='avail'?'Khả dụng (trừ BHXH, BHTN chờ nhận, cho vay)':'Tài sản ròng'} so với lộ trình</div><div class="big">${tr(M.P)}</div>
-      <div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:8px">Đã qua <b style="color:var(--hero-ink)">${nDone}/${M.rows.length} ngưỡng</b>${M.rows[M.cur]?' · đang hướng tới '+esc(M.rows[M.cur].name)+' '+msVal(M.rows[M.cur].v):''}</div></div>
+      <div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:8px">Đã qua ${chip(nDone+'/'+M.rows.length+' ngưỡng','v')}${M.rows[M.cur]?' · đang hướng tới '+esc(M.rows[M.cur].name)+' '+msVal(M.rows[M.cur].v):''}</div></div>
       <div class="stats">
         <div class="stat"><div class="label">Đủ sống không đi làm</div><div class="v">${nf(Math.max(0,M.P)/(M.E*12),1)} năm</div><div class="s">chi thiết yếu ${tr(M.E)}/tháng</div></div>
         <div class="stat"><div class="label">Thụ động (rút 4%/năm)</div><div class="v">${tr(passNow)}/th</div><div class="s">${pct(passNow/M.E,0)} chi thiết yếu · tự do ở ${msVal(Math.round(M.fi/1e8)*1e8)}</div></div>
@@ -2668,7 +2676,7 @@ function vTower(C){
     ${card('Tháp so với mục tiêu','tower',glassPyramid(C.rows)+`<div class="legend" style="justify-content:center">${C.rows.map(r=>`<span><i class="tdot" style="background:${tcol(r.id)}"></i>T${r.id} ${esc(r.name)}</span>`).join('')}</div><p class="note" style="text-align:center">Phần màu trong mỗi tầng là mức đạt mục tiêu. Chạm một tầng để làm sáng, chạm lần nữa để xem tài sản.</p>`)}
     ${card('Chênh lệch bằng tiền','chart',divBars(C.rows.map(r=>({label:'T'+r.id+' '+r.name,v:r.gap,col:tcol(r.id),dot:tcol(r.id),tip:`T${r.id}: ${tr(r.value)} so với mục tiêu ${tr(r.target/100*C.tw)}`})),trs)+
       `<div class="tablewrap" style="margin-top:12px"><table><tr><th>Tầng</th><th>Giá trị</th><th>Thực tế</th><th>Mục tiêu</th></tr>
-      ${C.rows.map(r=>`<tr class="clickable" data-tier="${r.id}"><td><i class="tdot" style="background:${tcol(r.id)}"></i> T${r.id} ${esc(r.name)}</td><td>${tr(r.value)}</td><td>${pct(r.share,1)}</td><td>${r.target}%</td></tr>`).join('')}
+      ${C.rows.map(r=>`<tr class="clickable" data-tier="${r.id}"><td><i class="tdot" style="background:${tcol(r.id)}"></i> T${r.id} ${esc(r.name)}</td><td>${tr(r.value)}</td><td>${chip(pct(r.share,1),toneDev(r.share*100-r.target))}</td><td>${r.target}%</td></tr>`).join('')}
       ${C.outside.length?`<tr><td class="muted"><i class="tdot" style="background:var(--c0)"></i> Ngoài tháp</td><td class="muted">${tr(sum(C.outside,'value'))}</td><td colspan="2" class="muted">${C.outside.map(a=>esc(a.name)).join(', ')}</td></tr>`:''}
 </table></div>`)}
   </div>
@@ -2917,13 +2925,13 @@ function vAnalysis(C){
   return `
   <div class="grid2">
     ${card('Sức khỏe tài chính','pulse',`<div class="score">${hudGauge(C.h)}<div><div class="mid">${C.h.label}</div><div class="note" style="margin-top:4px">Điểm do dashboard tự chấm theo 5 tiêu chí, tối đa 100.</div></div></div>
-      <div class="parts" style="margin-top:16px">${C.h.parts.map(p=>`<div class="part"><div class="row"><span>${p.k}</span><span class="num">${nf(p.v,1)} / ${p.max}</span></div><div class="bar"><i style="width:${p.v/p.max*100}%;background:${p.v/p.max>=.75?'var(--good)':p.v/p.max>=.4?'var(--warn)':'var(--bad)'}"></i></div><div class="nt">${p.note}</div></div>`).join('')}</div>`)}
+      <div class="parts" style="margin-top:16px">${C.h.parts.map(p=>`<div class="part"><div class="row"><span>${p.k}</span><span class="num">${chip(nf(p.v,1)+' / '+p.max,tone4(p.v/p.max,.75,.4,.2))}</span></div><div class="bar"><i style="width:${p.v/p.max*100}%;background:${p.v/p.max>=.75?'var(--good)':p.v/p.max>=.4?'var(--warn)':'var(--bad)'}"></i></div><div class="nt">${p.note}</div></div>`).join('')}</div>`)}
     ${card('Chỉ số chính','chart',`<div class="kpis">
-      <div class="kpi"><div class="label">Tỷ lệ để dành</div><div class="v ${cls(net)}">${INCOME>0?pct(net/INCOME,0):'–'}</div><div class="s">${trs(net)}/tháng</div></div>
-      <div class="kpi"><div class="label">Quỹ khẩn cấp</div><div class="v">${nf(C.runway,1)} th</div><div class="s">Mục tiêu ${C.targetM} tháng</div></div>
+      <div class="kpi"><div class="label">Tỷ lệ để dành</div><div class="v">${INCOME>0?chip(pct(net/INCOME,0),tone4(net/INCOME,.2,.1,0)):'–'}</div><div class="s">${trs(net)}/tháng</div></div>
+      <div class="kpi"><div class="label">Quỹ khẩn cấp</div><div class="v">${chip(nf(C.runway,1)+' th',tone4(C.runway/(C.targetM||12),1,.5,.25))}</div><div class="s">Mục tiêu ${C.targetM} tháng</div></div>
       <div class="kpi"><div class="label">Tài sản ròng khả dụng</div><div class="v">${tr(C.nwAvail)}</div><div class="s">${pct(C.nwAvail/(C.nw||1),0)} tổng · trừ khoản chờ nhận</div></div>
       <div class="kpi"><div class="label">Tự do tài chính</div><div class="v">${pct(C.nwAvail/(C.essential*12*25),0)}</div><div class="s">Cần ${tr(C.essential*12*25)} (chi thiết yếu × 12 × 25)</div></div>
-      <div class="kpi"><div class="label">Tỷ trọng lớn nhất</div><div class="v">${top?pct(top.value/(C.nwAvail||1),0):'–'}</div><div class="s">${top?esc(top.name):''}</div></div>
+      <div class="kpi"><div class="label">Tỷ trọng lớn nhất</div><div class="v">${top?chip(pct(top.value/(C.nwAvail||1),0),tone4(-top.value/(C.nwAvail||1),-.25,-.4,-.6)):'–'}</div><div class="s">${top?esc(top.name):''}</div></div>
       <div class="kpi"><div class="label">Lãi/lỗ đầu tư</div><div class="v ${cls(C.pnlInv)}">${pcts(C.pnlInv/(C.invBase||1),1)}</div><div class="s">${trs(C.pnlInv)} · không gồm khấu hao xe, laptop</div></div>
       <div class="kpi"><div class="label">Tầng Tăng trưởng</div><div class="v">${t3.items.length} mã</div><div class="s">${pct(t3.share,0)} tháp · mục tiêu ${t3.target}%</div></div>
     </div>`)}
@@ -3195,7 +3203,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=50, SEEN_KEY='thaptaisan.seen';
+const APP_VER=51, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3212,6 +3220,7 @@ async function checkUpdate(){
 }
 if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
 const CHANGES=[
+  [51,'12/11/2026',['Chip màu cho số nổi bật ở mọi tab: số tăng/giảm trong câu và bảng, % thực tế từng tầng (lệch ≤ 5 điểm xanh lá, ≤ 10 cam, ≤ 20 đỏ, hơn nữa đỏ đậm), điểm sức khỏe từng phần, chỉ số chính, quỹ khẩn cấp, tích lũy, lộ trình']],
   [50,'12/11/2026',['Số nổi bật thành <b>chip màu</b>: xanh lá tốt, cam, đỏ, đỏ đậm là tệ nhất; xanh dương, vàng, tím cho số trung tính','Thẻ mục tiêu ở đầu trang: % đạt, số tiền cần để dành mỗi tháng, ngày dự kiến đủ đều tô theo mức kịp hay trễ']],
   [49,'12/11/2026',['Thẻ trong suốt hơn nữa (đục khoảng 65%), hoạ tiết nền rõ hơn']],
   [48,'12/11/2026',['Tab mới <b>Vàng 24K</b> (Tự do): giá Kim Gia Bảo và Huy Thanh theo ngày, dải chênh mua – bán, % cao hơn thế giới','<b>Mua ở đâu, bán ở đâu</b>: bảng 2×2 mất bao nhiêu, giá phải tăng bao nhiêu mới hoà vốn','<b>Vàng bạn đang có</b>: ghi số chỉ ở sheet Tài sản, app tự định giá theo giá mua vào của đúng nhà','Thị trường thêm <b>Ethereum</b>, <b>bạc thế giới</b> và <b>bạc Phú Quý</b>']],
