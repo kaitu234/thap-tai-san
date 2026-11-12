@@ -819,6 +819,56 @@ details.fold .fold-i{margin-left:auto;display:inline-flex;transition:transform .
 details.fold[open] .fold-i{transform:rotate(180deg)}
 details.fold .fold-hint{font-size:12px;color:var(--muted);margin:6px 0 0}
 details.fold[open] .fold-hint{display:none}
+/* ==== Than chì (Kai 12/11/2026: "hơi chói, đơn điệu 1 màu lam"): nền/thẻ xanh xám bớt rực, bỏ phát sáng ở thẻ thường;
+   cyan chỉ cho nút chính + tab đang chọn; màu theo trạng thái: tốt xanh lá, hơi tệ cam, tệ quá đỏ, bình thường trắng/xám ==== */
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"],:root[data-theme="light"]{
+  --bg:#111A2C; --surface:#1A2438; --surface2:#222E46; --ink:#EDF2FA; --muted:#A7B3C9; --line:rgba(170,190,225,.16);
+  --hero-mute:#B4C0D6;
+  --good:#4FD88A; --warn:#FF9F43; --bad:#FF5A5F; --info:#C3CDDD;
+  --good-soft:rgba(79,216,138,.14); --warn-soft:rgba(255,159,67,.15); --bad-soft:rgba(255,90,95,.15); --info-soft:rgba(195,205,221,.12);
+  --up-hero:#4FD88A; --dn-hero:#FF5A5F; --card-ac:rgba(195,205,221,.55)}
+html{background:#0D1524}
+body{background-color:#111A2C}
+.appbar{background:color-mix(in srgb,#111A2C 84%,transparent)}
+@media (max-width:760px){nav.tabs{background:color-mix(in srgb,#151F33 92%,transparent);border-color:rgba(170,190,225,.16);box-shadow:0 -6px 20px rgba(0,0,0,.35)}}
+.card{background:linear-gradient(160deg,#1D283E,#172033);border-color:rgba(170,190,225,.14);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.card:not(.sky)::before{background:linear-gradient(90deg,transparent,var(--card-ac) 40%,transparent);background-size:200% 100%;opacity:.5}
+.card-h h2{color:var(--ink)}
+.card-h .ico{background:rgba(195,205,221,.1);color:#DCE4F1;box-shadow:inset 0 0 0 1px rgba(195,205,221,.18)}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){.card:hover{border-color:rgba(170,190,225,.28);box-shadow:0 10px 26px rgba(0,0,0,.32)}}
+.kpi,.ins,.cl,.gd,.todo-i,.arow{border-color:rgba(170,190,225,.13)}
+.kpi{background:rgba(255,255,255,.035)}
+.ins,.todo-i{background:rgba(255,255,255,.03)}
+th{background:#26324B;color:#DCE4F1}
+tbody tr:nth-child(even) td,tr:nth-child(even) td{background:rgba(255,255,255,.03)}
+.brand h1 span{text-shadow:none}
+.brand .mark{box-shadow:0 0 0 1px rgba(170,190,225,.22)}
+.iconbtn{background:#1D283E;border-color:rgba(170,190,225,.18);color:#DCE4F1}
+.iconbtn:hover{background:#26324B}
+nav.tabs .pill{background:rgba(94,208,255,.14);box-shadow:inset 0 0 0 1px rgba(94,208,255,.35)}
+.fbtn{background:rgba(255,255,255,.04);border-color:rgba(170,190,225,.18)}
+.chip{border-color:rgba(170,190,225,.16)}
+.btn.ghost{background:rgba(255,255,255,.06);color:#DCE4F1}
+.sh,.zm{background:#1A2438;border-color:rgba(170,190,225,.18)}
+#updToast{background:rgba(26,36,56,.96);border-color:rgba(94,208,255,.35);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.seg button[aria-selected="true"]{background:rgba(94,208,255,.16)}
+.brief{border-color:rgba(170,190,225,.2)}
+.brief-i{background:rgba(195,205,221,.1);color:#DCE4F1;box-shadow:inset 0 0 0 1px rgba(195,205,221,.18);animation:none!important}
+.earn-b>i{background:var(--good);box-shadow:none}
+.vnr-b>i{background:#8FA3C4;box-shadow:none}
+.vnr-top b{color:var(--ink);text-shadow:none}
+.mk-sp{filter:none}
+.mk-n{color:#B4C0D6}
+.mk-yr-b>i,.mk-yr-b>i.neg{box-shadow:none}
+.hero,.card.sky{--hero-mute:#B4C0D6; --muted:#A7B3C9;
+  background:radial-gradient(120% 90% at 85% -10%,rgba(56,96,160,.55) 0%,rgba(56,96,160,0) 58%),linear-gradient(160deg,#1A2740 0%,#111A2C 100%);border-color:rgba(170,190,225,.18)}
+.hero .stat,.card.sky .kpi,.mk-t{background:rgba(255,255,255,.04);border-color:rgba(170,190,225,.14)}
+.hero .chip-chg{background:rgba(17,26,44,.85)}
+.hero::before,.card.sky::before{opacity:.45}
+.hero::after,.card.sky::after{filter:none;opacity:.6}
+.card.sky .card-h h2{color:var(--ink);text-shadow:none}
+.card.sky .card-h .ico{background:rgba(195,205,221,.1);color:#DCE4F1;box-shadow:inset 0 0 0 1px rgba(195,205,221,.18);animation:none}
+.card.sky .card-h .aside{color:#B4C0D6}
 </style>
 
 <div id="splash" aria-hidden="true"><div class="sp-in"><svg viewBox="0 0 120 124" class="sp-logo" aria-hidden="true">
@@ -2757,7 +2807,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=41, SEEN_KEY='thaptaisan.seen';
+const APP_VER=42, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -2774,6 +2824,7 @@ async function checkUpdate(){
 }
 if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
 const CHANGES=[
+  [42,'12/11/2026',['Giao diện <b>dịu mắt hơn</b>: nền và thẻ xanh xám, bỏ viền phát sáng','Màu theo trạng thái: <b>tốt xanh lá</b>, cần chú ý <b>cam</b>, tệ <b>đỏ</b>, bình thường trắng/xám']],
   [41,'12/11/2026',['Biểu tượng <b>BHTN</b> mới: hai bàn tay đỡ đồng xu','Bậc sổ kế tiếp trong Kế hoạch sổ tiết kiệm hiện lại <b>logo Zalopay</b>']],
   [40,'12/11/2026',['<b>Điểm đa dạng hóa</b> tính trên toàn bộ tài sản, không còn trừ điểm vì bạn chọn chỉ giữ MSN','"Tầng Tăng trưởng chỉ có MSN" chỉ còn là thông tin, không còn nằm ở Việc cần làm và không gợi ý mua thêm cổ phiếu','Mục tiêu vượt mức dư chỉ nhắc ở tab Phân tích; quỹ khẩn cấp dư ghi rõ gồm tiền rút sớm sổ','Trên điện thoại: nút bấm to hơn, chữ biểu đồ to hơn; <b>Nguyên tắc vàng</b> và <b>Đánh giá chi tiết</b> thu gọn, bấm để mở']],
   [39,'12/11/2026',['Giao diện <b>sáng hơn</b>: nền và thẻ sáng lên một bậc, chữ phụ rõ hơn, vẫn giữ tông xanh bảng mạch']],
