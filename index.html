@@ -753,6 +753,34 @@ nav.tabs button[aria-selected="true"]{color:#5ED0FF}
 @media (max-width:480px){.brand h1{font-size:17px;letter-spacing:.01em}}
 .hero .stat,.card.sky .kpi{background:linear-gradient(160deg,rgba(9,30,70,.86),rgba(5,16,40,.9))}
 .hero .chip-chg{background:rgba(6,22,52,.85)}
+/* Báo bản mới (website) */
+#updToast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:95;display:inline-flex;align-items:center;gap:8px;max-width:92vw;
+  padding:10px 16px;border-radius:12px;border:1px solid rgba(94,231,255,.45);background:rgba(5,16,40,.94);color:var(--ink);font:600 13.5px var(--f-body);cursor:pointer;
+  box-shadow:0 8px 28px rgba(0,0,0,.45),0 0 16px rgba(94,208,255,.3);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#updToast .i{color:var(--accent)}
+@media (min-width:760px){#updToast{bottom:24px}}
+@media (prefers-reduced-motion:no-preference){#updToast{animation:updIn .4s cubic-bezier(.2,.8,.2,1) both}@keyframes updIn{from{opacity:0;transform:translate(-50%,16px)}}}
+/* Thị trường (tab Tự do › Thị trường, 12/11/2026) */
+.f-seg{margin:0 0 12px}
+.mk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:10px}
+.mk-t{position:relative;display:grid;gap:3px;align-content:start;padding:10px 12px;border-radius:8px;min-width:0;background:linear-gradient(160deg,rgba(9,30,70,.86),rgba(5,16,40,.9));border:1px solid rgba(94,231,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.mk-n{font:600 11.5px var(--f-tech);letter-spacing:.06em;color:#A9E4FF;text-transform:uppercase}
+.mk-v{font:700 19px var(--f-tech);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mk-c{font-size:11.5px;color:var(--muted)} .mk-c .pos{color:var(--good);font-weight:700} .mk-c .neg{color:var(--bad);font-weight:700}
+.mk-s{font-size:11px;color:var(--muted)}
+.mk-sp{width:100%;height:26px;margin-top:2px;filter:drop-shadow(0 0 4px rgba(94,208,255,.35))}
+.mk-tb td small,.mk-tb th small{color:var(--muted);font-weight:400}
+.mk-tb tr.mk-best td{background:rgba(91,228,155,.07)}
+.mk-tb td.pos{color:var(--good)} .mk-tb td.neg{color:var(--bad)}
+.mk-tag{display:inline-block;font:600 10px var(--f-body);font-style:normal;padding:1px 6px;border-radius:99px;background:rgba(91,228,155,.16);color:var(--good);vertical-align:1px}
+.mk-yr{display:grid;gap:12px}
+.mk-yr-h{display:flex;justify-content:space-between;gap:8px;font-size:13px} .mk-yr-h .pos{color:var(--good)} .mk-yr-h .neg{color:var(--bad)}
+.mk-yr-b{position:relative;height:8px;border-radius:99px;background:rgba(255,255,255,.07);margin:5px 0 4px}
+.mk-yr-b::before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:rgba(255,255,255,.3)}
+.mk-yr-b>i{position:absolute;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,#2F9B6B,var(--good));box-shadow:0 0 8px rgba(91,228,155,.45)}
+.mk-yr-b>i.neg{background:linear-gradient(90deg,var(--bad),#B8475A);box-shadow:0 0 8px rgba(255,122,144,.45)}
+.mk-yr-b>u{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--warn);border-radius:2px;text-decoration:none}
+.mk-yr-s{font-size:11.5px;color:var(--muted)} .mk-yr-s b.neg{color:var(--bad);display:inline;font-weight:600}
 </style>
 
 <div id="splash" aria-hidden="true"><div class="sp-in"><svg viewBox="0 0 120 124" class="sp-logo" aria-hidden="true">
@@ -1838,7 +1866,12 @@ function msRev(C){
   return `<div class="chk ${need<=M.m?'ok':'bad'}"><b>${ic('calendar','sm')} ${msVal(T)} vào ${mo}/${y} (${n} tháng nữa)</b>
     <span>${need<=0?'Không cần để dành thêm: riêng lãi đã đưa tới mốc này.':`Cần để dành <b class="amt ${need<=M.m?'g':'r'}">${tr(need)}</b>/tháng, ${need<=M.m?'bạn đang để dành đủ ('+tr(M.m)+').':'gấp '+nf(need/Math.max(M.m,1),1)+' lần mức hiện tại ('+tr(M.m)+').'}`}</span></div>`;
 }
+const fSeg=()=>`<div class="filters f-seg" role="tablist" aria-label="Xem">${[['road','Lộ trình tự do','flag'],['mk','Thị trường','globe']].map(([k,n,i])=>`<button class="fbtn" role="tab" data-fsub="${k}" aria-pressed="${(FM.sub||'road')===k}">${ic(i,'sm')}${n}</button>`).join('')}</div>`;
 function vFreedom(C){
+  if(FM.sub==='mk')return fSeg()+vMarket(C);
+  return fSeg()+vRoad(C);
+}
+function vRoad(C){
   const M=msCalc(C), Hs=msHist(M.base,M.rows), nDone=M.rows.filter(x=>x.done).length, passNow=Math.max(0,M.P)*WD/12;
   // lộ trình đi lên: ngưỡng 8 ở trên, ngưỡng 1 ở dưới; mỗi ngưỡng đổi ra năm chi thiết yếu và thu nhập thụ động 4%
   const path=[...M.rows].reverse().map(x=>{const st=x.done?'ok':x.i===M.cur?'cur':'lock', w=Hs.when[x.i];
@@ -1896,6 +1929,150 @@ function vnRefCard(C,M){
     <div class="vnr">${it.map(x=>{const p=Math.min(1,P/x.v);return `<div class="vnr-r"><div class="vnr-h"><b>${x.n}</b><span class="num">${msVal(Math.round(x.v/1e7)*1e7)}</span></div>
       <div class="vnr-b"><i style="width:${(p*100).toFixed(1)}%"></i></div><div class="vnr-s">${x.s} · ${P>=x.v?'đã vượt':'đạt '+pct(p,0)+', còn '+msVal(x.v-P)}</div></div>`;}).join('')}</div>
     <p class="note">Chỉ để xem cho biết, không dùng để tính lộ trình hay dự báo. Nguồn (tra ${R.at}): ${R.src.join('; ')}. Giá nhà mỗi đơn vị khảo sát một khác.</p>`,'tham khảo');
+}
+// ---- Thị trường (Kai 12/11/2026): tab Tự do › Thị trường. Đọc sheet "Thị trường" (Apps Script giaThiTruong() ghi mỗi giờ 7h–22h, mỗi ngày một dòng).
+// Chỉ để xem và gợi ý theo quy tắc; không đổi tháp, không vào tài sản ròng. Không phải tư vấn đầu tư.
+let MK=[];   // [{d, at, v:[25 cột A..Y]}]
+const MK_RANGE="'Thị trường'!A3:Y800";
+const parseMK=res=>rowsOf(res,'Thị trường',2,800,g=>typeof g(0)==='number'?{d:g(0),at:typeof g(1)==='number'?g(1):null,v:Array.from({length:25},(_,i)=>g(i))}:null).sort((a,b)=>a.d-b.d);
+const LUONG=37.5, OZ=31.1035;   // 1 lượng = 37,5 g = 10 chỉ; 1 ounce = 31,1035 g
+const mkSer=(c,days)=>{const L=MK.filter(r=>typeof r.v[c]==='number'&&r.v[c]>0);if(!L.length)return [];const end=L[L.length-1].d;return L.filter(r=>days==null||r.d>=end-days).map(r=>({d:r.d,v:r.v[c]}));};
+const mkLast=c=>{const s=mkSer(c);return s.length?s[s.length-1]:null;};
+// thay đổi so với điểm gần nhất cách ít nhất `days` ngày (days=0: so với phiên trước)
+function mkChg(c,days){
+  const s=mkSer(c);if(s.length<2)return null;const L=s[s.length-1];
+  const p=days?[...s].reverse().find(x=>x.d<=L.d-days):s[s.length-2];
+  if(!p||(days&&L.d-p.d>days*1.6))return null;
+  return {abs:L.v-p.v,rel:L.v/p.v-1,from:p.d};
+}
+// sụt sâu nhất (đỉnh → đáy) và biên độ trong `days` ngày
+function mkRisk(c,days){
+  const s=mkSer(c,days);if(s.length<20)return null;let pk=s[0].v,dd=0;
+  s.forEach(x=>{pk=Math.max(pk,x.v);dd=Math.min(dd,x.v/pk-1);});
+  const lo=Math.min(...s.map(x=>x.v)),hi=Math.max(...s.map(x=>x.v));return {dd,lo,hi};
+}
+const mkTrend=()=>{const r=[...MK].reverse().find(x=>typeof x.v[23]==='string'&&x.v[23]);try{return r?JSON.parse(r.v[23]):null;}catch(_){return null;}};
+// giá vàng thế giới đổi ra đồng/chỉ theo tỷ giá chuyển khoản VCB (chưa gồm thuế, phí gia công)
+function mkWorld(){const x=mkLast(15),u=mkLast(14)||mkLast(13);return x&&u?x.v*u.v/OZ*LUONG/10:null;}
+const pctS=(v,d=1)=>(v>0?'+':v<0?'−':'')+nf(Math.abs(v)*100,d)+'%';
+const clsR=v=>v>0.0005?'pos':v<-0.0005?'neg':'';
+function mkSpark(c,days=90){
+  const s=mkSer(c,days);if(s.length<3)return '';
+  const lo=Math.min(...s.map(x=>x.v)),hi=Math.max(...s.map(x=>x.v)),W=96,H=26,d0=s[0].d,dw=(s[s.length-1].d-d0)||1;
+  const x=p=>((p.d-d0)/dw*(W-4)+2).toFixed(1), y=p=>(H-3-(p.v-lo)/((hi-lo)||1)*(H-6)).toFixed(1);
+  const col=s[s.length-1].v>=s[0].v?'var(--good)':'var(--bad)', L=s[s.length-1];
+  return `<svg class="mk-sp" viewBox="0 0 ${W} ${H}" aria-label="${days} ngày gần nhất"><path d="${s.map((p,i)=>(i?'L':'M')+x(p)+','+y(p)).join('')}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round"/><circle cx="${x(L)}" cy="${y(L)}" r="2.2" fill="${col}"/></svg>`;
+}
+// các ô giá: c = cột sheet, f = cách hiện số
+const MK_TILES=[
+  {c:7,n:'Nhẫn Kim Gia Bảo 24K',s:'Bảo Tín Mạnh Hải bán ra',f:v=>nf(v/1e6,2)+' Tr/chỉ',tr:1},
+  {c:11,n:'Vàng 24K Huy Thanh',s:'Huy Thanh bán ra (miền Bắc)',f:v=>nf(v/1e6,2)+' Tr/chỉ'},
+  {c:9,n:'Vàng miếng SJC',s:'Bảo Tín Mạnh Hải bán ra',f:v=>nf(v/1e6,2)+' Tr/chỉ'},
+  {c:15,n:'Vàng thế giới',s:'USD/ounce',f:v=>'$'+nf(v,0)},
+  {c:13,n:'Đô la Mỹ',s:'Vietcombank bán ra',f:v=>nf(v,0)+'đ'},
+  {c:20,n:'Xăng RON 95-III',s:'Petrolimex vùng 1',f:v=>nf(v,0)+'đ/lít'},
+  {c:16,n:'Dầu Brent',s:'USD/thùng',f:v=>'$'+nf(v,2)},
+  {c:18,n:'VN-Index',s:'HOSE',f:v=>nf(v,2)},
+  {c:19,n:'Bitcoin',s:'USD',f:v=>'$'+nf(v,0)}];
+function mkTile(t){
+  const L=mkLast(t.c);if(!L)return '';
+  const d1=mkChg(t.c,0), d30=mkChg(t.c,30), T=t.tr?mkTrend():null;
+  const r1=d1?d1.rel:T&&T.d1!=null?T.d1/100:null, r30=d30?d30.rel:T&&T.d30!=null?T.d30/100:null;
+  return `<div class="mk-t"><div class="mk-n">${t.n}</div><div class="mk-v num">${t.f(L.v)}</div>
+    <div class="mk-c">${r1!=null?`<span class="${clsR(r1)}">${pctS(r1,2)}</span> phiên trước`:'<span>mới có hôm nay</span>'}${r30!=null?` · <span class="${clsR(r30)}">${pctS(r30)}</span> 30 ngày`:''}</div>
+    ${mkSpark(t.c)}<div class="mk-s">${t.s}</div></div>`;
+}
+// so sánh nơi mua vàng: tính theo đồng/chỉ; bạn mua = giá cửa hàng bán ra, bán lại = giá cửa hàng mua vào
+function mkGold(){
+  const g=(c,k=1)=>{const L=mkLast(c);return L?L.v/k:null;};
+  return [
+    {n:'Nhẫn Kim Gia Bảo 24K',b:'Bảo Tín Mạnh Hải',pay:g(7),back:g(6),ring:1},
+    {n:'Vàng 24K (nhẫn, trang sức)',b:'Huy Thanh',pay:g(11),back:g(10),ring:1},
+    {n:'Vàng miếng SJC',b:'Bảo Tín Mạnh Hải',pay:g(9),back:g(8)}].filter(x=>x.pay&&x.back).map(x=>({...x,spread:1-x.back/x.pay}));
+}
+function mkGoldCard(){
+  const G=mkGold(), W=mkWorld();if(!G.length)return '';
+  const minPay=Math.min(...G.map(x=>x.pay)), minSp=Math.min(...G.map(x=>x.spread)), amt=FM.mkAmt||10;
+  const rows=G.map(x=>`<tr${x.spread===minSp?' class="mk-best"':''}><td><b>${x.n}</b><br><small>${x.b}</small></td><td class="num">${nf(x.pay/1e6,2)}${x.pay===minPay?' <i class="mk-tag">rẻ nhất</i>':''}</td><td class="num">${nf(x.back/1e6,2)}</td>
+    <td class="num ${x.spread===minSp?'pos':x.spread>0.035?'neg':''}">${pct(x.spread,1)}${x.spread===minSp?' <i class="mk-tag">thấp nhất</i>':''}</td><td class="num">${W?pctS(x.pay/W-1):'—'}</td></tr>`).join('');
+  return card('Mua vàng ở đâu lợi nhất','gem',`<div class="tablewrap"><table class="mk-tb"><tr><th>Sản phẩm</th><th>Bạn mua<br><small>Tr/chỉ</small></th><th>Bán lại<br><small>Tr/chỉ</small></th><th>Mất ngay khi bán lại</th><th>So với thế giới</th></tr>${rows}</table></div>
+    <div class="fm-in" style="margin-top:12px"><label><span>Thử với số tiền (Tr)</span><input id="mkAmt" type="number" inputmode="decimal" min="1" step="1" value="${amt}"></label></div>
+    <div id="mkCalc">${mkCalc()}</div>
+    <p class="note">"Mất ngay khi bán lại" = chênh giá mua và bán của cửa hàng: mua xong bán lại ngay thì mất chừng ấy, giá phải tăng hơn mức đó mới có lãi. "So với thế giới" = giá bạn mua so với vàng thế giới quy đổi${W?' ('+nf(W/1e6,2)+' Tr/chỉ theo tỷ giá chuyển khoản VCB)':''}, chưa gồm thuế, phí. Giá Huy Thanh là giá miền Bắc. 1 lượng = 10 chỉ.</p>`,mkStamp());
+}
+function mkCalc(){
+  const G=mkGold();if(!G.length)return '';const amt=(FM.mkAmt||10)*1e6, b=[...G].sort((x,y)=>x.spread-y.spread)[0], ch=amt/b.pay;
+  return `<div class="chk ok"><b>${ic('gem','sm')} ${nf(amt/1e6,0)} Tr mua ${esc(b.n)} (${esc(b.b)}) được ${nf(ch,2)} chỉ</b>
+    <span>Bán lại ngay nhận ${vnd(ch*b.back)}, mất <b class="amt r">${vnd(amt-ch*b.back)}</b>. Giá mua vào của cửa hàng phải tăng ${pct(b.pay/b.back-1,1)} mới hoà vốn.</span></div>`;
+}
+function mkStamp(){const r=[...MK].reverse().find(x=>x.at);return r?'cập nhật '+fmtT((r.at-25569)*DAY-7*36e5)+' '+sdate(r.d).slice(0,5):'';}
+function mkFx(){
+  const b=mkLast(12),s=mkLast(13),t=mkLast(14);if(!s)return '';
+  const c30=mkChg(13,30), xs=[[20,'Xăng RON 95-III'],[21,'Xăng E5 RON 92'],[22,'Dầu DO 0,05S']].map(([c,n])=>({c,n,L:mkLast(c)})).filter(x=>x.L);
+  const prevDiff=c=>{const s=mkSer(c);for(let i=s.length-2;i>=0;i--)if(s[i].v!==s[s.length-1].v)return {d:s[i].d,v:s[i].v};return null;};
+  const ron=mkLast(20), e5=mkLast(21), tank=4.4, br=mkChg(16,30);
+  return card('Đô la và xăng dầu','globe',`<div class="kpis">
+      <div class="kpi"><div class="label">USD Vietcombank</div><div class="v num">${nf(s.v,0)}đ</div><div class="s">mua tiền mặt ${b?nf(b.v,0):'—'} · chuyển khoản ${t?nf(t.v,0):'—'}</div></div>
+      <div class="kpi"><div class="label">Chênh mua – bán USD</div><div class="v num">${b?pct(1-b.v/s.v,1):'—'}</div><div class="s">mua đô tiền mặt rồi bán lại ngay mất chừng ấy</div></div>
+      <div class="kpi"><div class="label">USD 30 ngày</div><div class="v ${c30?clsR(c30.rel):''}">${c30?pctS(c30.rel):'—'}</div><div class="s">${c30?'so với '+sdate(c30.from):'cần thêm vài tuần số liệu'}</div></div></div>
+    ${xs.length?`<div class="tablewrap" style="margin-top:12px"><table><tr><th>Petrolimex vùng 1</th><th>Giá (đ/lít)</th><th>So với kỳ trước</th></tr>${xs.map(x=>{const p=prevDiff(x.c);return `<tr><td>${x.n}</td><td class="num">${nf(x.L.v,0)}</td><td class="num ${p?clsR(x.L.v-p.v):''}">${p?(x.L.v>p.v?'+':'−')+nf(Math.abs(x.L.v-p.v),0)+'đ ('+sdate(p.d).slice(0,5)+')':'—'}</td></tr>`;}).join('')}</table></div>`:''}
+    ${ron?`<p class="note">Đổ đầy bình xe máy (~${nf(tank,1)} lít): RON 95-III ${vnd(ron.v*tank)}${e5?', E5 RON 92 '+vnd(e5.v*tank):''}. Mỗi 1.000đ/lít tăng giá = thêm ${vnd(1000*tank)}/bình.${br?` Dầu Brent 30 ngày qua <b class="${clsR(br.rel)}">${pctS(br.rel)}</b>: giá xăng trong nước thường đi theo dầu thế giới sau vài kỳ điều chỉnh.`:''}</p>`:''}`,mkStamp());
+}
+// lợi nhuận 1 năm qua của từng kênh (số quá khứ) và rủi ro: sụt sâu nhất đỉnh → đáy
+function mkYear(C){
+  const T=mkTrend(), ref=DATA.cfg.ref||0, inf=FM.inf!=null?FM.inf:0.035;
+  const it=[{n:'Sổ tiết kiệm',r:ref,s:'lãi tham chiếu Cấu hình B8',safe:1},
+    T&&T.y1!=null?{n:'Vàng nhẫn 24K (BTMH)',r:T.y1/100,s:'giá Kim Gia Bảo, theo Bảo Tín Mạnh Hải'}:null,
+    ...[[15,'Vàng thế giới (USD)'],[18,'VN-Index'],[13,'Đô la Mỹ (VCB)'],[19,'Bitcoin (USD)']].map(([c,n])=>{const x=mkChg(c,365),k=mkRisk(c,365);return x&&x.from<=mkLast(c).d-300?{n,r:x.rel,dd:k&&k.dd,s:k?'thấp nhất '+nf(k.lo,c===18?0:c===13?0:0)+' · cao nhất '+nf(k.hi,0):''}:null;})].filter(Boolean);
+  if(it.length<2)return '';
+  const mx=Math.max(...it.map(x=>Math.abs(x.r)),inf,0.01);
+  return card('Các kênh 1 năm qua','chart',`<div class="mk-yr">${it.map(x=>`<div class="mk-yr-r"><div class="mk-yr-h"><b>${x.n}</b><span class="num ${clsR(x.r)}">${pctS(x.r)}</span></div>
+      <div class="mk-yr-b"><i class="${x.r<0?'neg':''}" style="width:${(Math.abs(x.r)/mx*50).toFixed(1)}%;${x.r<0?'right:50%':'left:50%'}"></i><u style="left:${(50+inf/mx*50).toFixed(1)}%"></u></div>
+      <div class="mk-yr-s">${x.s}${x.dd!=null?' · <b class="neg">sụt sâu nhất '+pct(-x.dd,0)+'</b>':x.safe?' · không sụt (được bảo hiểm tiền gửi)':''}</div></div>`).join('')}</div>
+    <p class="note">Vạch đứng = lạm phát ${pct(inf,1)}/năm (số bạn nhập ở Dự báo lãi kép). "Sụt sâu nhất" = từ đỉnh xuống đáy trong năm: con số cho biết bạn có thể phải chịu lỗ tạm thời bao nhiêu nếu mua đúng đỉnh. Kết quả quá khứ không bảo đảm tương lai.</p>`,'tham khảo');
+}
+// gợi ý theo quy tắc, nghiêng về an toàn (Kai từng lỗ cổ phiếu, coin)
+function mkTips(C){
+  const L=[], G=mkGold(), W=mkWorld(), cf=DATA.cfg, inf=FM.inf!=null?FM.inf:0.035, t2=C.rows.find(r=>r.id===2), gw=mkChg(15,30);
+  const add=(sev,icon,t,d)=>L.push({sev,icon,t,d});
+  if(C.runway<C.targetM)add('warn','shield',`Ưu tiên quỹ dự phòng trước vàng hay chứng khoán`,`Tiền dùng được hiện đủ ${nf(C.runway,1)} tháng chi thiết yếu, mục tiêu ${C.targetM} tháng. Tiền dự phòng nên ở ví, sổ rút được; vàng mua bán mất phí, cổ phiếu có thể đang lỗ đúng lúc cần tiền.`);
+  else add('good','shield',`Quỹ dự phòng đã đủ (${nf(C.runway,1)} tháng)`,`Phần tiền nhàn rỗi ngoài quỹ này mới nên tính tới vàng hoặc kênh khác.`);
+  if(G.length){
+    const b=[...G].sort((x,y)=>x.spread-y.spread)[0], sjc=G.find(x=>/miếng/.test(x.n)), ring=G.filter(x=>x.ring).sort((x,y)=>x.spread-y.spread)[0];
+    add('info','gem',`Nếu mua vàng: ${esc(b.n)} (${esc(b.b)}) đang chênh mua – bán thấp nhất, ${pct(b.spread,1)}`,
+      `Vàng thuộc tầng Bảo toàn (T2) như sổ tiết kiệm${t2?`; T2 đang ${pct(t2.share,0)} tháp, mục tiêu ${t2.target}%${t2.share*100>t2.target?': T2 đã cao hơn mục tiêu, nên nếu mua vàng thì lấy từ phần định gửi sổ, đừng cộng thêm':''}`:''}. Mua rồi bán lại ngay là mất ${pct(b.spread,1)}, nên chỉ dùng tiền để yên được vài năm, mua chia nhiều lần thay vì một lần.`);
+    const pm=W?Math.min(...G.map(x=>x.pay/W-1)):0;
+    if(pm>0.05)add('warn','alert',`Vàng trong nước đang cao hơn thế giới ${pct(pm,0)}–${pct(Math.max(...G.map(x=>x.pay/W-1)),0)}`,`Nhẫn 24K${ring?' ('+esc(ring.b)+')':''} cao hơn ${ring?pct(ring.pay/W-1,1):'—'}${sjc?', vàng miếng '+pct(sjc.pay/W-1,1):''}. Khoảng chênh này có thể thu hẹp (nguồn cung tăng, chính sách thay đổi), khi đó giá trong nước giảm dù vàng thế giới đứng yên: mua lúc chênh cao là gánh thêm rủi ro đó.`);
+    if(gw&&gw.rel>0.05)add('warn','up',`Vàng thế giới vừa tăng ${pct(gw.rel)} trong 30 ngày`,`Tránh mua đuổi một lần lớn; nếu đã định mua thì chia nhỏ.`);
+    else if(gw&&gw.rel<-0.05)add('info','down',`Vàng thế giới giảm ${pct(-gw.rel)} trong 30 ngày`,`Giá có thể còn giảm tiếp. Nếu đã định mua, chia 3–4 lần cách nhau vài tuần để không dồn vào một mức giá.`);
+  }
+  if(cf.ref)add(cf.ref-inf>0.02?'good':'info','bank',`Sổ tiết kiệm ${pct(cf.ref,2)}/năm, sau lạm phát còn ~${pct((1+cf.ref)/(1+inf)-1,1)}`,`Kênh không sụt giá, có bảo hiểm tiền gửi, hợp với ưu tiên an toàn của bạn. So lãi suất các ngân hàng trước khi mở sổ mới.`);
+  const vni=mkRisk(18,365), btc=mkRisk(19,365);
+  add(C.riskShare>cf.riskCap?'bad':'info','chart',`Cổ phiếu + coin đang ${pct(C.riskShare,0)} tài sản ròng, trần bạn đặt ${pct(cf.riskCap,0)}`,
+    `Bạn đã chọn không mua thêm.${vni?` VN-Index trong năm từng sụt ${pct(-vni.dd,0)} từ đỉnh`:''}${btc?`, Bitcoin sụt ${pct(-btc.dd,0)}`:''}. Các con số trên chỉ để theo dõi thị trường.`);
+  const u=mkChg(13,30);if(u&&u.rel>0.01)add('info','globe',`Đô la tăng ${pctS(u.rel)} trong 30 ngày`,`Hàng nhập khẩu (laptop, điện thoại) có thể lên giá theo; định mua thì so giá sớm.`);
+  return card('Gợi ý cho bạn','bulb',`<div class="todo">${L.map(i=>`<div class="ins ${i.sev}"><span class="ii">${ic(i.icon)}</span><div><b>${i.t}</b><p>${i.d}</p></div></div>`).join('')}</div>
+    <p class="note">Gợi ý tự động theo quy tắc an toàn và số liệu của bạn, không phải tư vấn đầu tư. Quyết định mua bán là của bạn.</p>`);
+}
+function vMarket(C){
+  if(!MK.length)return card('Thị trường','globe',`<p class="note" style="margin:0">Chưa có số liệu giá. Sheet <b>Thị trường</b> do Apps Script <b>giaThiTruong()</b> ghi mỗi giờ (7h–22h); cần chạy lại <b>caiDat</b> trong trình soạn Apps Script một lần để cấp quyền gọi trang web bên ngoài.</p>`);
+  const last=MK[MK.length-1], stale=serialOf(Date.now())-last.d>=2, W=mkWorld(), usd=mkLast(13), kgb=mkLast(7), ht=mkLast(11);
+  return `<section class="hero">
+    <div class="l"><div>
+      <div class="label">Thị trường · ${mkStamp()||sdate(last.d)}</div><div class="big">${kgb?nf(kgb.v/1e6,2)+' Tr':ht?nf(ht.v/1e6,2)+' Tr':'—'}</div>
+      <div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:8px">${kgb?'Nhẫn 24K Kim Gia Bảo / chỉ (Bảo Tín Mạnh Hải bán ra)':'Vàng 24K Huy Thanh / chỉ'}${kgb&&ht?' · Huy Thanh 24K '+nf(ht.v/1e6,2)+' Tr':''}</div></div>
+      <div class="stats">
+        <div class="stat"><div class="label">Nhẫn 24K so với thế giới</div><div class="v">${(kgb||ht)&&W?pctS((kgb||ht).v/W-1):'—'}</div><div class="s">thế giới quy đổi ${W?nf(W/1e6,2)+' Tr/chỉ':'—'}</div></div>
+        <div class="stat"><div class="label">Đô la VCB bán</div><div class="v">${usd?nf(usd.v,0):'—'}</div><div class="s">${(()=>{const c=mkChg(13,30);return c?pctS(c.rel)+' trong 30 ngày':'đồng/USD';})()}</div></div>
+      </div></div>
+  </section>
+  ${stale?`<div class="ins warn"><span class="ii">${ic('alert')}</span><div><b>Giá chưa được cập nhật từ ${sdate(last.d)}</b><p>Apps Script giaThiTruong() có thể chưa chạy: mở trình soạn Apps Script, chạy lại <b>caiDat</b> để cấp quyền.${last.v[24]?' Lỗi lần trước: '+esc(last.v[24]):''}</p></div></div>`:''}
+  ${card('Bảng giá','pulse',`<div class="mk-grid">${MK_TILES.map(mkTile).join('')}</div>`,mkStamp(),'sky')}
+  ${mkGoldCard()}
+  ${mkTips(C)}
+  ${mkYear(C)}
+  ${mkFx()}
+  <p class="note" style="text-align:center">Nguồn: Bảo Tín Mạnh Hải, Huy Thanh, Vietcombank, Petrolimex (qua webgia.com), Yahoo Finance, VNDirect. Giá có thể lệch với giá tại cửa hàng. Không phải tư vấn đầu tư.</p>`;
 }
 // Chúc mừng khi tài sản ròng vượt ngưỡng mới (so với lần mở trước trên máy này); lần đầu chỉ ghi nhớ, không chúc
 function msCelebrate(C){
@@ -2423,8 +2600,8 @@ function parseKai(res){
 }
 // Lưu số liệu lần đọc gần nhất trên máy: mở app là thấy ngay, đăng nhập chỉ để làm mới. Đăng xuất thì xoá.
 const CACHE_KEY='thaptaisan.data', PRIV_KEY='thaptaisan.priv';
-function saveCache(){try{localStorage.setItem(CACHE_KEY,JSON.stringify({d:DATA,h:HIST,c:CF,g:GOALS,l:LOANS,k:KAI,m:MSD,at:LIVE.at}));}catch(_){}}
-function loadCache(){try{const c=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');if(c&&c.d&&c.d.rows){HIST=c.h||[];CF=c.c||[];GOALS=c.g||[];LOANS=c.l||[];KAI=c.k||null;MSD=c.m||[];applyData(c.d);LIVE.at=c.at||0;return true;}}catch(_){}return false;}
+function saveCache(){try{localStorage.setItem(CACHE_KEY,JSON.stringify({d:DATA,h:HIST,c:CF,g:GOALS,l:LOANS,k:KAI,m:MSD,mk:MK,at:LIVE.at}));}catch(_){}}
+function loadCache(){try{const c=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');if(c&&c.d&&c.d.rows){HIST=c.h||[];CF=c.c||[];GOALS=c.g||[];LOANS=c.l||[];KAI=c.k||null;MSD=c.m||[];MK=c.mk||[];applyData(c.d);LIVE.at=c.at||0;return true;}}catch(_){}return false;}
 try{PRIV=localStorage.getItem(PRIV_KEY)==='1';}catch(_){}
 const IS_WEB=typeof WEB_CFG!=='undefined';
 const TOKEN_KEY='thaptaisan.token';
@@ -2468,7 +2645,7 @@ function signOut(){
   PW=null;try{localStorage.removeItem(PW_KEY);}catch(_){}
   try{if(t&&window.google)window.google.accounts.oauth2.revoke(t,()=>{});}catch(_){}
   try{localStorage.removeItem(CACHE_KEY);}catch(_){}
-  HIST=[];CF=[];GOALS=[];LOANS=[];KAI=null;MSD=[];LIVE.at=0;applyData(SNAP);LIVE.state='login';render();
+  HIST=[];CF=[];GOALS=[];LOANS=[];KAI=null;MSD=[];MK=[];LIVE.at=0;applyData(SNAP);LIVE.state='login';render();
 }
 async function fetchSheet(ranges,id=SHEET_ID){
   if(IS_WEB){
@@ -2493,16 +2670,16 @@ async function loadSheet(manual){
   try{
     if(IS_WEB&&PW&&WEB_CFG.api){
       const j=await fetchByPw(), main=parseSheet(j.main);
-      if(j.hist)HIST=parseHist(j.hist);if(j.cf)CF=parseCF(j.cf);if(j.goals)GOALS=parseGoals(j.goals);if(j.loans)LOANS=parseLoans(j.loans);if(j.ms)MSD=parseMS(j.ms);
+      if(j.hist)HIST=parseHist(j.hist);if(j.cf)CF=parseCF(j.cf);if(j.goals)GOALS=parseGoals(j.goals);if(j.loans)LOANS=parseLoans(j.loans);if(j.ms)MSD=parseMS(j.ms);if(j.mk)MK=parseMK(j.mk);
       if(j.kai&&j.kai.sheets){try{KAI=parseKai(j.kai);KAI_ERR='';}catch(e){KAI_ERR=e.message;}}else KAI_ERR=(j.kai&&j.kai.err)||'Không đọc được sheet Kai Café';
       applyData(main);LIVE.state='ok';LIVE.at=Date.now();LIVE.msg='';LIVE.pwErr=false;saveCache();busy=false;render();return;
     }
     const main=parseSheet(await fetchSheet(RANGES));
     // các sheet phụ đọc riêng: thiếu sheet nào thì giữ số cũ của sheet đó
-    const extra=await Promise.allSettled([...[HIST_RANGE,CF_RANGE,GOAL_RANGE,LOAN_RANGE].map(r=>fetchSheet([r])),fetchSheet(KAI_RANGES,KAI_ID),fetchSheet([MS_RANGE])]);
+    const extra=await Promise.allSettled([...[HIST_RANGE,CF_RANGE,GOAL_RANGE,LOAN_RANGE].map(r=>fetchSheet([r])),fetchSheet(KAI_RANGES,KAI_ID),fetchSheet([MS_RANGE]),fetchSheet([MK_RANGE])]);
     if(extra.some(x=>x.status==='rejected'&&x.reason&&x.reason.code==='needs_login'))throw extra.find(x=>x.reason&&x.reason.code==='needs_login').reason;
     const ok=(i,f)=>{if(extra[i].status==='fulfilled')return f(extra[i].value);};
-    ok(0,v=>HIST=parseHist(v));ok(1,v=>CF=parseCF(v));ok(2,v=>GOALS=parseGoals(v));ok(3,v=>LOANS=parseLoans(v));ok(4,v=>{try{KAI=parseKai(v);KAI_ERR='';}catch(e){KAI_ERR=e.message;}});ok(5,v=>MSD=parseMS(v));
+    ok(0,v=>HIST=parseHist(v));ok(1,v=>CF=parseCF(v));ok(2,v=>GOALS=parseGoals(v));ok(3,v=>LOANS=parseLoans(v));ok(4,v=>{try{KAI=parseKai(v);KAI_ERR='';}catch(e){KAI_ERR=e.message;}});ok(5,v=>MSD=parseMS(v));ok(6,v=>MK=parseMK(v));
     if(extra[4].status==='rejected')KAI_ERR=(extra[4].reason&&extra[4].reason.message)||'Không đọc được sheet Kai Café';
     applyData(main);
     LIVE.state='ok';LIVE.at=Date.now();saveCache();
@@ -2526,8 +2703,24 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=37, SEEN_KEY='thaptaisan.seen';
+const APP_VER=38, SEEN_KEY='thaptaisan.seen';
+// Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
+// "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
+let updShown=false;
+async function checkUpdate(){
+  if(!IS_WEB||updShown||!navigator.onLine)return;
+  try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();
+    if(+j.v>APP_VER){updShown=true;let el=document.getElementById('updToast');
+      if(!el){el=document.createElement('button');el.id='updToast';el.type='button';document.body.appendChild(el);}
+      el.innerHTML=ic('refresh','sm')+'<span>Có bản mới v'+(+j.v)+' — bấm để tải lại</span>';
+      el.onclick=()=>{el.disabled=true;el.querySelector('span').textContent='Đang tải bản mới…';
+        const go=()=>location.reload();
+        if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration)navigator.serviceWorker.getRegistration().then(g=>g?g.update().finally(go):go()).catch(go);else go();};}}
+  catch(_){}
+}
+if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
 const CHANGES=[
+  [38,'12/11/2026',['Tab Tự do có thêm mục <b>Thị trường</b>: giá vàng Bảo Tín Mạnh Hải, Huy Thanh, vàng thế giới, đô la Vietcombank, xăng dầu, dầu Brent, VN-Index, Bitcoin (tự cập nhật mỗi giờ)','<b>Mua vàng ở đâu lợi nhất</b>: so giá mua, giá bán lại, chênh lệch và giá thế giới; thử với số tiền của bạn','<b>Các kênh 1 năm qua</b> (tiết kiệm, vàng, VN-Index, đô, Bitcoin) kèm mức sụt sâu nhất; <b>gợi ý</b> theo ưu tiên an toàn']],
   [37,'09/11/2026',['Trên máy tính: <b>thanh trên và thanh tab luôn ghim ở đầu trang</b> khi kéo xuống, chuyển tab không cần cuộn lên']],
   [36,'08/11/2026',['<b>Ngưỡng tự do theo chi tiêu của bạn</b>: quỹ khẩn cấp 6 tháng, an toàn 1 năm, tự chủ 3 năm, tự do tối giản, tự do tài chính, tự do thoải mái; chi tiêu đổi thì ngưỡng tự đổi','Sửa tên, số tiền, thêm mốc riêng ở sheet <b>Ngưỡng</b>','Khối <b>Mốc theo kinh tế Việt Nam</b> (thu nhập bình quân, GDP đầu người, giá căn hộ): chỉ để xem, không tính vào lộ trình']],
   [35,'08/11/2026',['<b>Câu tóm tắt</b> đầu Tổng quan: 30 ngày qua thay đổi vì đâu, còn bao nhiêu tới mốc kế tiếp, việc nên làm trước','<b>Tiền tự sinh ra</b> (Hiệu suất): lãi sổ, ví đã tích lũy, mỗi tháng, mỗi năm','Biểu đồ tài sản ròng có nút <b>1T / 6T / 1N / Tất cả</b>; thẻ tài sản có đường mini','<b>Đồng hồ sức khỏe</b> 5 vòng phát sáng; icon tự vẽ nét','App nhẹ hơn: logo nhỏ lại, bớt phông, hiệu ứng tự dừng khi ra khỏi màn hình']],
@@ -2652,6 +2845,7 @@ setAbh();window.addEventListener('resize',setAbh,{passive:true});if(document.fon
 setTimeout(()=>{const sp=document.getElementById('splash');if(sp)sp.remove();animateView('in-up');if(seenVer()!==APP_VER)openSheet('new');},MOTION()?2000:0);
 document.addEventListener('click',e=>{
   if(zoomClick(e))return;
+  const fs=e.target.closest('[data-fsub]');if(fs){FM.sub=fs.dataset.fsub;saveFM();render();window.scrollTo(0,0);animateView('in-up');return;}
   const mb=e.target.closest('[data-msbase]');if(mb){FM.base=mb.dataset.msbase;saveFM();const y=window.scrollY;render();window.scrollTo(0,y);return;}
   if(e.target.closest('#news')){openSheet('new');return;}
   const sh=e.target.closest('[data-sh]');if(sh){openSheet(sh.dataset.sh);return;}
@@ -2690,6 +2884,7 @@ document.addEventListener('keydown',e=>{
 // ô nhập của tab Tự do: cập nhật FM, lưu trên máy, chỉ vẽ lại phần dự báo (giữ con trỏ ở ô đang gõ)
 function fmInput(e){
   const id=e.target.id, num=()=>parseFloat(String(e.target.value).replace(',','.'));
+  if(id==='mkAmt'){const v=num();if(v>0){FM.mkAmt=v;saveFM();const el=document.getElementById('mkCalc');if(el)el.innerHTML=mkCalc();}return true;}
   if(!/^fm(Save|Ret|Inf|Real|Tgt|Date)$/.test(id))return false;
   const v=num();
   if(id==='fmSave'&&v>=0)FM.m=v*1e6; else if(id==='fmRet'&&v>=0)FM.R=v/100; else if(id==='fmInf'&&v>=0)FM.inf=v/100;
