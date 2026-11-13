@@ -935,6 +935,11 @@ b.amt.v{color:#C9AEFF;background:rgba(176,140,255,.17);box-shadow:none}
 :is(b,span).neg:not(.v):not(.v *):not(.big *):not(.chip):not(.amt):not(svg *){color:var(--bad);background:var(--bad-soft)}
 .kpi .v b.amt{font-size:inherit;padding:0 8px}
 .part .row b.amt{font-size:12px}
+/* ETH + bạc thế giới theo ngày (13/11/2026) */
+.mkl{margin-top:12px}
+.mkl-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:13px;margin-bottom:4px}
+.mkl-h .num{font:700 16px var(--f-disp);color:var(--ink)}
+.mkl-s{font-size:12px;color:var(--muted);margin-top:2px}
 </style>
 
 <div id="splash" aria-hidden="true"><div class="sp-in"><svg viewBox="0 0 120 124" class="sp-logo" aria-hidden="true">
@@ -2570,6 +2575,36 @@ function silverChart(){
   <div class="legend"><span><i class="tdot" style="background:var(--c3)"></i>Phú Quý bạc miếng 1 lượng: nét liền bán ra, nét đứt mua vào, dải là chênh</span><span><i class="tdot" style="background:var(--info)"></i>Thế giới quy đổi đ/lượng</span></div>
   ${one?'<p class="note">Giá Phú Quý mới có từ 13/11/2026 nên hiện là một điểm; đường thế giới quy đổi có lịch sử 1 năm (ngày chưa có tỷ giá VCB dùng tỷ giá gần nhất).</p>':''}`;
 }
+// đường giá một cột sheet Thị trường trong khoảng FM.lr; col màu, f cách hiện số
+function mkLine(c,name,col,f){
+  const lr=FM.lr||'90', S=mkSer(c,lr==='all'?null:+lr);
+  if(S.length<2)return `<div class="mkl"><div class="mkl-h"><b>${name}</b></div><p class="muted">Chưa đủ số liệu.</p></div>`;
+  const W=360,H=150,L=6,Rt=62,T=10,B=22, d0=S[0].d, d1=S[S.length-1].d, vs=S.map(p=>p.v), lo=Math.min(...vs), hi=Math.max(...vs), pad=(hi-lo)*.08||hi*.01;
+  const x=d=>L+(d1===d0?1:(d-d0)/(d1-d0))*(W-L-Rt), y=v=>T+(1-(v-lo+pad)/(hi-lo+2*pad))*(H-T-B);
+  const p=S.map((q,i)=>`${i?'L':'M'}${x(q.d).toFixed(1)},${y(q.v).toFixed(1)}`).join(''), last=S[S.length-1], first=S[0], ch=last.v/first.v-1;
+  let pk=0,dd=0;S.forEach(q=>{pk=Math.max(pk,q.v);dd=Math.min(dd,q.v/pk-1);});
+  const iHi=vs.indexOf(hi), iLo=vs.indexOf(lo), dl=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1)+(lr==='all'||+lr>=365?'/'+String(t.getUTCFullYear()).slice(2):'');}, step=Math.max(1,Math.ceil(S.length/60));
+  const gid='mkg'+c;
+  return `<div class="mkl"><div class="mkl-h"><b>${name}</b><span class="num">${f(last.v)}</span>${chip(pctS(ch,1),tone4(ch,0,-.05,-.15))}<span class="muted">so với ${dl(first.d)}</span></div>
+  <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${name} theo ngày"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".35"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+    ${[lo,(lo+hi)/2,hi].map(v=>`<line x1="${L}" x2="${W-Rt+2}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${W-Rt+6}" y="${(y(v)+4).toFixed(1)}">${f(v)}</text>`).join('')}
+    <path d="${p}L${x(d1).toFixed(1)},${H-B}L${x(d0).toFixed(1)},${H-B}Z" fill="url(#${gid})"/>
+    <path d="${p}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="${x(S[iHi].d).toFixed(1)}" cy="${y(hi).toFixed(1)}" r="3" fill="var(--good)"/><circle cx="${x(S[iLo].d).toFixed(1)}" cy="${y(lo).toFixed(1)}" r="3" fill="var(--bad)"/>
+    <circle cx="${x(d1).toFixed(1)}" cy="${y(last.v).toFixed(1)}" r="4" fill="${col}" stroke="var(--surface)" stroke-width="2"/>
+    <text x="${L}" y="${H-6}">${dl(d0)}</text><text x="${W-Rt}" y="${H-6}" text-anchor="end">${dl(d1)}</text>
+    ${S.filter((_,i)=>i%step===0||i===S.length-1).map(q=>`<rect x="${(x(q.d)-5).toFixed(1)}" y="${T}" width="10" height="${H-T-B}" fill="transparent" data-tip="${dl(q.d)}: ${f(q.v)}"/>`).join('')}
+  </svg>
+  <div class="mkl-s">Cao nhất ${chip(f(hi),'g')} ${dl(S[iHi].d)} · thấp nhất ${chip(f(lo),'r')} ${dl(S[iLo].d)} · sụt sâu nhất từ đỉnh ${chip(pct(-dd,0),tone4(dd,-.05,-.15,-.3))}</div></div>`;
+}
+function ethSilverCard(){
+  if(!mkLast(25)&&!mkLast(26))return '';
+  const lr=FM.lr||'90';
+  return card('Ethereum và bạc thế giới','chart',`<div class="rng">${[['30','30N'],['90','90N'],['365','1N'],['all','Tất cả']].map(([k,l])=>`<button data-lr="${k}" aria-selected="${lr===k}">${l}</button>`).join('')}</div>
+    ${mkLine(26,'Bạc thế giới (USD/oz)','var(--c3)',v=>'$'+nf(v,2))}
+    ${mkLine(25,'Ethereum (USD)','var(--c1)',v=>'$'+nf(v,0))}
+    <p class="note">Nguồn Yahoo Finance, giá đóng cửa mỗi ngày (bạc chỉ có ngày giao dịch). Chấm xanh lá là cao nhất, chấm đỏ là thấp nhất trong khoảng chọn. Ethereum biến động rất mạnh: chỉ để theo dõi, không phải gợi ý mua.</p>`,mkStamp(),'sky');
+}
 function silverCard(){
   const m=mkLast(28), mb=mkLast(27), k=mkLast(30), kb=mkLast(29), xs=mkLast(26), u=mkLast(14)||mkLast(13);
   if(!m&&!xs)return '';
@@ -2597,6 +2632,7 @@ function vMarket(C){
   ${stale?`<div class="ins warn"><span class="ii">${ic('alert')}</span><div><b>Giá chưa được cập nhật từ ${sdate(last.d)}</b><p>Apps Script giaThiTruong() có thể chưa chạy: mở trình soạn Apps Script, chạy lại <b>caiDat</b> để cấp quyền.${last.v[24]?' Lỗi lần trước: '+esc(last.v[24]):''}</p></div></div>`:''}
   ${card('Bảng giá','pulse',`<div class="mk-grid">${MK_TILES.map(mkTile).join('')}</div>`,mkStamp(),'sky')}
   ${silverCard()}
+  ${ethSilverCard()}
   ${mkTips(C)}
   ${mkYear(C)}
   ${mkFx()}
@@ -3237,7 +3273,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=54, SEEN_KEY='thaptaisan.seen';
+const APP_VER=55, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3254,6 +3290,7 @@ async function checkUpdate(){
 }
 if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
 const CHANGES=[
+  [55,'13/11/2026',['Đưa lại biểu đồ <b>Ethereum và bạc thế giới theo ngày</b>: thay đổi trong khoảng chọn, cao/thấp nhất, sụt sâu nhất từ đỉnh, nút 30N/90N/1N/Tất cả']],
   [54,'13/11/2026',['Bỏ thẻ biểu đồ Ethereum và bạc thế giới cho app nhẹ hơn; giá ETH, bạc thế giới vẫn ở Bảng giá']],
   [52,'13/11/2026',['Thẻ <b>Bạc Phú Quý</b> có biểu đồ theo ngày: giá bán ra, mua vào, dải chênh và bạc thế giới quy đổi (1 năm), nút 30N/90N/1N/Tất cả']],
   [51,'12/11/2026',['Chip màu cho số nổi bật ở mọi tab: số tăng/giảm trong câu và bảng, % thực tế từng tầng (lệch ≤ 5 điểm xanh lá, ≤ 10 cam, ≤ 20 đỏ, hơn nữa đỏ đậm), điểm sức khỏe từng phần, chỉ số chính, quỹ khẩn cấp, tích lũy, lộ trình']],
@@ -3401,6 +3438,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-close]')){closeSheet();return;}
   const skb=e.target.closest('[data-sk]');if(skb){S.sk=skb.dataset.sk;const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const tab2=e.target.closest('[data-ta]');if(tab2){S.ta=tab2.dataset.ta;const y=window.scrollY;render();window.scrollTo(0,y);return;}
+  const lrb=e.target.closest('[data-lr]');if(lrb){FM.lr=lrb.dataset.lr;saveFM();const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const srb=e.target.closest('[data-sr]');if(srb){FM.sr=srb.dataset.sr;saveFM();const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const grb=e.target.closest('[data-gr]');if(grb){FM.gr=grb.dataset.gr;saveFM();const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const hb=e.target.closest('[data-hr]');if(hb){S.hr=hb.dataset.hr;const y=window.scrollY;render();window.scrollTo(0,y);return;}
