@@ -7,8 +7,8 @@
 <meta name="description" content="Sổ tài sản cá nhân đọc từ Google Sheet: tháp 4 tầng, phân tích sức khỏe tài chính.">
 <meta name="robots" content="noindex">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" href="icons/chip-192.png">
+<link rel="apple-touch-icon" href="icons/chip-192.png">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>:root{--nav-lift:64px;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
@@ -968,6 +968,20 @@ b.amt.v{color:#C9AEFF;background:rgba(176,140,255,.17);box-shadow:none}
 @keyframes spWord{from{opacity:0;transform:translateY(8px);letter-spacing:.3em}}
 @keyframes spLoad{from{transform:scaleX(0)}}
 @media (prefers-reduced-motion:reduce){#splash{display:none}}
+/* ==== Huy hiệu thương hiệu / tài sản ở Tự do, Thị trường, Vàng 24K (Kai 14/11/2026) ==== */
+.logo.lgi{display:inline-grid;vertical-align:-5px;margin-right:6px;border-radius:5px}
+.logo.mk.lgi::after,.mk-t .logo::after,.mk-pn .logo::after,.src-strip .logo::after,.hero-lg .logo::after,.gd-n .logo::after{display:none}
+.mk-bn{display:inline-flex;align-items:center;gap:0}
+.mk-h{display:flex;align-items:center;gap:8px;min-width:0}
+.mk-h .logo.sm{width:26px;height:26px;border-radius:7px}
+.mk-pn{display:flex;align-items:center;gap:10px}
+.gd-n{display:flex;align-items:center;gap:8px;line-height:1.25}
+.gd-n small{opacity:.8}
+.hero-lg{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px}
+.hero-lg .logo.sm{width:24px;height:24px;border-radius:6px;box-shadow:0 0 0 1px rgba(255,255,255,.08)}
+.src-strip{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 14px;margin:18px 0 4px}
+.src-strip>span{display:grid;justify-items:center;gap:4px;font-size:10.5px;color:var(--muted);max-width:76px;text-align:center;line-height:1.2}
+.legend .logo.lgi{margin-right:0;vertical-align:middle}
 </style>
 
 <div id="splash" aria-hidden="true"><div class="sp-grid"></div><div class="sp-scan"></div><div class="sp-in"><div class="sp-frame"><i></i><i></i><i></i><i></i><svg viewBox="0 0 120 120" class="sp-logo" aria-hidden="true"><defs><mask id="lgS"><rect width="120" height="120" fill="#fff"/><path d="M35.5 40v52M42.5 40v52M49.5 40v52M56.5 40v52M63.5 40v52M70.5 40v52M77.5 40v52M84.5 40v52" stroke="#000" stroke-width="1.6"/></mask></defs><path class="lg-pin" d="M5 46h11M5 59h11M5 72h11M5 85h11M104 46h11M104 59h11M104 72h11M104 85h11M40 104v11M60 104v11M80 104v11M40 5v11M80 5v11" stroke="#6B7C9E" stroke-width="4" stroke-linecap="round"/><rect class="lg-body" x="16" y="16" width="88" height="88" rx="14" fill="#1A2438" stroke="#4A5C80" stroke-width="3" pathLength="100"/><path class="lg-pin1" d="M24 24h9l-9 9z" fill="#4A5C80"/><g class="lg-tr"><path d="M22 46h24M22 59h17M22 72h10M98 46H74M98 59H81M98 72H88M28 96h64" fill="none" stroke="#3E5074" stroke-width="2" stroke-linecap="round" pathLength="100"/><g fill="#5E7096"><circle cx="22" cy="46" r="2.2"/><circle cx="22" cy="59" r="2.2"/><circle cx="22" cy="72" r="2.2"/><circle cx="98" cy="46" r="2.2"/><circle cx="98" cy="59" r="2.2"/><circle cx="98" cy="72" r="2.2"/></g></g><g mask="url(#lgS)"><rect class="lg-b lg-b1" x="31" y="80" width="58" height="10" rx="2" fill="var(--h1)"/><rect class="lg-b lg-b2" x="38" y="67" width="44" height="10" rx="2" fill="var(--h2)"/><rect class="lg-b lg-b3" x="45" y="54" width="30" height="10" rx="2" fill="var(--h3)"/><rect class="lg-b lg-b4" x="52" y="41" width="16" height="10" rx="2" fill="var(--h4)"/></g><path class="lg-sp" d="M60 41V32" stroke="#DCE4F1" stroke-width="3" stroke-linecap="round"/><circle class="lg-n" cx="60" cy="28" r="4.2" fill="#5ED0FF"/><path class="lg-arc" d="M51.5 23.1A9.8 9.8 0 0 1 55.1 19.5M64.9 19.5A9.8 9.8 0 0 1 68.5 23.1" fill="none" stroke="#5ED0FF" stroke-width="2.6" stroke-linecap="round" opacity=".8"/></svg></div><div class="sp-word">Tháp <span>Tài Sản</span></div><div class="sp-sys"><span>Khởi động</span><b><i></i></b><span class="sp-pc">SYNC</span></div></div></div>
@@ -1353,8 +1367,33 @@ const MARKS={
   bhyt:['#FFFFFF','<rect x="3.5" y="2.8" width="17" height="12.4" rx="1.8" fill="#D7261E" stroke="#222" stroke-width=".9"/>'+
     '<path d="M10.6 4.9h2.8v2.2h2.2v2.8h-2.2v2.2h-2.8v-2.2H8.4V7.1h2.2z" fill="#fff" stroke="#222" stroke-width=".6"/>'+
     '<path d="M5.3 6h2.4M5.3 8.2h2.4M5.3 10.4h2.4M16.3 6h2.4M16.3 8.2h2.4M16.3 10.4h2.4" stroke="#fff" stroke-width="1" stroke-linecap="round"/>'+
-    '<path d="M2.4 17.6 5.5 15c1.2-1 2.5-1.3 4-1.1h5.4c1 0 1.5.9 1.1 1.7-.3.6-.9.9-1.6.9h-3.2l4.7.1 4.3-2.4c.9-.5 1.9.6 1.2 1.4l-4.4 4.4c-.7.7-1.6 1-2.6 1H7.6L5 21.8z" fill="#fff" stroke="#222" stroke-width=".9" stroke-linejoin="round"/>']};
-const DEV_BRANDS=[[/bhxh|bảo hiểm xã hội/,'bhxh'],[/bhtn|thất nghiệp/,'bhtn'],[/bhyt|y tế/,'bhyt'],[/zalo/,'zalopay'],[/honda|airblade|vision|\bwave\b|\bsh\b|\blead\b|winner/,'honda'],[/acer|nitro|predator|aspire/,'acer'],[/huawei|matepad/,'huawei'],[/poco/,'poco'],[/xiaomi|redmi|\bmi\b/,'xiaomi']];
+    '<path d="M2.4 17.6 5.5 15c1.2-1 2.5-1.3 4-1.1h5.4c1 0 1.5.9 1.1 1.7-.3.6-.9.9-1.6.9h-3.2l4.7.1 4.3-2.4c.9-.5 1.9.6 1.2 1.4l-4.4 4.4c-.7.7-1.6 1-2.6 1H7.6L5 21.8z" fill="#fff" stroke="#222" stroke-width=".9" stroke-linejoin="round"/>'],
+  // Thương hiệu và tài sản ở tab Tự do › Thị trường, Vàng 24K (Kai 14/11/2026): huy hiệu chữ/hình đơn giản theo màu nhận diện, không phải logo gốc
+  btmh:['#B71C1C',mkT('BTMH',6.4,900,'#FFD54F')],
+  kgb:['#7A1414','<circle cx="12" cy="14" r="5.4" fill="none" stroke="#F6C445" stroke-width="2.4"/><path d="M12 3.6l2.8 2.7L12 8.9 9.2 6.3z" fill="#FFF0B0"/>'],
+  ht:['#0F2D5C',mkT('HT',10,900,'#F2C14E')],
+  pq:['#0E6B4E',mkT('PQ',9.6,900,'#FFFFFF')],
+  sjc:['#C62828',mkT('SJC',7.8,900,'#FFE082')],
+  vcb:['#0B7A3E',mkT('VCB',7.4,900,'#FFFFFF')],
+  plx:['#0A4DA2','<path d="M8 19V5h5.2a4.3 4.3 0 0 1 0 8.6H10.6" fill="none" stroke="#F7941D" stroke-width="2.6" stroke-linejoin="round"/>'],
+  hose:['#123E7A','<path d="M4 17l4.5-5 3.5 3 7.5-8.5" fill="none" stroke="#5ED0FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 6.5h4v4" fill="none" stroke="#5ED0FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'],
+  au:['#D4A62A',mkT('Au',10.5,900,'#3D2A00')],
+  ag:['#B8C1CE',mkT('Ag',10.5,900,'#1F2937')],
+  usd:['#1E7B45',mkT('$',14,900,'#FFFFFF')],
+  btc:['#F7931A','<g transform="rotate(14 12 12)"><path d="M10.4 4.5v15M13.4 4.5v15" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>'+mkT('B',13,900,'#FFFFFF')+'</g>'],
+  eth:['#627EEA','<path d="M12 3.2 6.8 12 12 15.1 17.2 12z" fill="#fff"/><path d="M12 16.3 6.8 13.2 12 20.8 17.2 13.2z" fill="#fff" fill-opacity=".8"/><path d="M12 3.2V15.1L6.8 12z" fill="#C9D3FA"/>'],
+  brent:['#2B2F36','<path d="M12 4.2c3.2 4.2 5.2 6.9 5.2 9.7a5.2 5.2 0 0 1-10.4 0c0-2.8 2-5.5 5.2-9.7z" fill="#F5A524"/><path d="M9.6 14.2a2.6 2.6 0 0 0 2.2 2.5" fill="none" stroke="#2B2F36" stroke-width="1.3" stroke-linecap="round"/>'],
+  r95:['#D32F2F',mkT('95',10,900,'#FFFFFF')],
+  e5:['#2E7D32',mkT('E5',10,900,'#FFFFFF')],
+  do:['#374151',mkT('DO',9.4,900,'#FFFFFF')],
+  save:['#4A5C80','<path d="M12 4 4.5 8v1.8h15V8z" fill="#fff"/><path d="M6.5 11v6M10 11v6M14 11v6M17.5 11v6" stroke="#fff" stroke-width="1.8"/><path d="M4.5 18.6h15" stroke="#fff" stroke-width="2"/>'],
+  vn:['#DA251D','<path d="M12 5.2l1.75 5.1h5.4l-4.35 3.2 1.65 5.2L12 15.5l-4.45 3.2 1.65-5.2-4.35-3.2h5.4z" fill="#FFCD00"/>'],
+  apt:['#3B5BA9','<path d="M6 20V6.5L12 4v16M12 9h6v11" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.3 9h1.4M8.3 12h1.4M8.3 15h1.4M14.3 12h1.4M14.3 15h1.4" stroke="#fff" stroke-width="1.6"/><path d="M4 20h16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>']};
+const DEV_BRANDS=[[/kim gia bảo|\bkgb\b/,'kgb'],[/bảo tín|btmh/,'btmh'],[/huy thanh/,'ht'],[/phú quý/,'pq'],[/\bsjc\b/,'sjc'],[/bitcoin|\bbtc\b/,'btc'],[/ethereum|\beth\b/,'eth'],[/bhxh|bảo hiểm xã hội/,'bhxh'],[/bhtn|thất nghiệp/,'bhtn'],[/bhyt|y tế/,'bhyt'],[/zalo/,'zalopay'],[/honda|airblade|vision|\bwave\b|\bsh\b|\blead\b|winner/,'honda'],[/acer|nitro|predator|aspire/,'acer'],[/huawei|matepad/,'huawei'],[/poco/,'poco'],[/xiaomi|redmi|\bmi\b/,'xiaomi']];
+// huy hiệu nhỏ theo khoá MARKS (mặc định cỡ xs nằm trong dòng chữ)
+const bLogo=(k,c='xs lgi',t='')=>{const m=MARKS[k];if(!m)return '';return `<span class="logo mk ${c}${m[0]==='#FFFFFF'?' lt':''}" style="--lc:${m[0]}"${t?` title="${esc(t)}"`:''}><svg viewBox="0 0 24 24" aria-hidden="true">${m[1]}</svg></span>`;};
+const shopLg=s=>s.k==='kgb'?'btmh':'ht';
+const srcStrip=ks=>`<div class="src-strip">${ks.map(([k,n])=>`<span>${bLogo(k,'sm',n)}<small>${n}</small></span>`).join('')}</div>`;
 function brandOf(a){
   const n=a.name.toLowerCase();
   for(const [re,k] of DEV_BRANDS) if(re.test(n)) return {color:MARKS[k][0],mark:k};
@@ -2344,12 +2383,12 @@ const VN_REF={at:'08/11/2026',inc:9.2e6,gdp:125.5e6,hcm:76e6,hn:86e6,area:70,
 function vnRefCard(C,M){
   const R=VN_REF, P=Math.max(0,M.P), yInc=R.inc*12;
   const it=[
-    {n:'Sống bằng thu nhập trung bình',v:yInc/WD,s:'rút 4%/năm = '+tr(R.inc)+'/tháng, bằng thu nhập bình quân một lao động'},
-    {n:'Sống bằng GDP đầu người',v:R.gdp/WD,s:'rút 4%/năm = '+tr(R.gdp/12)+'/tháng'},
-    {n:'Căn hộ '+R.area+' m² TP.HCM',v:R.hcm*R.area,s:'giá sơ cấp ~'+tr(R.hcm)+'/m²'},
-    {n:'Căn hộ '+R.area+' m² Hà Nội',v:R.hn*R.area,s:'giá sơ cấp ~'+tr(R.hn)+'/m²'}].sort((a,b)=>a.v-b.v);
+    {b:'vn',n:'Sống bằng thu nhập trung bình',v:yInc/WD,s:'rút 4%/năm = '+tr(R.inc)+'/tháng, bằng thu nhập bình quân một lao động'},
+    {b:'vn',n:'Sống bằng GDP đầu người',v:R.gdp/WD,s:'rút 4%/năm = '+tr(R.gdp/12)+'/tháng'},
+    {b:'apt',n:'Căn hộ '+R.area+' m² TP.HCM',v:R.hcm*R.area,s:'giá sơ cấp ~'+tr(R.hcm)+'/m²'},
+    {b:'apt',n:'Căn hộ '+R.area+' m² Hà Nội',v:R.hn*R.area,s:'giá sơ cấp ~'+tr(R.hn)+'/m²'}].sort((a,b)=>a.v-b.v);
   return card('Mốc theo kinh tế Việt Nam','globe',`<div class="vnr-top"><b>${nf(P/yInc,1)} năm</b><span>${M.base==='avail'?'Tài sản khả dụng':'Tài sản ròng'} của bạn bằng chừng ấy năm thu nhập của một lao động bình quân (${tr(yInc)}/năm).</span></div>
-    <div class="vnr">${it.map(x=>{const p=Math.min(1,P/x.v);return `<div class="vnr-r"><div class="vnr-h"><b>${x.n}</b><span class="num">${msVal(Math.round(x.v/1e7)*1e7)}</span></div>
+    <div class="vnr">${it.map(x=>{const p=Math.min(1,P/x.v);return `<div class="vnr-r"><div class="vnr-h"><b class="mk-bn">${bLogo(x.b)}${x.n}</b><span class="num">${msVal(Math.round(x.v/1e7)*1e7)}</span></div>
       <div class="vnr-b"><i style="width:${(p*100).toFixed(1)}%"></i></div><div class="vnr-s">${x.s} · ${P>=x.v?'đã vượt':'đạt '+pct(p,0)+', còn '+msVal(x.v-P)}</div></div>`;}).join('')}</div>
     <p class="note">Chỉ để xem cho biết, không dùng để tính lộ trình hay dự báo. Nguồn (tra ${R.at}): ${R.src.join('; ')}. Giá nhà mỗi đơn vị khảo sát một khác.</p>`,'tham khảo');
 }
@@ -2388,23 +2427,23 @@ function mkSpark(c,days=90){
 }
 // các ô giá: c = cột sheet, f = cách hiện số
 const MK_TILES=[
-  {c:7,n:'Nhẫn Kim Gia Bảo 24K',s:'Bảo Tín Mạnh Hải bán ra',f:v=>nf(v/1e6,2)+' Tr/chỉ',tr:1},
-  {c:11,n:'Vàng 24K Huy Thanh',s:'Huy Thanh bán ra (miền Bắc)',f:v=>nf(v/1e6,2)+' Tr/chỉ'},
-  {c:28,n:'Bạc miếng Phú Quý 999',s:'Phú Quý bán ra, 1 lượng',f:v=>nf(v,0)+'đ'},
-  {c:9,n:'Vàng miếng SJC',s:'Bảo Tín Mạnh Hải bán ra',f:v=>nf(v/1e6,2)+' Tr/chỉ'},
-  {c:15,n:'Vàng thế giới',s:'USD/ounce',f:v=>'$'+nf(v,0)},
-  {c:26,n:'Bạc thế giới',s:'USD/ounce',f:v=>'$'+nf(v,2)},
-  {c:13,n:'Đô la Mỹ',s:'Vietcombank bán ra',f:v=>nf(v,0)+'đ'},
-  {c:20,n:'Xăng RON 95-III',s:'Petrolimex vùng 1',f:v=>nf(v,0)+'đ/lít'},
-  {c:16,n:'Dầu Brent',s:'USD/thùng',f:v=>'$'+nf(v,2)},
-  {c:18,n:'VN-Index',s:'HOSE',f:v=>nf(v,2)},
-  {c:19,n:'Bitcoin',s:'USD',f:v=>'$'+nf(v,0)},
-  {c:25,n:'Ethereum',s:'USD',f:v=>'$'+nf(v,0)}];
+  {c:7,b:'kgb',n:'Nhẫn Kim Gia Bảo 24K',s:'Bảo Tín Mạnh Hải bán ra',f:v=>nf(v/1e6,2)+' Tr/chỉ',tr:1},
+  {c:11,b:'ht',n:'Vàng 24K Huy Thanh',s:'Huy Thanh bán ra (miền Bắc)',f:v=>nf(v/1e6,2)+' Tr/chỉ'},
+  {c:28,b:'pq',n:'Bạc miếng Phú Quý 999',s:'Phú Quý bán ra, 1 lượng',f:v=>nf(v,0)+'đ'},
+  {c:9,b:'sjc',n:'Vàng miếng SJC',s:'Bảo Tín Mạnh Hải bán ra',f:v=>nf(v/1e6,2)+' Tr/chỉ'},
+  {c:15,b:'au',n:'Vàng thế giới',s:'USD/ounce',f:v=>'$'+nf(v,0)},
+  {c:26,b:'ag',n:'Bạc thế giới',s:'USD/ounce',f:v=>'$'+nf(v,2)},
+  {c:13,b:'usd',n:'Đô la Mỹ',s:'Vietcombank bán ra',f:v=>nf(v,0)+'đ'},
+  {c:20,b:'r95',n:'Xăng RON 95-III',s:'Petrolimex vùng 1',f:v=>nf(v,0)+'đ/lít'},
+  {c:16,b:'brent',n:'Dầu Brent',s:'USD/thùng',f:v=>'$'+nf(v,2)},
+  {c:18,b:'hose',n:'VN-Index',s:'HOSE',f:v=>nf(v,2)},
+  {c:19,b:'btc',n:'Bitcoin',s:'USD',f:v=>'$'+nf(v,0)},
+  {c:25,b:'eth',n:'Ethereum',s:'USD',f:v=>'$'+nf(v,0)}];
 function mkTile(t){
   const L=mkLast(t.c);if(!L)return '';
   const d1=mkChg(t.c,0), d30=mkChg(t.c,30), T=t.tr?mkTrend():null;
   const r1=d1?d1.rel:T&&T.d1!=null?T.d1/100:null, r30=d30?d30.rel:T&&T.d30!=null?T.d30/100:null;
-  return `<div class="mk-t"><div class="mk-n">${t.n}</div><div class="mk-v num">${t.f(L.v)}</div>
+  return `<div class="mk-t"><div class="mk-h">${bLogo(t.b,'sm')}<div class="mk-n">${t.n}</div></div><div class="mk-v num">${t.f(L.v)}</div>
     <div class="mk-c">${r1!=null?`<span class="${clsR(r1)}">${pctS(r1,2)}</span> phiên trước`:'<span>mới có hôm nay</span>'}${r30!=null?` · <span class="${clsR(r30)}">${pctS(r30)}</span> 30 ngày`:''}</div>
     ${mkSpark(t.c)}<div class="mk-s">${t.s}</div></div>`;
 }
@@ -2412,14 +2451,14 @@ function mkTile(t){
 function mkGold(){
   const g=(c,k=1)=>{const L=mkLast(c);return L?L.v/k:null;};
   return [
-    {n:'Nhẫn Kim Gia Bảo 24K',b:'Bảo Tín Mạnh Hải',pay:g(7),back:g(6),ring:1},
-    {n:'Vàng 24K (nhẫn, trang sức)',b:'Huy Thanh',pay:g(11),back:g(10),ring:1},
-    {n:'Vàng miếng SJC',b:'Bảo Tín Mạnh Hải',pay:g(9),back:g(8)}].filter(x=>x.pay&&x.back).map(x=>({...x,spread:1-x.back/x.pay}));
+    {k:'kgb',n:'Nhẫn Kim Gia Bảo 24K',b:'Bảo Tín Mạnh Hải',pay:g(7),back:g(6),ring:1},
+    {k:'ht',n:'Vàng 24K (nhẫn, trang sức)',b:'Huy Thanh',pay:g(11),back:g(10),ring:1},
+    {k:'sjc',n:'Vàng miếng SJC',b:'Bảo Tín Mạnh Hải',pay:g(9),back:g(8)}].filter(x=>x.pay&&x.back).map(x=>({...x,spread:1-x.back/x.pay}));
 }
 function mkGoldCard(){
   const G=mkGold(), W=mkWorld();if(!G.length)return '';
   const minPay=Math.min(...G.map(x=>x.pay)), minSp=Math.min(...G.map(x=>x.spread)), amt=FM.mkAmt||10;
-  const rows=G.map(x=>`<tr${x.spread===minSp?' class="mk-best"':''}><td><b>${x.n}</b><br><small>${x.b}</small></td><td class="num">${nf(x.pay/1e6,2)}${x.pay===minPay?' <i class="mk-tag">rẻ nhất</i>':''}</td><td class="num">${nf(x.back/1e6,2)}</td>
+  const rows=G.map(x=>`<tr${x.spread===minSp?' class="mk-best"':''}><td><div class="mk-pn">${bLogo(x.k,'sm')}<div><b>${x.n}</b><br><small>${x.b}</small></div></div></td><td class="num">${nf(x.pay/1e6,2)}${x.pay===minPay?' <i class="mk-tag">rẻ nhất</i>':''}</td><td class="num">${nf(x.back/1e6,2)}</td>
     <td class="num ${x.spread===minSp?'pos':x.spread>0.035?'neg':''}">${pct(x.spread,1)}${x.spread===minSp?' <i class="mk-tag">thấp nhất</i>':''}</td><td class="num">${W?pctS(x.pay/W-1):'—'}</td></tr>`).join('');
   return card('Mua vàng ở đâu lợi nhất','gem',`<div class="tablewrap"><table class="mk-tb"><tr><th>Sản phẩm</th><th>Bạn mua<br><small>Tr/chỉ</small></th><th>Bán lại<br><small>Tr/chỉ</small></th><th>Mất ngay khi bán lại</th><th>So với thế giới</th></tr>${rows}</table></div>
     <div class="fm-in" style="margin-top:12px"><label><span>Thử với số tiền (Tr)</span><input id="mkAmt" type="number" inputmode="decimal" min="1" step="1" value="${amt}"></label></div>
@@ -2434,25 +2473,25 @@ function mkCalc(){
 function mkStamp(){const r=[...MK].reverse().find(x=>x.at);return r?'cập nhật '+fmtT((r.at-25569)*DAY-7*36e5)+' '+sdate(r.d).slice(0,5):'';}
 function mkFx(){
   const b=mkLast(12),s=mkLast(13),t=mkLast(14);if(!s)return '';
-  const c30=mkChg(13,30), xs=[[20,'Xăng RON 95-III'],[21,'Xăng E5 RON 92'],[22,'Dầu DO 0,05S']].map(([c,n])=>({c,n,L:mkLast(c)})).filter(x=>x.L);
+  const c30=mkChg(13,30), xs=[[20,'Xăng RON 95-III','r95'],[21,'Xăng E5 RON 92','e5'],[22,'Dầu DO 0,05S','do']].map(([c,n,b])=>({c,n,b,L:mkLast(c)})).filter(x=>x.L);
   const prevDiff=c=>{const s=mkSer(c);for(let i=s.length-2;i>=0;i--)if(s[i].v!==s[s.length-1].v)return {d:s[i].d,v:s[i].v};return null;};
   const ron=mkLast(20), e5=mkLast(21), tank=4.4, br=mkChg(16,30);
   return card('Đô la và xăng dầu','globe',`<div class="kpis">
-      <div class="kpi"><div class="label">USD Vietcombank</div><div class="v num">${nf(s.v,0)}đ</div><div class="s">mua tiền mặt ${b?nf(b.v,0):'—'} · chuyển khoản ${t?nf(t.v,0):'—'}</div></div>
+      <div class="kpi"><div class="label">${bLogo('vcb')}USD Vietcombank</div><div class="v num">${nf(s.v,0)}đ</div><div class="s">mua tiền mặt ${b?nf(b.v,0):'—'} · chuyển khoản ${t?nf(t.v,0):'—'}</div></div>
       <div class="kpi"><div class="label">Chênh mua – bán USD</div><div class="v num">${b?pct(1-b.v/s.v,1):'—'}</div><div class="s">mua đô tiền mặt rồi bán lại ngay mất chừng ấy</div></div>
-      <div class="kpi"><div class="label">USD 30 ngày</div><div class="v ${c30?clsR(c30.rel):''}">${c30?pctS(c30.rel):'—'}</div><div class="s">${c30?'so với '+sdate(c30.from):'cần thêm vài tuần số liệu'}</div></div></div>
-    ${xs.length?`<div class="tablewrap" style="margin-top:12px"><table><tr><th>Petrolimex vùng 1</th><th>Giá (đ/lít)</th><th>So với kỳ trước</th></tr>${xs.map(x=>{const p=prevDiff(x.c);return `<tr><td>${x.n}</td><td class="num">${nf(x.L.v,0)}</td><td class="num ${p?clsR(x.L.v-p.v):''}">${p?(x.L.v>p.v?'+':'−')+nf(Math.abs(x.L.v-p.v),0)+'đ ('+sdate(p.d).slice(0,5)+')':'—'}</td></tr>`;}).join('')}</table></div>`:''}
+      <div class="kpi"><div class="label">${bLogo('usd')}USD 30 ngày</div><div class="v ${c30?clsR(c30.rel):''}">${c30?pctS(c30.rel):'—'}</div><div class="s">${c30?'so với '+sdate(c30.from):'cần thêm vài tuần số liệu'}</div></div></div>
+    ${xs.length?`<div class="tablewrap" style="margin-top:12px"><table><tr><th>${bLogo('plx')}Petrolimex vùng 1</th><th>Giá (đ/lít)</th><th>So với kỳ trước</th></tr>${xs.map(x=>{const p=prevDiff(x.c);return `<tr><td>${bLogo(x.b)}${x.n}</td><td class="num">${nf(x.L.v,0)}</td><td class="num ${p?clsR(x.L.v-p.v):''}">${p?(x.L.v>p.v?'+':'−')+nf(Math.abs(x.L.v-p.v),0)+'đ ('+sdate(p.d).slice(0,5)+')':'—'}</td></tr>`;}).join('')}</table></div>`:''}
     ${ron?`<p class="note">Đổ đầy bình xe máy (~${nf(tank,1)} lít): RON 95-III ${vnd(ron.v*tank)}${e5?', E5 RON 92 '+vnd(e5.v*tank):''}. Mỗi 1.000đ/lít tăng giá = thêm ${vnd(1000*tank)}/bình.${br?` Dầu Brent 30 ngày qua <b class="${clsR(br.rel)}">${pctS(br.rel)}</b>: giá xăng trong nước thường đi theo dầu thế giới sau vài kỳ điều chỉnh.`:''}</p>`:''}`,mkStamp());
 }
 // lợi nhuận 1 năm qua của từng kênh (số quá khứ) và rủi ro: sụt sâu nhất đỉnh → đáy
 function mkYear(C){
   const T=mkTrend(), ref=DATA.cfg.ref||0, inf=FM.inf!=null?FM.inf:0.035;
-  const it=[{n:'Sổ tiết kiệm',r:ref,s:'lãi tham chiếu Cấu hình B8',safe:1},
-    T&&T.y1!=null?{n:'Vàng nhẫn 24K (BTMH)',r:T.y1/100,s:'giá Kim Gia Bảo, theo Bảo Tín Mạnh Hải'}:null,
-    ...[[15,'Vàng thế giới (USD)'],[26,'Bạc thế giới (USD)'],[18,'VN-Index'],[13,'Đô la Mỹ (VCB)'],[19,'Bitcoin (USD)'],[25,'Ethereum (USD)']].map(([c,n])=>{const x=mkChg(c,365),k=mkRisk(c,365);return x&&x.from<=mkLast(c).d-300?{n,r:x.rel,dd:k&&k.dd,s:k?'thấp nhất '+nf(k.lo,c===18?0:c===13?0:0)+' · cao nhất '+nf(k.hi,0):''}:null;})].filter(Boolean);
+  const it=[{b:'save',n:'Sổ tiết kiệm',r:ref,s:'lãi tham chiếu Cấu hình B8',safe:1},
+    T&&T.y1!=null?{b:'kgb',n:'Vàng nhẫn 24K (BTMH)',r:T.y1/100,s:'giá Kim Gia Bảo, theo Bảo Tín Mạnh Hải'}:null,
+    ...[[15,'Vàng thế giới (USD)','au'],[26,'Bạc thế giới (USD)','ag'],[18,'VN-Index','hose'],[13,'Đô la Mỹ (VCB)','usd'],[19,'Bitcoin (USD)','btc'],[25,'Ethereum (USD)','eth']].map(([c,n,b])=>{const x=mkChg(c,365),k=mkRisk(c,365);return x&&x.from<=mkLast(c).d-300?{b,n,r:x.rel,dd:k&&k.dd,s:k?'thấp nhất '+nf(k.lo,c===18?0:c===13?0:0)+' · cao nhất '+nf(k.hi,0):''}:null;})].filter(Boolean);
   if(it.length<2)return '';
   const mx=Math.max(...it.map(x=>Math.abs(x.r)),inf,0.01);
-  return card('Các kênh 1 năm qua','chart',`<div class="mk-yr">${it.map(x=>`<div class="mk-yr-r"><div class="mk-yr-h"><b>${x.n}</b><span class="num ${clsR(x.r)}">${pctS(x.r)}</span></div>
+  return card('Các kênh 1 năm qua','chart',`<div class="mk-yr">${it.map(x=>`<div class="mk-yr-r"><div class="mk-yr-h"><b class="mk-bn">${bLogo(x.b)}${x.n}</b><span class="num ${clsR(x.r)}">${pctS(x.r)}</span></div>
       <div class="mk-yr-b"><i class="${x.r<0?'neg':''}" style="width:${(Math.abs(x.r)/mx*50).toFixed(1)}%;${x.r<0?'right:50%':'left:50%'}"></i><u style="left:${(50+inf/mx*50).toFixed(1)}%"></u></div>
       <div class="mk-yr-s">${x.s}${x.dd!=null?' · <b class="neg">sụt sâu nhất '+pct(-x.dd,0)+'</b>':x.safe?' · không sụt (được bảo hiểm tiền gửi)':''}</div></div>`).join('')}</div>
     <p class="note">Vạch đứng = lạm phát ${pct(inf,1)}/năm (số bạn nhập ở Dự báo lãi kép). "Sụt sâu nhất" = từ đỉnh xuống đáy trong năm: con số cho biết bạn có thể phải chịu lỗ tạm thời bao nhiêu nếu mua đúng đỉnh. Kết quả quá khứ không bảo đảm tương lai.</p>`,'tham khảo');
@@ -2511,7 +2550,7 @@ function goldChart(){
     <text x="${L}" y="${H-8}">${dl(d0)}</text><text x="${W-Rt}" y="${H-8}" text-anchor="end">${dl(d1)}</text>
     ${R.filter((_,i)=>i%step===0||i===R.length-1).map(r=>`<rect x="${(x(r.d)-6).toFixed(1)}" y="${T}" width="12" height="${H-T-B}" fill="transparent" data-tip="${tip(r)}"/>`).join('')}
   </svg>
-  <div class="legend">${GSHOP.map(s=>`<span><i class="tdot" style="background:${s.col}"></i>${s.n} (${s.b})</span>`).join('')}<span><i class="tdot" style="background:var(--info)"></i>Thế giới quy đổi</span><span>Nét liền: giá bán ra (bạn mua) · nét đứt: giá mua vào (bạn bán) · dải màu: chênh mua – bán</span></div>`;
+  <div class="legend">${GSHOP.map(s=>`<span><i class="tdot" style="background:${s.col}"></i>${bLogo(s.k)}${s.n} (${s.b})</span>`).join('')}<span><i class="tdot" style="background:var(--info)"></i>${bLogo('au')}Thế giới quy đổi</span><span>Nét liền: giá bán ra (bạn mua) · nét đứt: giá mua vào (bạn bán) · dải màu: chênh mua – bán</span></div>`;
 }
 // % cao hơn thế giới theo ngày cho từng nhà (giá bán ra so với thế giới quy đổi)
 function goldPremium(){
@@ -2533,8 +2572,8 @@ function goldMatrix(){
   const cell=(a,b)=>{const loss=1-b.buy.v/a.sell.v;return {loss,be:a.sell.v/b.buy.v-1,a,b};}, all=P.flatMap(a=>P.map(b=>cell(a,b))), best=all.reduce((m,c)=>c.loss<m.loss?c:m,all[0]);
   const tone=l=>l<=0.025?'good':l<=0.04?'warn':'bad', amt=(FM.mkAmt||10)*1e6;
   const cheap=P.length>1?[...P].sort((a,b)=>a.sell.v-b.sell.v):null, R=goldRows(FM.gr||'90').filter(r=>GSHOP.every(s=>r.v[s.sell]>0)), kgbWin=R.filter(r=>r.v[7]<r.v[11]).length;
-  return `<div class="tablewrap"><table class="gm"><tr><th>Mua ↓ · bán →</th>${P.map(b=>`<th>${b.s.k==='kgb'?'BTMH':'Huy Thanh'}<br><small>mua vào ${nf(b.buy.v/1e6,2)}</small></th>`).join('')}</tr>
-    ${P.map(a=>`<tr><td><b>${a.s.k==='kgb'?'BTMH':'Huy Thanh'}</b><br><small>bán ra ${nf(a.sell.v/1e6,2)}</small></td>${P.map(b=>{const c=cell(a,b);return `<td class="${c===best?'gm-best':''}"><span class="chip ${tone(c.loss)}">mất ${pct(c.loss,1)}</span><br><small>hoà vốn khi +${pct(c.be,1)}${a!==b?'<br>bán chéo':''}</small></td>`;}).join('')}</tr>`).join('')}
+  return `<div class="tablewrap"><table class="gm"><tr><th>Mua ↓ · bán →</th>${P.map(b=>`<th>${bLogo(shopLg(b.s))}${b.s.k==='kgb'?'BTMH':'Huy Thanh'}<br><small>mua vào ${nf(b.buy.v/1e6,2)}</small></th>`).join('')}</tr>
+    ${P.map(a=>`<tr><td><b>${bLogo(shopLg(a.s))}${a.s.k==='kgb'?'BTMH':'Huy Thanh'}</b><br><small>bán ra ${nf(a.sell.v/1e6,2)}</small></td>${P.map(b=>{const c=cell(a,b);return `<td class="${c===best?'gm-best':''}"><span class="chip ${tone(c.loss)}">mất ${pct(c.loss,1)}</span><br><small>hoà vốn khi +${pct(c.be,1)}${a!==b?'<br>bán chéo':''}</small></td>`;}).join('')}</tr>`).join('')}
   </table></div>
   <div class="chk ok" style="margin-top:12px"><b>${ic('gem','sm')} Tốt nhất hôm nay: mua ở ${esc(best.a.s.b)}, bán lại cho ${esc(best.b.s.b)}</b><span>${nf(amt/1e6,0)} Tr mua được ${nf(amt/best.a.sell.v,2)} chỉ; bán lại ngay nhận ${vnd(amt/best.a.sell.v*best.b.buy.v)}, mất <b class="amt r">${vnd(amt*best.loss)}</b>.</span></div>
   ${cheap?`<p class="note">Hôm nay <b>${esc(cheap[0].s.b)}</b> bán rẻ hơn ${esc(cheap[1].s.b)} <b>${vnd(cheap[1].sell.v-cheap[0].sell.v)}/chỉ</b>.${R.length>1?` Trong ${R.length} ngày có giá cả hai nhà, Kim Gia Bảo rẻ hơn ${kgbWin} ngày, Huy Thanh rẻ hơn ${R.length-kgbWin} ngày.`:''}</p>`:''}
@@ -2556,15 +2595,16 @@ function vGold(C){
   const cheap=[...P].sort((a,b)=>a.sell.v-b.sell.v)[0];
   return `<section class="hero"><div class="l"><div>
       <div class="label">Vàng 24K · ${mkStamp()||''}</div>
-      <div class="gd-top">${P.map(p=>`<div><div class="s" style="color:var(--hero-mute)">${p.s.n}</div><div class="big" style="font-size:30px">${nf(p.sell.v/1e6,2)} Tr</div><div class="s" style="color:var(--hero-mute)">mua vào ${p.buy?nf(p.buy.v/1e6,2):'—'} · chênh ${p.buy?pct(1-p.buy.v/p.sell.v,1):'—'}</div></div>`).join('')}</div></div>
+      <div class="gd-top">${P.map(p=>`<div><div class="s gd-n" style="color:var(--hero-mute)">${bLogo(p.s.k,'sm')}<span>${p.s.n}<br><small>${p.s.b}</small></span></div><div class="big" style="font-size:30px">${nf(p.sell.v/1e6,2)} Tr</div><div class="s" style="color:var(--hero-mute)">mua vào ${p.buy?nf(p.buy.v/1e6,2):'—'} · chênh ${p.buy?pct(1-p.buy.v/p.sell.v,1):'—'}</div></div>`).join('')}</div></div>
       <div class="stats">
-        <div class="stat"><div class="label">Rẻ hơn hôm nay</div><div class="v">${P.length>1?esc(cheap.s.b):'—'}</div><div class="s">${P.length>1?'rẻ hơn '+vnd(Math.abs(P[0].sell.v-P[1].sell.v))+'/chỉ':'chỉ có giá một nhà'}</div></div>
-        <div class="stat"><div class="label">So với thế giới</div><div class="v">${W?pctS(cheap.sell.v/W-1):'—'}</div><div class="s">thế giới quy đổi ${W?nf(W/1e6,2)+' Tr/chỉ':'—'}</div></div>
+        <div class="stat"><div class="label">Rẻ hơn hôm nay</div><div class="v">${P.length>1?bLogo(shopLg(cheap.s))+esc(cheap.s.b):'—'}</div><div class="s">${P.length>1?'rẻ hơn '+vnd(Math.abs(P[0].sell.v-P[1].sell.v))+'/chỉ':'chỉ có giá một nhà'}</div></div>
+        <div class="stat"><div class="label">${bLogo('au')}So với thế giới</div><div class="v">${W?pctS(cheap.sell.v/W-1):'—'}</div><div class="s">thế giới quy đổi ${W?nf(W/1e6,2)+' Tr/chỉ':'—'}</div></div>
       </div></div></section>
   ${card('Giá 24K hai nhà theo ngày','chart',goldChart()+goldPremium(),'Tr/chỉ','sky')}
   ${card('Mua ở đâu, bán ở đâu','target',goldMatrix())}
   ${card('Vàng bạn đang có','wallet',goldHold(C))}
   ${mkGoldCard()}
+  ${srcStrip([['btmh','Bảo Tín Mạnh Hải'],['kgb','Kim Gia Bảo'],['ht','Huy Thanh'],['sjc','SJC'],['vcb','Vietcombank']])}
   <p class="note" style="text-align:center">Nguồn: Bảo Tín Mạnh Hải, Huy Thanh (miền Bắc), cập nhật mỗi giờ 7h–22h. Không phải tư vấn đầu tư.</p>`;
 }
 // ---- Bạc (Kai 12/11/2026): Phú Quý (giabac.phuquygroup.vn) cột AB–AE, bạc thế giới cột AA (USD/oz)
@@ -2602,16 +2642,16 @@ function silverChart(){
   ${one?'<p class="note">Giá Phú Quý mới có từ 13/11/2026 nên hiện là một điểm; đường thế giới quy đổi có lịch sử 1 năm (ngày chưa có tỷ giá VCB dùng tỷ giá gần nhất).</p>':''}`;
 }
 // đường giá một cột sheet Thị trường trong khoảng FM.lr; col màu, f cách hiện số
-function mkLine(c,name,col,f){
+function mkLine(c,name,col,f,b){
   const lr=FM.lr||'90', S=mkSer(c,lr==='all'?null:+lr);
-  if(S.length<2)return `<div class="mkl"><div class="mkl-h"><b>${name}</b></div><p class="muted">Chưa đủ số liệu.</p></div>`;
+  if(S.length<2)return `<div class="mkl"><div class="mkl-h"><b class="mk-bn">${bLogo(b)}${name}</b></div><p class="muted">Chưa đủ số liệu.</p></div>`;
   const W=360,H=150,L=6,Rt=62,T=10,B=22, d0=S[0].d, d1=S[S.length-1].d, vs=S.map(p=>p.v), lo=Math.min(...vs), hi=Math.max(...vs), pad=(hi-lo)*.08||hi*.01;
   const x=d=>L+(d1===d0?1:(d-d0)/(d1-d0))*(W-L-Rt), y=v=>T+(1-(v-lo+pad)/(hi-lo+2*pad))*(H-T-B);
   const p=S.map((q,i)=>`${i?'L':'M'}${x(q.d).toFixed(1)},${y(q.v).toFixed(1)}`).join(''), last=S[S.length-1], first=S[0], ch=last.v/first.v-1;
   let pk=0,dd=0;S.forEach(q=>{pk=Math.max(pk,q.v);dd=Math.min(dd,q.v/pk-1);});
   const iHi=vs.indexOf(hi), iLo=vs.indexOf(lo), dl=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1)+(lr==='all'||+lr>=365?'/'+String(t.getUTCFullYear()).slice(2):'');}, step=Math.max(1,Math.ceil(S.length/60));
   const gid='mkg'+c;
-  return `<div class="mkl"><div class="mkl-h"><b>${name}</b><span class="num">${f(last.v)}</span>${chip(pctS(ch,1),tone4(ch,0,-.05,-.15))}<span class="muted">so với ${dl(first.d)}</span></div>
+  return `<div class="mkl"><div class="mkl-h"><b class="mk-bn">${bLogo(b)}${name}</b><span class="num">${f(last.v)}</span>${chip(pctS(ch,1),tone4(ch,0,-.05,-.15))}<span class="muted">so với ${dl(first.d)}</span></div>
   <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${name} theo ngày"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".35"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
     ${[lo,(lo+hi)/2,hi].map(v=>`<line x1="${L}" x2="${W-Rt+2}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${W-Rt+6}" y="${(y(v)+4).toFixed(1)}">${f(v)}</text>`).join('')}
     <path d="${p}L${x(d1).toFixed(1)},${H-B}L${x(d0).toFixed(1)},${H-B}Z" fill="url(#${gid})"/>
@@ -2627,8 +2667,8 @@ function ethSilverCard(){
   if(!mkLast(25)&&!mkLast(26))return '';
   const lr=FM.lr||'90';
   return card('Ethereum và bạc thế giới','chart',`<div class="rng">${[['30','30N'],['90','90N'],['365','1N'],['all','Tất cả']].map(([k,l])=>`<button data-lr="${k}" aria-selected="${lr===k}">${l}</button>`).join('')}</div>
-    ${mkLine(26,'Bạc thế giới (USD/oz)','var(--c3)',v=>'$'+nf(v,2))}
-    ${mkLine(25,'Ethereum (USD)','var(--c1)',v=>'$'+nf(v,0))}
+    ${mkLine(26,'Bạc thế giới (USD/oz)','var(--c3)',v=>'$'+nf(v,2),'ag')}
+    ${mkLine(25,'Ethereum (USD)','var(--c1)',v=>'$'+nf(v,0),'eth')}
     <p class="note">Nguồn Yahoo Finance, giá đóng cửa mỗi ngày (bạc chỉ có ngày giao dịch). Chấm xanh lá là cao nhất, chấm đỏ là thấp nhất trong khoảng chọn. Ethereum biến động rất mạnh: chỉ để theo dõi, không phải gợi ý mua.</p>`,mkStamp(),'sky');
 }
 function silverCard(){
@@ -2636,10 +2676,10 @@ function silverCard(){
   if(!m&&!xs)return '';
   const wl=xs&&u?xs.v*u.v/OZ*LUONG:null, wk=xs&&u?xs.v*u.v/OZ*1000:null;
   return card('Bạc Phú Quý','gem',`<div class="kpis">
-      <div class="kpi"><div class="label">Bạc miếng 999 · 1 lượng</div><div class="v num">${m?nf(m.v,0)+'đ':'—'}</div><div class="s">bán ra · mua vào ${mb?nf(mb.v,0)+'đ':'—'}</div></div>
+      <div class="kpi"><div class="label">${bLogo('pq')}Bạc miếng 999 · 1 lượng</div><div class="v num">${m?nf(m.v,0)+'đ':'—'}</div><div class="s">bán ra · mua vào ${mb?nf(mb.v,0)+'đ':'—'}</div></div>
       <div class="kpi"><div class="label">Chênh mua – bán</div><div class="v num">${m&&mb?pct(1-mb.v/m.v,1):'—'}</div><div class="s">mua rồi bán lại ngay mất chừng ấy</div></div>
-      <div class="kpi"><div class="label">So với thế giới</div><div class="v">${m&&wl?pctS(m.v/wl-1):'—'}</div><div class="s">${wl?'thế giới quy đổi '+nf(wl,0)+'đ/lượng':'chưa có giá thế giới'}</div></div>
-      <div class="kpi"><div class="label">Bạc thỏi 1 kg</div><div class="v num">${k?nf(k.v/1e6,2)+' Tr':'—'}</div><div class="s">mua vào ${kb?nf(kb.v/1e6,2)+' Tr':'—'}${wk?' · thế giới '+nf(wk/1e6,2)+' Tr':''}</div></div></div>
+      <div class="kpi"><div class="label">${bLogo('ag')}So với thế giới</div><div class="v">${m&&wl?pctS(m.v/wl-1):'—'}</div><div class="s">${wl?'thế giới quy đổi '+nf(wl,0)+'đ/lượng':'chưa có giá thế giới'}</div></div>
+      <div class="kpi"><div class="label">${bLogo('pq')}Bạc thỏi 1 kg</div><div class="v num">${k?nf(k.v/1e6,2)+' Tr':'—'}</div><div class="s">mua vào ${kb?nf(kb.v/1e6,2)+' Tr':'—'}${wk?' · thế giới '+nf(wk/1e6,2)+' Tr':''}</div></div></div>
     <div class="label" style="margin:14px 0 6px">Theo ngày</div>${silverChart()}
     <p class="note">Giá đã gồm VAT. Thế giới quy đổi = USD/oz × USD chuyển khoản VCB ÷ 31,1035 × 37,5 (1 lượng) hoặc × 1.000 (1 kg), chưa gồm thuế nhập khẩu, phí. Bạc biến động mạnh hơn vàng và chênh mua – bán lớn hơn.</p>`,mkStamp());
 }
@@ -2648,11 +2688,11 @@ function vMarket(C){
   const last=MK[MK.length-1], stale=serialOf(Date.now())-last.d>=2, W=mkWorld(), usd=mkLast(13), kgb=mkLast(7), ht=mkLast(11);
   return `<section class="hero">
     <div class="l"><div>
-      <div class="label">Thị trường · ${mkStamp()||sdate(last.d)}</div><div class="big">${kgb?nf(kgb.v/1e6,2)+' Tr':ht?nf(ht.v/1e6,2)+' Tr':'—'}</div>
+      <div class="label">Thị trường · ${mkStamp()||sdate(last.d)}</div><div class="hero-lg">${['kgb','ht','pq','au','ag','usd','r95','hose','btc','eth'].map(k=>bLogo(k,'sm')).join('')}</div><div class="big">${kgb?nf(kgb.v/1e6,2)+' Tr':ht?nf(ht.v/1e6,2)+' Tr':'—'}</div>
       <div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:8px">${kgb?'Nhẫn 24K Kim Gia Bảo / chỉ (Bảo Tín Mạnh Hải bán ra)':'Vàng 24K Huy Thanh / chỉ'}${kgb&&ht?' · Huy Thanh 24K '+nf(ht.v/1e6,2)+' Tr':''}</div></div>
       <div class="stats">
-        <div class="stat"><div class="label">Nhẫn 24K so với thế giới</div><div class="v">${(kgb||ht)&&W?pctS((kgb||ht).v/W-1):'—'}</div><div class="s">thế giới quy đổi ${W?nf(W/1e6,2)+' Tr/chỉ':'—'}</div></div>
-        <div class="stat"><div class="label">Đô la VCB bán</div><div class="v">${usd?nf(usd.v,0):'—'}</div><div class="s">${(()=>{const c=mkChg(13,30);return c?pctS(c.rel)+' trong 30 ngày':'đồng/USD';})()}</div></div>
+        <div class="stat"><div class="label">${bLogo('au')}Nhẫn 24K so với thế giới</div><div class="v">${(kgb||ht)&&W?pctS((kgb||ht).v/W-1):'—'}</div><div class="s">thế giới quy đổi ${W?nf(W/1e6,2)+' Tr/chỉ':'—'}</div></div>
+        <div class="stat"><div class="label">${bLogo('vcb')}Đô la VCB bán</div><div class="v">${usd?nf(usd.v,0):'—'}</div><div class="s">${(()=>{const c=mkChg(13,30);return c?pctS(c.rel)+' trong 30 ngày':'đồng/USD';})()}</div></div>
       </div></div>
   </section>
   ${stale?`<div class="ins warn"><span class="ii">${ic('alert')}</span><div><b>Giá chưa được cập nhật từ ${sdate(last.d)}</b><p>Apps Script giaThiTruong() có thể chưa chạy: mở trình soạn Apps Script, chạy lại <b>caiDat</b> để cấp quyền.${last.v[24]?' Lỗi lần trước: '+esc(last.v[24]):''}</p></div></div>`:''}
@@ -2662,6 +2702,7 @@ function vMarket(C){
   ${mkTips(C)}
   ${mkYear(C)}
   ${mkFx()}
+  ${srcStrip([['btmh','Bảo Tín Mạnh Hải'],['ht','Huy Thanh'],['pq','Phú Quý'],['vcb','Vietcombank'],['plx','Petrolimex'],['hose','HOSE']])}
   <p class="note" style="text-align:center">Nguồn: Bảo Tín Mạnh Hải, Huy Thanh, Vietcombank, Petrolimex (qua webgia.com), Yahoo Finance, VNDirect. Giá có thể lệch với giá tại cửa hàng. Không phải tư vấn đầu tư.</p>`;
 }
 // Chúc mừng khi tài sản ròng vượt ngưỡng mới (so với lần mở trước trên máy này); lần đầu chỉ ghi nhớ, không chúc
@@ -3299,7 +3340,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=56, SEEN_KEY='thaptaisan.seen';
+const APP_VER=57, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3316,6 +3357,7 @@ async function checkUpdate(){
 }
 if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
 const CHANGES=[
+  [57,'14/11/2026',['Tab Tự do, Vàng 24K, Thị trường có <b>huy hiệu thương hiệu và tài sản</b>: Bảo Tín Mạnh Hải, Kim Gia Bảo, Huy Thanh, Phú Quý, SJC, Vietcombank, Petrolimex, HOSE, vàng, bạc, USD, Bitcoin, Ethereum, dầu Brent, xăng','Icon app đổi tên file để điện thoại tải icon chip mới']],
   [56,'14/11/2026',['<b>Logo mới</b> kiểu chip: tháp 4 tầng dạng thanh LED, mạch dẫn, ăng-ten tín hiệu; icon app và màn mở app làm lại theo giao diện than chì (khung ngắm, lưới, vạch quét, thanh khởi động)']],
   [55,'13/11/2026',['Đưa lại biểu đồ <b>Ethereum và bạc thế giới theo ngày</b>: thay đổi trong khoảng chọn, cao/thấp nhất, sụt sâu nhất từ đỉnh, nút 30N/90N/1N/Tất cả']],
   [54,'13/11/2026',['Bỏ thẻ biểu đồ Ethereum và bạc thế giới cho app nhẹ hơn; giá ETH, bạc thế giới vẫn ở Bảng giá']],
