@@ -1035,6 +1035,51 @@ body::after{transform:translateZ(0)}
   .card::before,.hero::after,.card.sky::after,.card.sky .card-h .ico,.hg-o{animation:none!important}
   .card,.hero{transition:none!important}
 }
+/* ==== Bố cục điện thoại (Kai 19/11/2026: "một số tab bố cục hơi gò bó") ====
+   - lề trang 16 → 12px; ô số (kpi) lẻ cuối hàng thì trải hết hàng thay vì để trống nửa hàng
+   - danh sách tài sản / sổ nợ: số tiền xuống dòng dưới tên (một hàng ngang), không chiếm cột trái làm hẹp chữ
+   - kế hoạch sổ: 5 cột hẹp → mỗi sổ một hàng; lịch đáo hạn: tên sổ nằm trên thanh, thanh trải hết bề ngang
+   - bảng rộng hơn khung: script gắn class stk, mỗi dòng thành khối 2 tầng (tên + cột cuối, các cột giữa có nhãn) */
+@media (max-width:760px){
+  .arow:not([style]){grid-template-columns:auto minmax(0,1fr);align-items:start;row-gap:8px}
+  .arow:not([style])>.logo{grid-row:1/span 2}
+  .arow:not([style])>.rt{grid-column:2;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;text-align:left}
+  .arow:not([style])>.rt .aspark{margin:0}
+  .arow:not([style])>.rt .sb{margin:0}
+}
+@media (max-width:560px){
+  th,td{padding:7px 6px} th{letter-spacing:.03em}
+  .db{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:8px}
+  .ladder{grid-template-columns:minmax(0,1fr);gap:8px}
+  .lad-c{grid-template-columns:48px minmax(0,1fr);grid-template-rows:none;column-gap:12px;row-gap:1px;text-align:left;align-items:center;align-content:center;font-size:12.5px}
+  .lad-c>.lad-b{grid-row:1/span 4;height:58px!important;align-self:center}
+  .lad-c>:not(.lad-b){grid-column:2}
+  .lad-t{margin-top:0} .lad-s{font-size:11.5px}
+  .gt-r{grid-template-columns:minmax(0,1fr)}
+  .gt-s{grid-column:1}
+  .gt-ax{margin-left:0;font-size:10.5px}
+  .ins{gap:10px;padding:12px}
+  .ins .ii{width:32px;height:32px;border-radius:9px}
+  .tablewrap:has(>table.stk){max-height:none;overflow:visible}
+  table.stk,table.stk tbody{display:block}
+  table.stk thead,table.stk tr:not(:has(td)){display:none}
+  table.stk tr{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 12px;padding:9px 10px;border-bottom:1px solid var(--line)}
+  table.stk tr:last-child{border-bottom:0}
+  table.stk tr::after{content:"";order:0;flex-basis:100%;height:0}
+  table.stk tbody tr:nth-child(even){background:rgba(255,255,255,.03)}
+  table.stk tr.sel,table.stk tr.clickable:hover{background:var(--surface2)}
+  table.stk td{display:block;border:0;padding:0;background:none!important;white-space:normal;text-align:left}
+  table.stk td:first-child{order:-2;flex:1 1 0;min-width:0;font-weight:600}
+  table.stk td:last-child{order:-1;text-align:right;font-weight:600}
+  table.stk td:not(:first-child):not(:last-child){order:1;font-size:12px}
+  table.stk td:not(:first-child):not(:last-child)::before{content:attr(data-l) " ";color:var(--muted);font-size:11px;font-weight:400}
+}
+@media (max-width:480px){
+  body{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+}
+@media (max-width:455px){
+  .kpis>.kpi:last-child:nth-child(odd):not(:first-child){grid-column:1/-1}
+}
 </style>
 
 <div id="splash" aria-hidden="true"><div class="sp-grid"></div><div class="sp-scan"></div><div class="sp-in"><div class="sp-frame"><i></i><i></i><i></i><i></i><svg viewBox="0 0 120 120" class="sp-logo" aria-hidden="true"><defs><mask id="lgS"><rect width="120" height="120" fill="#fff"/><path d="M35.5 40v52M42.5 40v52M49.5 40v52M56.5 40v52M63.5 40v52M70.5 40v52M77.5 40v52M84.5 40v52" stroke="#000" stroke-width="1.6"/></mask></defs><path class="lg-pin" d="M5 46h11M5 59h11M5 72h11M5 85h11M104 46h11M104 59h11M104 72h11M104 85h11M40 104v11M60 104v11M80 104v11M40 5v11M80 5v11" stroke="#6B7C9E" stroke-width="4" stroke-linecap="round"/><rect class="lg-body" x="16" y="16" width="88" height="88" rx="14" fill="#1A2438" stroke="#4A5C80" stroke-width="3" pathLength="100"/><path class="lg-pin1" d="M24 24h9l-9 9z" fill="#4A5C80"/><g class="lg-tr"><path d="M22 46h24M22 59h17M22 72h10M98 46H74M98 59H81M98 72H88M28 96h64" fill="none" stroke="#3E5074" stroke-width="2" stroke-linecap="round" pathLength="100"/><g fill="#5E7096"><circle cx="22" cy="46" r="2.2"/><circle cx="22" cy="59" r="2.2"/><circle cx="22" cy="72" r="2.2"/><circle cx="98" cy="46" r="2.2"/><circle cx="98" cy="59" r="2.2"/><circle cx="98" cy="72" r="2.2"/></g></g><g mask="url(#lgS)"><rect class="lg-b lg-b1" x="31" y="80" width="58" height="10" rx="2" fill="var(--h1)"/><rect class="lg-b lg-b2" x="38" y="67" width="44" height="10" rx="2" fill="var(--h2)"/><rect class="lg-b lg-b3" x="45" y="54" width="30" height="10" rx="2" fill="var(--h3)"/><rect class="lg-b lg-b4" x="52" y="41" width="16" height="10" rx="2" fill="var(--h4)"/></g><path class="lg-sp" d="M60 41V32" stroke="#DCE4F1" stroke-width="3" stroke-linecap="round"/><circle class="lg-n" cx="60" cy="28" r="4.2" fill="#5ED0FF"/><path class="lg-arc" d="M51.5 23.1A9.8 9.8 0 0 1 55.1 19.5M64.9 19.5A9.8 9.8 0 0 1 68.5 23.1" fill="none" stroke="#5ED0FF" stroke-width="2.6" stroke-linecap="round" opacity=".8"/></svg></div><div class="sp-word">Tháp <span>Tài Sản</span></div><div class="sp-sys"><span>Khởi động</span><b><i></i></b><span class="sp-pc">SYNC</span></div></div></div>
@@ -3050,6 +3095,22 @@ function observeAnim(){
   document.querySelectorAll('#view .hero,#view .card,#view .ms-sky,#view svg.glass').forEach(el=>ANIM_IO.observe(el));
 }
 document.addEventListener('visibilitychange',()=>document.documentElement.classList.toggle('bgpause',document.hidden));
+// Điện thoại (Kai 19/11/2026: "bố cục hơi gò bó"): bảng rộng hơn khung thì gắn class stk, CSS xếp mỗi dòng thành khối 2 tầng;
+// ô giữa mang nhãn cột (data-l). Theo dõi #view để bảng vẽ lại riêng (đổi khoảng thời gian, mở mục thu gọn) cũng được xếp.
+const NARROW=window.matchMedia?matchMedia('(max-width:560px)'):{matches:false};let STK_Q=0;
+function stackTables(){
+  STK_Q=0;if(!NARROW.matches)return;
+  document.querySelectorAll('#view .tablewrap>table:not(.stk)').forEach(t=>{
+    const w=t.parentElement;if(!w.clientWidth||w.scrollWidth<=w.clientWidth+4)return;
+    const hr=t.querySelector('tr'), hs=hr?[...hr.children].map(c=>c.tagName==='TH'?c.textContent.trim():''):[];
+    if(hs.filter(Boolean).length<3)return;
+    t.querySelectorAll('tr').forEach(tr=>{if(tr!==hr)[...tr.children].forEach((td,i)=>{if(hs[i])td.dataset.l=hs[i];});});
+    t.classList.add('stk');});
+}
+const queueStack=()=>{if(!STK_Q)STK_Q=requestAnimationFrame(stackTables);};
+new MutationObserver(queueStack).observe(document.getElementById('view'),{childList:true,subtree:true});
+document.addEventListener('toggle',queueStack,true);
+NARROW.addEventListener&&NARROW.addEventListener('change',()=>render());
 // Biến động tài sản ròng so với lần chụp gần nhất trước hôm nay (Lịch sử ghi 22h mỗi ngày; Kai 18/11/2026)
 function dayChange(C){
   const today=serialOf(C.now);let b=null;
@@ -3651,7 +3712,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=75, SEEN_KEY='thaptaisan.seen';
+const APP_VER=76, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3673,6 +3734,7 @@ if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(()=>{if(!document.hidden)che
   window.addEventListener('focus',checkUpdate);window.addEventListener('online',checkUpdate);
   if(/[?&]v=\d+/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);}
 const CHANGES=[
+  [76,'19/11/2026',['Điện thoại: bố cục thoáng hơn — lề trang hẹp lại cho nội dung rộng hơn, ô số lẻ cuối hàng trải hết hàng','Danh sách tài sản, sổ nợ: số tiền nằm dưới tên, chữ không bị ép hẹp','Kế hoạch sổ mỗi sổ một hàng; lịch đáo hạn tên sổ nằm trên thanh','Bảng rộng (sổ tiết kiệm, Kai Café theo tháng, kịch bản…) tự xếp thành khối, không phải kéo ngang']],
   [75,'19/11/2026',['Mượt hơn trên điện thoại: bỏ làm mờ nền ở thanh trên và thanh tab, tắt hiệu ứng viền chạy, vệt quét, vòng xoay (vẽ lại liên tục)','Tự làm mới mỗi phút: số không đổi thì không vẽ lại cả trang (hết giật định kỳ, không mất vạch dò đang kéo)','Chạm, kéo biểu đồ và tooltip nhẹ hơn; trên máy tính hiệu ứng viền thẻ dừng khi thẻ ngoài màn hình']],
   [74,'19/11/2026',['Tự do › Lộ trình: dự phóng dạng quạt có số trên đường giữa, chấm ▲ tháng vượt ngưỡng hoặc đạt mục tiêu, chạm hoặc kéo xem từng tháng','Tốc độ thật có biểu đồ: đường thật so với nét đứt dự báo, vạch cam các ngưỡng, chấm ▲ ngày vượt ngưỡng, ▼ ngày tụt dưới ngưỡng, nút 1T / 6T / 1N / Tất cả']],
   [73,'19/11/2026',['Tab Tài sản: thẻ mới <b>Từng tài sản theo thời gian</b>: chọn tài sản (hoặc chạm đường nhỏ ở danh sách), nút 1T / 6T / 1N / Tất cả, số trên đường, chấm ▲▼ ngày đổi mạnh, chạm hoặc kéo xem từng ngày, nút ⤢']],
