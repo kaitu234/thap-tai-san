@@ -146,6 +146,14 @@ main{padding-top:16px;display:grid;gap:16px}
 .hero .l{display:grid;gap:16px;align-content:center;min-width:0}
 .chip-chg{display:inline-flex;align-items:center;gap:6px;font:700 13px var(--f-body);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.12);width:fit-content}
 .chg-row{display:flex;flex-wrap:wrap;gap:8px}
+.hc-bar{display:flex;flex-wrap:wrap;gap:0 8px}
+.hc-out{font:600 12.5px var(--f-body);color:var(--muted);min-height:18px;margin:-2px 0 4px}
+.hc-out.on{color:var(--ink)}
+#view svg.chart.hc{cursor:crosshair;touch-action:pan-y}
+svg.chart text.hc-n{font-size:10px;fill:var(--muted);paint-order:stroke;stroke:var(--surface);stroke-width:3px}
+svg.chart text.hc-n.v{fill:var(--ink);font-weight:700}
+svg.chart text.hc-n.hc-hi{fill:var(--good);font-weight:700}
+svg.chart text.hc-n.hc-lo{fill:var(--bad);font-weight:700}
 .chip-chg.up,.hero .up{color:var(--up-hero)} .chip-chg.dn,.hero .dn{color:var(--dn-hero)}
 .hero .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .hero .stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:10px 12px;min-width:0}
@@ -1673,24 +1681,56 @@ function histChart(C){
   const HR=[['30','1T'],['180','6T'],['365','1N'],['all','Tất cả']], hr=S.hr||'all', rng=`<div class="rng">${HR.map(([k,l])=>`<button data-hr="${k}" aria-selected="${hr===k}">${l}</button>`).join('')}</div>`;
   if(hr!=='all'){const lim=today-(+hr);for(let i=pts.length-2;i>=0;i--)if(pts[i].d<lim)pts.splice(i,1);}
   if(pts.length<2) return rng+`<div class="empty">${ic('calendar','lg')}<div><b>Đang chờ dữ liệu lịch sử</b><p>Apps Script lưu số liệu mỗi tối lúc 22 giờ vào sheet Lịch sử. Biểu đồ hiện từ ngày thứ hai${hr!=='all'?' (hoặc chọn khoảng dài hơn)':''}.</p></div></div>`;
-  const W=360,H=170,L=8,R=64,T=14,B=26, d0=pts[0].d, d1=pts[pts.length-1].d||d0+1;
-  const all=pts.flatMap(p=>[p.nw,p.av]), lo=Math.min(...all), hi=Math.max(...all), pad=(hi-lo)*.12||hi*.02||1, y0=lo-pad, y1=hi+pad;
+  // Kai 18/11/2026: mỗi lần chỉ vẽ một đường (tài sản ròng hoặc khả dụng) để trục phóng sát số, thấy rõ lên xuống từng ngày;
+  // nhãn số ở ngày cao nhất, thấp nhất, hôm nay và cách nhau 2–3 ngày; chạm/kéo trên biểu đồ để xem từng ngày (`hcScrub`).
+  const hb=S.hb==='av'?'av':'nw', col=hb==='nw'?'var(--accent)':'var(--c1)';
+  const seg=`<div class="rng">${[['nw','Tài sản ròng'],['av','Khả dụng']].map(([k,l])=>`<button data-hb="${k}" aria-selected="${hb===k}">${l}</button>`).join('')}</div>`;
+  const W=360,H=200,L=10,R=50,T=26,B=26, n=pts.length, d0=pts[0].d, d1=pts[n-1].d||d0+1;
+  const vs=pts.map(p=>p[hb]), lo=Math.min(...vs), hi=Math.max(...vs), pad=(hi-lo)*.2||hi*.01||1, y0=lo-pad, y1=hi+pad;
   const x=d=>L+(d1===d0?1:(d-d0)/(d1-d0))*(W-L-R), y=v=>T+(1-(v-y0)/(y1-y0))*(H-T-B);
-  const path=k=>pts.map((p,i)=>`${i?'L':'M'}${x(p.d).toFixed(1)},${y(p[k]).toFixed(1)}`).join('');
-  const ticks=[y0+(y1-y0)*.15,y0+(y1-y0)*.5,y0+(y1-y0)*.85], last=pts[pts.length-1], first=pts[0];
+  const line=pts.map((p,i)=>`${i?'L':'M'}${x(p.d).toFixed(1)},${y(p[hb]).toFixed(1)}`).join('');
+  const ticks=[y0+(y1-y0)*.1,y0+(y1-y0)*.5,y0+(y1-y0)*.9], last=pts[n-1], first=pts[0];
   const dl=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);};
-  const step=Math.max(1,Math.ceil(pts.length/60));
-  return rng+`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tài sản ròng theo ngày">
+  const iMax=vs.indexOf(hi), iMin=vs.lastIndexOf(lo);
+  // chọn điểm ghi số: ưu tiên cao nhất, thấp nhất, hôm nay, ngày đầu; rồi cứ vài ngày một điểm, bỏ điểm sát nhãn đã có
+  const dx=(W-L-R)/Math.max(1,n-1), every=Math.max(2,Math.ceil(34/dx)), lab=[];
+  const fits=i=>lab.every(j=>Math.abs(x(pts[j].d)-x(pts[i].d))>=30);
+  [n-1,iMax,iMin,0].forEach(i=>{if(!lab.includes(i)&&(fits(i)||i===iMax||i===iMin||i===n-1))lab.push(i);});
+  for(let i=n-1-every;i>0;i-=every)if(fits(i))lab.push(i);
+  const lbl=i=>{const v=vs[i], prev=vs[i-1]??v, next=vs[i+1]??v, below=i===iMin||(i!==iMax&&v<=prev&&v<=next&&v<hi);
+    const yy=y(v)+(below?15:-8), xx=Math.min(W-R-2,Math.max(L+12,x(pts[i].d))), cl=i===iMax?'hc-hi':i===iMin?'hc-lo':i===n-1?'v':'';
+    return `<text x="${xx.toFixed(1)}" y="${yy.toFixed(1)}" text-anchor="middle" class="hc-n ${cl}">${PRIV?HIDE:nf(v/1e6,1)}</text>`;};
+  // dữ liệu cho vạch dò: x, y, dòng chữ hiện phía trên biểu đồ
+  const info=pts.map((p,i)=>{const pv=i?p[hb]-pts[i-1][hb]:null;
+    return [+x(p.d).toFixed(1),+y(p[hb]).toFixed(1),`${i===n-1?'Hôm nay':dl(p.d)} · ${hb==='nw'?'tài sản ròng':'khả dụng'} ${tr(p[hb])}`+(pv==null?'':` · ${trs(pv)} so với ${dl(pts[i-1].d)}`)+(hb==='nw'?` · khả dụng ${tr(p.av)}`:'')];});
+  return `<div class="hc-bar">${rng}${seg}</div><div class="hc-out" aria-live="polite">${esc(info[n-1][2])}</div>
+  <svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="${hb==='nw'?'Tài sản ròng':'Tài sản khả dụng'} theo ngày" data-pts='${esc(JSON.stringify(info))}'>
     ${ticks.map(t=>`<line x1="${L}" x2="${W-R+4}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${W-R+8}" y="${y(t)+4}">${trn(t)} Tr</text>`).join('')}
-    <path d="${path('nw')}L${x(last.d)},${H-B}L${x(first.d)},${H-B}Z" fill="var(--accent)" fill-opacity=".10"/>
-    <path d="${path('nw')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
-    <path d="${path('av')}" fill="none" stroke="var(--c1)" stroke-width="2" stroke-dasharray="5 3" stroke-linejoin="round"/>
-    <circle cx="${x(last.d)}" cy="${y(last.nw)}" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>
+    <path d="${line}L${x(last.d)},${H-B}L${x(first.d)},${H-B}Z" fill="${col}" fill-opacity=".10"/>
+    <path d="${line}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>
+    ${n<=90?pts.map(p=>`<circle cx="${x(p.d).toFixed(1)}" cy="${y(p[hb]).toFixed(1)}" r="2" fill="${col}"/>`).join(''):''}
+    <circle cx="${x(pts[iMax].d)}" cy="${y(hi)}" r="3.5" fill="var(--good)"/><circle cx="${x(pts[iMin].d)}" cy="${y(lo)}" r="3.5" fill="var(--bad)"/>
+    <circle cx="${x(last.d)}" cy="${y(last[hb])}" r="4.5" fill="${col}" stroke="var(--surface)" stroke-width="2"/>
+    ${lab.map(lbl).join('')}
     <text x="${x(first.d)}" y="${H-8}">${dl(first.d)}</text><text x="${x(last.d)}" y="${H-8}" text-anchor="end">Hôm nay</text>
-    ${pts.filter((_,i)=>i%step===0||i===pts.length-1).map(p=>`<rect x="${x(p.d)-6}" y="${T}" width="12" height="${H-T-B}" fill="transparent" data-tip="${dl(p.d)}: ${tr(p.nw)} · khả dụng ${tr(p.av)}"/>`).join('')}
+    <g class="hc-g" visibility="hidden"><line y1="${T-6}" y2="${H-B}" stroke="var(--ink)" stroke-opacity=".5" stroke-dasharray="3 3"/><circle r="5" fill="${col}" stroke="var(--ink)" stroke-width="2"/></g>
+    <rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>
   </svg>
-  <div class="legend"><span><i class="tdot" style="background:var(--accent)"></i>Tài sản ròng ${trs(last.nw-first.nw)} từ ${dl(first.d)}</span><span><i class="tdot" style="background:var(--c1)"></i>Khả dụng (trừ khoản chờ nhận)</span></div>`;
+  <div class="legend"><span><i class="tdot" style="background:${col}"></i>${hb==='nw'?'Tài sản ròng':'Khả dụng (trừ khoản chờ nhận)'} ${trs(last[hb]-first[hb])} từ ${dl(first.d)}</span><span><i class="tdot" style="background:var(--good)"></i>Cao nhất ${tr(hi)} (${dl(pts[iMax].d)})</span><span><i class="tdot" style="background:var(--bad)"></i>Thấp nhất ${tr(lo)} (${dl(pts[iMin].d)})</span><span>Chạm hoặc kéo trên biểu đồ để xem từng ngày</span></div>`;
 }
+// vạch dò cho histChart: chạm/kéo ngang, hiện số ngày gần nhất ở dòng phía trên biểu đồ
+function hcScrub(e){
+  const svg=e.target.closest&&e.target.closest('svg.hc');if(!svg)return;
+  let P;try{P=JSON.parse(svg.dataset.pts);}catch(_){return;}
+  const r=svg.getBoundingClientRect(), vb=svg.viewBox.baseVal, vx=(e.clientX-r.left)/r.width*vb.width;
+  let b=0;P.forEach((p,i)=>{if(Math.abs(p[0]-vx)<Math.abs(P[b][0]-vx))b=i;});
+  const g=svg.querySelector('.hc-g'), out=svg.previousElementSibling;
+  g.setAttribute('visibility','visible');g.querySelector('line').setAttribute('x1',P[b][0]);g.querySelector('line').setAttribute('x2',P[b][0]);
+  const c=g.querySelector('circle');c.setAttribute('cx',P[b][0]);c.setAttribute('cy',P[b][1]);
+  if(out&&out.classList.contains('hc-out')){out.textContent=P[b][2];out.classList.add('on');}
+}
+document.addEventListener('pointerdown',hcScrub);
+document.addEventListener('pointermove',hcScrub);
 function divBars(items,fmt){
   const mx=Math.max(1e-9,...items.map(i=>Math.abs(i.v)));
   return `<div class="dbars">${items.map(i=>{const w=Math.abs(i.v)/mx*50;
@@ -3362,7 +3402,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=62, SEEN_KEY='thaptaisan.seen';
+const APP_VER=63, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3379,6 +3419,7 @@ async function checkUpdate(){
 }
 if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
 const CHANGES=[
+  [63,'18/11/2026',['Biểu đồ tài sản ròng theo thời gian: có số trên đường (cao nhất, thấp nhất, cách 2–3 ngày), chạm hoặc kéo để xem từng ngày, chuyển Tài sản ròng / Khả dụng']],
   [62,'18/11/2026',['Thẻ đầu có thêm biến động tài sản ròng so với hôm qua, cạnh mức 30 ngày']],
   [61,'14/11/2026',['Honda dùng lại huy hiệu cũ']],
   [60,'14/11/2026',['Zalopay dùng lại huy hiệu cũ','Tiền mặt dùng icon tờ tiền mới']],
@@ -3472,7 +3513,7 @@ function closeSheet(){
 }
 // ---- Chạm biểu đồ, bảng để xem to (biểu đồ ngang trên điện thoại dọc thì xoay ngang cho to); chạm ra ngoài hoặc ✕ để thu nhỏ
 const ZOOMABLE='svg.chart,.gt,.tablewrap,.wf,.dbars,.tm,.ladder,.stack';
-const NOZOOM='[data-tier],[data-goto],[data-tab],[data-filter],[data-snooze],[data-sh],button,a,input,select,label,summary,tr.clickable';
+const NOZOOM='svg.hc,[data-tier],[data-goto],[data-tab],[data-filter],[data-snooze],[data-sh],button,a,input,select,label,summary,tr.clickable';
 function openZoom(el){
   const z=document.getElementById('zoom');if(!z)return;
   const body=z.querySelector('.zm-body'), card=el.closest('.card'), h=card&&card.querySelector('.card-h h2');
@@ -3538,6 +3579,7 @@ document.addEventListener('click',e=>{
   const srb=e.target.closest('[data-sr]');if(srb){FM.sr=srb.dataset.sr;saveFM();const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const grb=e.target.closest('[data-gr]');if(grb){FM.gr=grb.dataset.gr;saveFM();const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const hb=e.target.closest('[data-hr]');if(hb){S.hr=hb.dataset.hr;const y=window.scrollY;render();window.scrollTo(0,y);return;}
+  const hk=e.target.closest('[data-hb]');if(hk){S.hb=hk.dataset.hb;const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const tb=e.target.closest('[data-tab]');if(tb){go(tb.dataset.tab);return;}
   if(e.target.closest('#privacy')){PRIV=!PRIV;try{localStorage.setItem(PRIV_KEY,PRIV?'1':'0');}catch(_){}render();return;}
   const gt=e.target.closest('[data-goto]');if(gt){if(gt.classList.contains('hgoal')){FM.sub='road';saveFM();}go(gt.dataset.goto);return;}
