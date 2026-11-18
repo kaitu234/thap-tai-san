@@ -145,6 +145,7 @@ main{padding-top:16px;display:grid;gap:16px}
 .hero .label{color:var(--hero-mute)}
 .hero .l{display:grid;gap:16px;align-content:center;min-width:0}
 .chip-chg{display:inline-flex;align-items:center;gap:6px;font:700 13px var(--f-body);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.12);width:fit-content}
+.chg-row{display:flex;flex-wrap:wrap;gap:8px}
 .chip-chg.up,.hero .up{color:var(--up-hero)} .chip-chg.dn,.hero .dn{color:var(--dn-hero)}
 .hero .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .hero .stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:10px 12px;min-width:0}
@@ -2781,6 +2782,19 @@ function observeAnim(){
   document.querySelectorAll('#view .hero,#view .card.sky,#view .ms-sky,#view svg.glass').forEach(el=>ANIM_IO.observe(el));
 }
 document.addEventListener('visibilitychange',()=>document.documentElement.classList.toggle('bgpause',document.hidden));
+// Biến động tài sản ròng so với lần chụp gần nhất trước hôm nay (Lịch sử ghi 22h mỗi ngày; Kai 18/11/2026)
+function dayChange(C){
+  const today=serialOf(C.now);let b=null;
+  for(const h of HIST)if(h.d<today&&h.nw!=null&&(!b||h.d>b.d))b=h;
+  if(!b)return null;const v=C.nw-b.nw;
+  const t=new Date((b.d-25569)*DAY);
+  return {v,pct:b.nw?v/b.nw:0,lab:b.d===today-1?'so với hôm qua':'so với '+t.getUTCDate()+'/'+(t.getUTCMonth()+1)};
+}
+function dayChip(C){
+  const c=dayChange(C);if(!c)return '';
+  const z=Math.abs(c.v)<5e4, cl=z?'':(c.v>=0?'up':'dn');
+  return `<span class="chip-chg ${cl}">${ic(z?'flow':c.v>=0?'up':'down','sm')} ${z?'±0':trs(c.v)} · ${pcts(c.pct,2)} ${c.lab}</span>`;
+}
 function vOverview(C){
   const net=INCOME-S.expense;
   return `
@@ -2788,7 +2802,7 @@ function vOverview(C){
     <div class="l">
       <div><div class="label">Tài sản ròng</div><div class="big" data-n="${PRIV?'':Math.round(C.nw)}">${vnd(C.nw)}</div>
         ${C.entV+C.recV>0?`<div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:8px"><span class="avail">Khả dụng <b>${tr(C.nwAvail)}</b></span>${C.entV?' chờ nhận '+tr(C.entV):''}${C.recV?' · cho vay '+tr(C.recV):''}${C.payable?' · nợ '+tr(C.payable):''}</div>`:''}</div>
-      <span class="chip-chg ${C.chg30>=0?'up':'dn'}">${ic(C.chg30>=0?'up':'down','sm')} ${trs(C.chg30)} · ${pcts(C.chgPct,2)} trong 30 ngày</span>
+      <div class="chg-row">${dayChip(C)}<span class="chip-chg ${C.chg30>=0?'up':'dn'}">${ic(C.chg30>=0?'up':'down','sm')} ${trs(C.chg30)} · ${pcts(C.chgPct,2)} trong 30 ngày</span></div>
       ${heroGoal(C)}
       <div class="stats">
         <div class="stat"><div class="label">Thanh khoản</div><div class="v">${tr(C.liquid)}</div><div class="s">Đủ ${chip(nf(C.runway,1)+' tháng',tone4(C.runway/(C.targetM||12),1,.5,.25))} chi thiết yếu</div></div>
@@ -3348,7 +3362,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=61, SEEN_KEY='thaptaisan.seen';
+const APP_VER=62, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3365,6 +3379,7 @@ async function checkUpdate(){
 }
 if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
 const CHANGES=[
+  [62,'18/11/2026',['Thẻ đầu có thêm biến động tài sản ròng so với hôm qua, cạnh mức 30 ngày']],
   [61,'14/11/2026',['Honda dùng lại huy hiệu cũ']],
   [60,'14/11/2026',['Zalopay dùng lại huy hiệu cũ','Tiền mặt dùng icon tờ tiền mới']],
   [59,'14/11/2026',['Petrolimex dùng huy hiệu chữ P cam, VN-Index dùng icon biểu đồ chứng khoán']],
