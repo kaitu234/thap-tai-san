@@ -151,9 +151,9 @@ main{padding-top:16px;display:grid;gap:16px}
 #view svg.chart .hc-ev{cursor:help}
 #view svg.chart .hc-ev:hover circle{stroke:var(--ink);stroke-width:2}
 svg.chart text.hc-evt{fill:#fff;font-size:8.5px;font-weight:700;pointer-events:none}
-.card-h .cbtns{display:inline-flex;align-items:center;gap:4px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.card-h .cbtns{display:inline-flex;align-items:center;gap:4px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end;position:relative;z-index:3}
 .card-h .aside+.cbtns{margin-left:8px}
-.cbtn{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:var(--muted);min-width:30px;height:30px;padding:0 6px;border-radius:8px;font:600 15px/1 var(--f-body);cursor:pointer}
+.cbtn{appearance:none;border:1px solid rgba(94,208,255,.55);background:var(--surface2);color:var(--accent);min-width:32px;height:32px;padding:0 6px;border-radius:8px;font:700 17px/1 var(--f-body);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 .cbtn:hover:not(:disabled){color:var(--ink);border-color:var(--accent)}
 .cbtn:disabled{opacity:.35;cursor:default}
 .cbtn.wide{font-size:12px;padding:0 9px}
@@ -3548,7 +3548,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=70, SEEN_KEY='thaptaisan.seen';
+const APP_VER=71, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3570,6 +3570,7 @@ if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(()=>{if(!document.hidden)che
   window.addEventListener('focus',checkUpdate);window.addEventListener('online',checkUpdate);
   if(/[?&]v=\d+/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);}
 const CHANGES=[
+  [71,'19/11/2026',['Nút ⤢ phóng to trên các thẻ biểu đồ (tài sản ròng, các tầng, vàng, bạc, Kai Café) hiện rõ hơn: nền đặc, viền xanh, không còn lẫn vào hình trang trí góc thẻ']],
   [70,'19/11/2026',['Phân tích · Tài sản ròng 12 tháng tới: số trên đường, chấm ▲ tháng vượt ngưỡng hoặc tới hạn mục tiêu, chạm hoặc kéo xem từng tháng','Nếu mất thu nhập: số tiền còn lại trên mép trên, chấm ▼ tháng hết từng lớp thanh khoản, chạm hoặc kéo xem từng tháng']],
   [69,'19/11/2026',['Hiệu suất · Sụt so với đỉnh: nút 1T / 6T / 1N / Tất cả, số % trên đường, chấm ▲▼ ngày tài sản ròng đổi mạnh kèm tài sản kéo lên/xuống','Đường giá cổ phiếu có nút 1T / 6T / 1N / Tất cả']],
   [68,'19/11/2026',['Kai Café · Doanh thu theo ngày: nút 30N / 90N / Tất cả, số trên cột (cao nhất, thấp nhất, mới nhất), chấm ▲▼ ngày bán lệch ≥ 40% so với trung bình 7 ngày trước, chạm hoặc kéo để xem từng ngày, nút ⤢ phóng to']],
