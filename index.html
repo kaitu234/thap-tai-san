@@ -1691,15 +1691,7 @@ function histChart(C){
   const line=pts.map((p,i)=>`${i?'L':'M'}${x(p.d).toFixed(1)},${y(p[hb]).toFixed(1)}`).join('');
   const ticks=[y0+(y1-y0)*.1,y0+(y1-y0)*.5,y0+(y1-y0)*.9], last=pts[n-1], first=pts[0];
   const dl=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);};
-  const iMax=vs.indexOf(hi), iMin=vs.lastIndexOf(lo);
-  // chọn điểm ghi số: ưu tiên cao nhất, thấp nhất, hôm nay, ngày đầu; rồi cứ vài ngày một điểm, bỏ điểm sát nhãn đã có
-  const dx=(W-L-R)/Math.max(1,n-1), every=Math.max(2,Math.ceil(34/dx)), lab=[];
-  const fits=i=>lab.every(j=>Math.abs(x(pts[j].d)-x(pts[i].d))>=30);
-  [n-1,iMax,iMin,0].forEach(i=>{if(!lab.includes(i)&&(fits(i)||i===iMax||i===iMin||i===n-1))lab.push(i);});
-  for(let i=n-1-every;i>0;i-=every)if(fits(i))lab.push(i);
-  const lbl=i=>{const v=vs[i], prev=vs[i-1]??v, next=vs[i+1]??v, below=i===iMin||(i!==iMax&&v<=prev&&v<=next&&v<hi);
-    const yy=y(v)+(below?15:-8), xx=Math.min(W-R-2,Math.max(L+12,x(pts[i].d))), cl=i===iMax?'hc-hi':i===iMin?'hc-lo':i===n-1?'v':'';
-    return `<text x="${xx.toFixed(1)}" y="${yy.toFixed(1)}" text-anchor="middle" class="hc-n ${cl}">${PRIV?HIDE:nf(v/1e6,1)}</text>`;};
+  const {lab,iMax,iMin}=hcPick(pts.map(p=>x(p.d)),vs), lbl=i=>hcLabel(i,pts.map(p=>x(p.d)),vs,y,iMax,iMin,L,W-R);
   // dữ liệu cho vạch dò: x, y, dòng chữ hiện phía trên biểu đồ
   const info=pts.map((p,i)=>{const pv=i?p[hb]-pts[i-1][hb]:null;
     return [+x(p.d).toFixed(1),+y(p[hb]).toFixed(1),`${i===n-1?'Hôm nay':dl(p.d)} · ${hb==='nw'?'tài sản ròng':'khả dụng'} ${tr(p[hb])}`+(pv==null?'':` · ${trs(pv)} so với ${dl(pts[i-1].d)}`)+(hb==='nw'?` · khả dụng ${tr(p.av)}`:'')];});
@@ -1717,6 +1709,23 @@ function histChart(C){
     <rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>
   </svg>
   <div class="legend"><span><i class="tdot" style="background:${col}"></i>${hb==='nw'?'Tài sản ròng':'Khả dụng (trừ khoản chờ nhận)'} ${trs(last[hb]-first[hb])} từ ${dl(first.d)}</span><span><i class="tdot" style="background:var(--good)"></i>Cao nhất ${tr(hi)} (${dl(pts[iMax].d)})</span><span><i class="tdot" style="background:var(--bad)"></i>Thấp nhất ${tr(lo)} (${dl(pts[iMin].d)})</span><span>Chạm hoặc kéo trên biểu đồ để xem từng ngày</span></div>`;
+}
+// Chọn điểm ghi số trên đường (dùng chung histChart, tierArea): ưu tiên cao nhất, thấp nhất, hôm nay, ngày đầu;
+// rồi cứ 2–3 ngày một điểm (khoảng cách ≥ 34 px), bỏ điểm sát nhãn đã có
+function hcPick(xs,vs){
+  const n=vs.length, hi=Math.max(...vs), lo=Math.min(...vs), iMax=vs.indexOf(hi), iMin=vs.lastIndexOf(lo);
+  const dx=n>1?(xs[n-1]-xs[0])/(n-1):99, every=Math.max(2,Math.ceil(34/(dx||1))), lab=[];
+  const fits=i=>lab.every(j=>Math.abs(xs[j]-xs[i])>=30);
+  [n-1,iMax,iMin,0].forEach(i=>{if(!lab.includes(i)&&(fits(i)||i===iMax||i===iMin||i===n-1))lab.push(i);});
+  for(let i=n-1-every;i>0;i-=every)if(fits(i))lab.push(i);
+  return {lab,iMax,iMin};
+}
+function hcLabel(i,xs,vs,y,iMax,iMin,xMin,xMax){
+  const v=vs[i], hi=vs[iMax], prev=vs[i-1]??v, next=vs[i+1]??v, below=i===iMin||(i!==iMax&&v<=prev&&v<=next&&v<hi);
+  const yy=y(v)+(below?15:-8), cl=i===iMax?'hc-hi':i===iMin?'hc-lo':i===vs.length-1?'v':'';
+  // sát mép thì canh lề về phía trong, không đè lên nhãn trục / nhãn tầng bên phải
+  const [xx,an]=xs[i]>xMax-16?[xMax,'end']:xs[i]<xMin+16?[xMin,'start']:[xs[i],'middle'];
+  return `<text x="${xx.toFixed(1)}" y="${yy.toFixed(1)}" text-anchor="${an}" class="hc-n ${cl}">${PRIV?HIDE:nf(v/1e6,1)}</text>`;
 }
 // vạch dò cho histChart: chạm/kéo ngang, hiện số ngày gần nhất ở dòng phía trên biểu đồ
 function hcScrub(e){
@@ -1969,7 +1978,7 @@ function tierArea(C){
   pts.push({d:today,t:ids.map(id=>{const r=C.rows.find(x=>x.id===id);return r?r.value:0;})});
   const seg=`<div class="rng">${[['abs','Giá trị'],['pct','Tỷ trọng %']].map(([k,l])=>`<button data-ta="${k}" aria-selected="${mode===k}">${l}</button>`).join('')}</div>`;
   if(pts.length<2)return seg+`<div class="empty">${ic('calendar','lg')}<div><b>Đang chờ dữ liệu lịch sử</b><p>Sheet Lịch sử ghi giá trị từng tầng mỗi tối lúc 22 giờ. Biểu đồ hiện từ ngày thứ hai.</p></div></div>`;
-  const W=360,H=190,L=8,R=58,T=12,B=24, d0=pts[0].d, d1=pts[pts.length-1].d;
+  const W=360,H=200,L=8,R=58,T=mode==='abs'?26:12,B=24, d0=pts[0].d, d1=pts[pts.length-1].d;
   const rows=pts.map(p=>{const tot=sum(p.t,x=>x)||1, v=mode==='pct'?p.t.map(x=>x/tot):p.t;let c=0;return {d:p.d,raw:p.t,tot,cum:[0,...v.map(x=>c+=x)]};});
   const hi=mode==='pct'?1:Math.max(...rows.map(r=>r.cum[4]))*1.08;
   const x=d=>L+(d1===d0?1:(d-d0)/(d1-d0))*(W-L-R), y=v=>T+(1-v/hi)*(H-T-B);
@@ -1979,16 +1988,22 @@ function tierArea(C){
   // nhãn bên phải ở giữa dải của từng tầng, đẩy xuống nếu chồng nhau
   let prev=-99;const labs=ids.map((id,i)=>{let yy=y((last.cum[i]+last.cum[i+1])/2)+4;return {id,i,yy};}).reverse().map(o=>{if(o.yy<prev+12)o.yy=prev+12;prev=o.yy;return o;})
     .map(o=>`<text x="${W-R+8}" y="${o.yy.toFixed(1)}" fill="${tcol(o.id)}" style="fill:${tcol(o.id)};font-weight:600">T${o.id} ${mode==='pct'?pct(last.raw[o.i]/last.tot,0):trn(last.raw[o.i])+' Tr'}</text>`).join('');
-  const dl=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);}, step=Math.max(1,Math.ceil(rows.length/60));
-  return seg+`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Giá trị từng tầng theo thời gian">
+  const dl=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);}, n=rows.length;
+  // Kai 18/11/2026 (như histChart): số tổng trên mép trên ở ngày cao nhất, thấp nhất, hôm nay, cách 2–3 ngày; chạm/kéo xem từng tầng mỗi ngày
+  const xs=rows.map(r=>x(r.d)), tots=rows.map(r=>r.tot), pk=mode==='abs'?hcPick(xs,tots):null;
+  const nums=pk?pk.lab.map(i=>hcLabel(i,xs,tots,y,pk.iMax,pk.iMin,L,W-R)).join(''):'';
+  const info=rows.map((r,i)=>{const dv=i?r.tot-rows[i-1].tot:null;
+    return [+xs[i].toFixed(1),+y(r.cum[4]).toFixed(1),`${i===n-1?'Hôm nay':dl(r.d)} · `+(mode==='abs'?`tổng ${tr(r.tot)}${dv==null?'':' ('+trs(dv)+')'} · `:'')+ids.map((id,k)=>'T'+id+' '+(mode==='pct'?pct(r.raw[k]/r.tot,0):tr(r.raw[k]))).join(' · ')];});
+  return seg+`<div class="hc-out" aria-live="polite">${esc(info[n-1][2])}</div><svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Giá trị từng tầng theo thời gian" data-pts='${esc(JSON.stringify(info))}'>
     ${[0,1,2,3].map(area).join('')}${tgt}
     <line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" stroke="var(--line)"/>
-    ${labs}
+    ${labs}${pk?`<circle cx="${xs[pk.iMax].toFixed(1)}" cy="${y(tots[pk.iMax]).toFixed(1)}" r="3.5" fill="var(--good)"/><circle cx="${xs[pk.iMin].toFixed(1)}" cy="${y(tots[pk.iMin]).toFixed(1)}" r="3.5" fill="var(--bad)"/>`:''}${nums}
     <text x="${L}" y="${H-8}">${dl(d0)}</text><text x="${W-R}" y="${H-8}" text-anchor="end">Hôm nay</text>
-    ${rows.filter((_,i)=>i%step===0||i===rows.length-1).map(r=>`<rect x="${(x(r.d)-6).toFixed(1)}" y="${T}" width="12" height="${H-T-B}" fill="transparent" data-tip="${dl(r.d)}: ${ids.map((id,i)=>'T'+id+' '+(mode==='pct'?pct(r.raw[i]/r.tot,0):tr(r.raw[i]))).join(' · ')}"/>`).join('')}
+    <g class="hc-g" visibility="hidden"><line y1="${T-6}" y2="${H-B}" stroke="var(--ink)" stroke-opacity=".6" stroke-dasharray="3 3"/><circle r="5" fill="var(--ink)" stroke="var(--surface)" stroke-width="2"/></g>
+    <rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>
   </svg>
   <div class="legend">${C.rows.map(r=>`<span><i class="tdot" style="background:${tcol(r.id)}"></i>T${r.id} ${esc(r.name)}</span>`).join('')}${mode==='pct'?'<span>Nét đứt: ranh giới theo mục tiêu</span>':''}</div>
-  <p class="note">${pts.length-1} ngày ở sheet Lịch sử + hôm nay. ${mode==='pct'?'Nét đứt là ranh giới mục tiêu giữa hai tầng (từ dưới lên T1|T2, T2|T3, T3|T4); mép màu thấp hơn nét đứt nghĩa là các tầng bên dưới đang thiếu so với mục tiêu.':'Chuyển sang Tỷ trọng % để so với mục tiêu.'}</p>`;
+  <p class="note">${pts.length-1} ngày ở sheet Lịch sử + hôm nay. ${mode==='pct'?'Nét đứt là ranh giới mục tiêu giữa hai tầng (từ dưới lên T1|T2, T2|T3, T3|T4); mép màu thấp hơn nét đứt nghĩa là các tầng bên dưới đang thiếu so với mục tiêu.':'Số trên mép trên là tổng các tầng (xanh lá cao nhất, đỏ thấp nhất). Chuyển sang Tỷ trọng % để so với mục tiêu.'} Chạm hoặc kéo trên biểu đồ để xem từng tầng mỗi ngày.</p>`;
 }
 // Fan chart: đường giữa = kịch bản như trung bình gần đây; dải 68% và 95% theo độ lệch dư hằng tháng thật (sheet Dòng tiền, cần ≥ 3 tháng), giả định các tháng độc lập
 function fanChart(C,R){
@@ -3402,7 +3417,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=63, SEEN_KEY='thaptaisan.seen';
+const APP_VER=64, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3413,12 +3428,18 @@ async function checkUpdate(){
       if(!el){el=document.createElement('button');el.id='updToast';el.type='button';document.body.appendChild(el);}
       el.innerHTML=ic('refresh','sm')+'<span>Có bản mới v'+(+j.v)+' — bấm để tải lại</span>';
       el.onclick=()=>{el.disabled=true;el.querySelector('span').textContent='Đang tải bản mới…';
-        const go=()=>location.reload();
+        // tải lại kèm ?v=… để CDN GitHub Pages (giữ index.html tới 10 phút) trả bản mới ngay, không đưa lại bản cũ
+        const go=()=>{location.href=location.pathname+'?v='+(+j.v)+location.hash;};
         if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration)navigator.serviceWorker.getRegistration().then(g=>g?g.update().finally(go):go()).catch(go);else go();};}}
   catch(_){}
 }
-if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(checkUpdate,15*60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});}
+// Kai 18/11/2026: kiểm mỗi 2 phút (file 9 byte) + khi quay lại tab/cửa sổ, vì 15 phút quá lâu nên Kai phải tự F5
+if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(()=>{if(!document.hidden)checkUpdate();},2*60000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});
+  window.addEventListener('focus',checkUpdate);window.addEventListener('online',checkUpdate);
+  if(/[?&]v=\d+/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);}
 const CHANGES=[
+  [64,'18/11/2026',['Biểu đồ các tầng theo thời gian: có số tổng trên mép trên (cao nhất, thấp nhất, cách 2–3 ngày), chạm hoặc kéo để xem từng tầng mỗi ngày','Báo bản mới nhanh hơn: kiểm mỗi 2 phút và khi quay lại cửa sổ; bấm tải lại luôn ra bản mới']],
   [63,'18/11/2026',['Biểu đồ tài sản ròng theo thời gian: có số trên đường (cao nhất, thấp nhất, cách 2–3 ngày), chạm hoặc kéo để xem từng ngày, chuyển Tài sản ròng / Khả dụng']],
   [62,'18/11/2026',['Thẻ đầu có thêm biến động tài sản ròng so với hôm qua, cạnh mức 30 ngày']],
   [61,'14/11/2026',['Honda dùng lại huy hiệu cũ']],
