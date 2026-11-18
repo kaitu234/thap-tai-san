@@ -164,7 +164,10 @@ svg.chart text.hc-evt{fill:#fff;font-size:8.5px;font-weight:700;pointer-events:n
   box-shadow:0 20px 60px rgba(0,0,0,.6);background:var(--bg)}
 .foc-bg{position:fixed;inset:0;z-index:80;background:rgba(4,9,20,.82);backdrop-filter:blur(3px)}
 #view .card.focus .foc-body{overflow-x:auto}
-#view .card.focus svg.chart.hc{width:calc(100% * var(--fz,1));max-width:none}
+#view .card.focus svg.chart{width:calc(100% * var(--fz,1));max-width:none}
+#view .card.focus :is(.wf,.dbars,.tm,.ladder,.stack,.gt){zoom:var(--fz,1)}
+#view .card.focus :is(svg.chart,.wf,.dbars,.tm,.ladder,.stack,.gt){cursor:auto}
+#view details.card.focus>summary{cursor:default}
 html.focusing{overflow:hidden}
 .hc-out{font:600 12.5px var(--f-body);color:var(--muted);min-height:18px;margin:-2px 0 4px}
 .hc-out.on{color:var(--ink)}
@@ -1465,12 +1468,14 @@ const tierName=t=>t===0?'Ngoài tháp':'T'+t+' '+((TIERS0[t-1]||{}).short||'');
 // Thẻ biểu đồ lớn vẽ trên nền trời đêm kiểu bảng điều khiển viễn tưởng (class sky)
 const SKY_CARDS=/^(Tiền tự sinh ra|Nếu mất thu nhập|Sụt so với đỉnh|Tiền đi đâu mỗi tháng|Các tầng theo thời gian|Sức khỏe tài chính|12 tháng tới|Cơ cấu tài sản|30 ngày qua|Tài sản ròng theo thời gian|Cổ phiếu|Tháp so với mục tiêu|Lộ trình \d+ ngưỡng|Dự báo bằng lãi kép)/;
 // thẻ thu gọn được (Kai 12/11/2026: tab Phân tích quá dài trên điện thoại): bấm tiêu đề để mở; hint hiện khi đang gọn
-const foldCard=(title,icon,body,aside='',hint='')=>`<details class="card fold"><summary><div class="card-h"><span class="ico">${ic(icon)}</span><h2>${title}</h2>${aside?`<span class="aside">${aside}</span>`:''}<span class="fold-i" aria-hidden="true"><svg class="i sm" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></div>${hint?`<p class="fold-hint">${hint}</p>`:''}</summary>${body}</details>`;
-const FOCUS_CARDS=/^(Tài sản ròng theo thời gian|Các tầng theo thời gian|Giá 24K hai nhà theo ngày|Ethereum và bạc thế giới|Bạc Phú Quý|Doanh thu theo ngày)$/;
-const focBtns=title=>{if(!FOCUS_CARDS.test(title))return '';const on=S.focus===title, fz=S.fz||1;
+const foldCard=(title,icon,body,aside='',hint='')=>{const ok=canFoc(title,body), foc=S.focus===title&&ok;return `${foc?'<div class="foc-bg"></div>':''}<details class="card fold${foc?' focus':''}"${foc?` open style="--fz:${S.fz||1}"`:''}><summary><div class="card-h"><span class="ico">${ic(icon)}</span><h2>${title}</h2>${aside?`<span class="aside">${aside}</span>`:''}${focBtns(title,ok)}<span class="fold-i" aria-hidden="true"><svg class="i sm" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></div>${hint?`<p class="fold-hint">${hint}</p>`:''}</summary>${foc?`<div class="foc-body">${body}</div>`:body}</details>`;};
+const FOCUS_CARDS=/^(Lộ trình \d+ ngưỡng|Tài sản ròng theo thời gian|Các tầng theo thời gian|Giá 24K hai nhà theo ngày|Ethereum và bạc thế giới|Bạc Phú Quý|Doanh thu theo ngày)$/;
+// Kai 19/11/2026: mọi thẻ có biểu đồ (svg.chart, thác nước, thanh, ô tỷ lệ, bậc thang, lịch) đều có nút ⤢
+const HAS_CHART=/class="(?:chart|wf|dbars|tm|ladder|stack|gt)(?=[ "$])/, canFoc=(title,body)=>FOCUS_CARDS.test(title)||HAS_CHART.test(body);
+const focBtns=(title,ok)=>{if(!ok)return '';const on=S.focus===title, fz=S.fz||1;
   return `<span class="cbtns">${on?`<span class="zctl"><button class="cbtn" data-fz="-1" title="Thu nhỏ"${fz<=1?' disabled':''}>−</button><span class="zpct">${Math.round(fz*100)}%</span><button class="cbtn" data-fz="1" title="Phóng to"${fz>=4?' disabled':''}>+</button><button class="cbtn wide" data-fz="0" title="Về cỡ mặc định">Vừa khung</button></span>`:''}<button class="cbtn" data-foc="${esc(title)}" title="${on?'Thu nhỏ · Esc':'Phóng to thẻ · Esc để đóng'}" aria-pressed="${on}">${on?'⤡':'⤢'}</button></span>`;};
-const card=(title,icon,body,aside='',extra='')=>{const foc=S.focus===title&&FOCUS_CARDS.test(title);
-  return `${foc?'<div class="foc-bg"></div>':''}<section class="card ${extra}${SKY_CARDS.test(title)?' sky':''}${foc?' focus':''}"${foc?` style="--fz:${S.fz||1}"`:''}><div class="card-h"><span class="ico">${ic(icon)}</span><h2>${title}</h2>${aside?`<span class="aside">${aside}</span>`:''}${focBtns(title)}</div>${foc?`<div class="foc-body">${body}</div>`:body}</section>`;};
+const card=(title,icon,body,aside='',extra='')=>{const ok=canFoc(title,body), foc=S.focus===title&&ok;
+  return `${foc?'<div class="foc-bg"></div>':''}<section class="card ${extra}${SKY_CARDS.test(title)?' sky':''}${foc?' focus':''}"${foc?` style="--fz:${S.fz||1}"`:''}><div class="card-h"><span class="ico">${ic(icon)}</span><h2>${title}</h2>${aside?`<span class="aside">${aside}</span>`:''}${focBtns(title,ok)}</div>${foc?`<div class="foc-body">${body}</div>`:body}</section>`;};
 
 // ---- biểu đồ
 // Tháp 3D nhìn chéo từ trên-phải: mỗi tầng là một khối có mặt trước, mặt bên (tối), mặt trên (sáng).
@@ -3548,7 +3553,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=71, SEEN_KEY='thaptaisan.seen';
+const APP_VER=72, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3570,6 +3575,7 @@ if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(()=>{if(!document.hidden)che
   window.addEventListener('focus',checkUpdate);window.addEventListener('online',checkUpdate);
   if(/[?&]v=\d+/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);}
 const CHANGES=[
+  [72,'19/11/2026',['Mọi thẻ có biểu đồ đều có nút ⤢ phóng to (thác nước, Sankey, cơ cấu, lịch đáo hạn, 12 tháng tới, mất thu nhập, lịch nhiệt, lộ trình…): − / + để giãn, Vừa khung, Esc hoặc ⤡ để thu nhỏ']],
   [71,'19/11/2026',['Nút ⤢ phóng to trên các thẻ biểu đồ (tài sản ròng, các tầng, vàng, bạc, Kai Café) hiện rõ hơn: nền đặc, viền xanh, không còn lẫn vào hình trang trí góc thẻ']],
   [70,'19/11/2026',['Phân tích · Tài sản ròng 12 tháng tới: số trên đường, chấm ▲ tháng vượt ngưỡng hoặc tới hạn mục tiêu, chạm hoặc kéo xem từng tháng','Nếu mất thu nhập: số tiền còn lại trên mép trên, chấm ▼ tháng hết từng lớp thanh khoản, chạm hoặc kéo xem từng tháng']],
   [69,'19/11/2026',['Hiệu suất · Sụt so với đỉnh: nút 1T / 6T / 1N / Tất cả, số % trên đường, chấm ▲▼ ngày tài sản ròng đổi mạnh kèm tài sản kéo lên/xuống','Đường giá cổ phiếu có nút 1T / 6T / 1N / Tất cả']],
@@ -3697,7 +3703,7 @@ function zoomClick(e){
   const z=document.getElementById('zoom');
   if(z&&!z.hidden){if(e.target.closest('.zm-x')||!e.target.closest('.zm-body > *'))closeZoom();return true;}
   const el=e.target.closest&&e.target.closest(ZOOMABLE);
-  if(!el||!el.closest('#view')||e.target.closest(NOZOOM)||el.closest('#zoom'))return false;
+  if(!el||!el.closest('#view')||e.target.closest(NOZOOM)||el.closest('#zoom')||el.closest('.card.focus'))return false;
   openZoom(el);return true;
 }
 // ---- chuyển động: ô sáng trượt theo tab, nội dung trượt vào theo hướng tab
@@ -3729,9 +3735,10 @@ setTimeout(()=>{const sp=document.getElementById('splash');if(sp)sp.remove();ani
 // ⤡ / Esc / bấm ra ngoài để thu nhỏ. Lưu ở S.focus (tiêu đề thẻ) để giữ khi app tự đọc lại mỗi phút.
 function setFocus(t){S.focus=t||'';if(!t)S.fz=1;document.documentElement.classList.toggle('focusing',!!t);const y=window.scrollY;render();window.scrollTo(0,y);}
 function focusClick(e){
-  const fb=e.target.closest('[data-foc]');if(fb){setFocus(S.focus===fb.dataset.foc?'':fb.dataset.foc);return true;}
-  const zb=e.target.closest('[data-fz]');if(zb){const d=+zb.dataset.fz;S.fz=d?Math.min(4,Math.max(1,(S.fz||1)+d*.5)):1;const y=window.scrollY;render();window.scrollTo(0,y);return true;}
+  const fb=e.target.closest('[data-foc]');if(fb){e.preventDefault();setFocus(S.focus===fb.dataset.foc?'':fb.dataset.foc);return true;}
+  const zb=e.target.closest('[data-fz]');if(zb){e.preventDefault();const d=+zb.dataset.fz;S.fz=d?Math.min(4,Math.max(1,(S.fz||1)+d*.5)):1;const y=window.scrollY;render();window.scrollTo(0,y);return true;}
   if(S.focus&&!e.target.closest('.card.focus')){setFocus('');return true;}
+  if(e.target.closest('details.card.focus>summary')){e.preventDefault();return true;}
   return false;
 }
 document.addEventListener('click',e=>{
