@@ -1022,6 +1022,19 @@ b.amt.v{color:#C9AEFF;background:rgba(176,140,255,.17);box-shadow:none}
 .logo.img.mk>svg{width:100%;height:100%}
 .logo.img.mk::after{display:none}
 .logo.img.lgi{box-shadow:none}
+/* ==== Tối ưu tốc độ, độ mượt trên điện thoại (Kai 19/11/2026: app lag trên mobile) ====
+   - bỏ làm mờ nền (backdrop-filter) ở thanh trên và thanh tab: mỗi lần cuộn máy phải làm mờ lại cả vùng phía sau
+   - tắt hiệu ứng chạy liên tục bằng background-position (viền chạy edgeRun, vệt quét hudScan) và vòng xoay, nhấp nháy icon: vẽ lại mỗi khung hình
+   - lớp hoạ tiết nền cố định được tách lớp riêng (GPU) để cuộn không phải vẽ lại; tooltip di chuyển bằng transform */
+#tip{left:0;top:0;will-change:transform}
+body::after{transform:translateZ(0)}
+@media (max-width:760px),(pointer:coarse){
+  .appbar,nav.tabs,.foc-bg{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .appbar{background:var(--bg)!important}
+  nav.tabs{background:var(--surface)!important}
+  .card::before,.hero::after,.card.sky::after,.card.sky .card-h .ico,.hg-o{animation:none!important}
+  .card,.hero{transition:none!important}
+}
 </style>
 
 <div id="splash" aria-hidden="true"><div class="sp-grid"></div><div class="sp-scan"></div><div class="sp-in"><div class="sp-frame"><i></i><i></i><i></i><i></i><svg viewBox="0 0 120 120" class="sp-logo" aria-hidden="true"><defs><mask id="lgS"><rect width="120" height="120" fill="#fff"/><path d="M35.5 40v52M42.5 40v52M49.5 40v52M56.5 40v52M63.5 40v52M70.5 40v52M77.5 40v52M84.5 40v52" stroke="#000" stroke-width="1.6"/></mask></defs><path class="lg-pin" d="M5 46h11M5 59h11M5 72h11M5 85h11M104 46h11M104 59h11M104 72h11M104 85h11M40 104v11M60 104v11M80 104v11M40 5v11M80 5v11" stroke="#6B7C9E" stroke-width="4" stroke-linecap="round"/><rect class="lg-body" x="16" y="16" width="88" height="88" rx="14" fill="#1A2438" stroke="#4A5C80" stroke-width="3" pathLength="100"/><path class="lg-pin1" d="M24 24h9l-9 9z" fill="#4A5C80"/><g class="lg-tr"><path d="M22 46h24M22 59h17M22 72h10M98 46H74M98 59H81M98 72H88M28 96h64" fill="none" stroke="#3E5074" stroke-width="2" stroke-linecap="round" pathLength="100"/><g fill="#5E7096"><circle cx="22" cy="46" r="2.2"/><circle cx="22" cy="59" r="2.2"/><circle cx="22" cy="72" r="2.2"/><circle cx="98" cy="46" r="2.2"/><circle cx="98" cy="59" r="2.2"/><circle cx="98" cy="72" r="2.2"/></g></g><g mask="url(#lgS)"><rect class="lg-b lg-b1" x="31" y="80" width="58" height="10" rx="2" fill="var(--h1)"/><rect class="lg-b lg-b2" x="38" y="67" width="44" height="10" rx="2" fill="var(--h2)"/><rect class="lg-b lg-b3" x="45" y="54" width="30" height="10" rx="2" fill="var(--h3)"/><rect class="lg-b lg-b4" x="52" y="41" width="16" height="10" rx="2" fill="var(--h4)"/></g><path class="lg-sp" d="M60 41V32" stroke="#DCE4F1" stroke-width="3" stroke-linecap="round"/><circle class="lg-n" cx="60" cy="28" r="4.2" fill="#5ED0FF"/><path class="lg-arc" d="M51.5 23.1A9.8 9.8 0 0 1 55.1 19.5M64.9 19.5A9.8 9.8 0 0 1 68.5 23.1" fill="none" stroke="#5ED0FF" stroke-width="2.6" stroke-linecap="round" opacity=".8"/></svg></div><div class="sp-word">Tháp <span>Tài Sản</span></div><div class="sp-sys"><span>Khởi động</span><b><i></i></b><span class="sp-pc">SYNC</span></div></div></div>
@@ -1053,6 +1066,7 @@ b.amt.v{color:#C9AEFF;background:rgba(176,140,255,.17);box-shadow:none}
   </section></div>
 
 <script>
+
 // Cấu hình bản website. clientId: OAuth Client ID (loại Web application) tạo trong Google Cloud Console.
 // api: cổng Apps Script (web app) trả số liệu khi đúng mật khẩu xem (apps-script/deploy-id.txt)
 const WEB_CFG={clientId:'392966348914-f4v6b77agtodv80sm3np980b9f2sq43v.apps.googleusercontent.com',api:'https://script.google.com/macros/s/AKfycbxlKnGvIG9SegFKB3eM1OWMlGRywksnawQSkSEumgIw8r913hrI_NeKg6rVMwZriVsraA/exec'};
@@ -1813,18 +1827,22 @@ function hcKit(o){
       `<rect x="0" y="0" width="${o.W}" height="${o.H}" fill="transparent"/>`+(o.ev?evDots(o.ev,xs,ys):'')};
 }
 // vạch dò cho histChart: chạm/kéo ngang, hiện số ngày gần nhất ở dòng phía trên biểu đồ
+// Tối ưu (Kai 19/11/2026, mobile lag): dữ liệu điểm đọc một lần rồi nhớ trên phần tử (_P); pointermove gộp theo khung hình (rAF)
+let hcRaf=0, hcEvt=null;
+function hcScrubQ(e){if(e.type==='pointerdown'){hcScrub(e);return;}if(!(e.target.closest&&e.target.closest('svg.hc')))return;hcEvt=e;if(!hcRaf)hcRaf=requestAnimationFrame(()=>{hcRaf=0;if(hcEvt)hcScrub(hcEvt);});}
 function hcScrub(e){
   const svg=e.target.closest&&e.target.closest('svg.hc');if(!svg)return;
-  let P;try{P=JSON.parse(svg.dataset.pts);}catch(_){return;}
+  let P=svg._P;if(!P){try{P=svg._P=JSON.parse(svg.dataset.pts);}catch(_){return;}}
   const r=svg.getBoundingClientRect(), vb=svg.viewBox.baseVal, vx=(e.clientX-r.left)/r.width*vb.width;
-  let b=0;P.forEach((p,i)=>{if(Math.abs(p[0]-vx)<Math.abs(P[b][0]-vx))b=i;});
+  if(svg._b!=null&&Math.abs(P[svg._b][0]-vx)<=Math.abs((P[svg._b-1]||P[svg._b])[0]-vx)&&Math.abs(P[svg._b][0]-vx)<=Math.abs((P[svg._b+1]||P[svg._b])[0]-vx))return;
+  let b=0;P.forEach((p,i)=>{if(Math.abs(p[0]-vx)<Math.abs(P[b][0]-vx))b=i;});svg._b=b;
   const g=svg.querySelector('.hc-g'), out=svg.previousElementSibling;
   g.setAttribute('visibility','visible');g.querySelector('line').setAttribute('x1',P[b][0]);g.querySelector('line').setAttribute('x2',P[b][0]);
   const c=g.querySelector('circle');c.setAttribute('cx',P[b][0]);c.setAttribute('cy',P[b][1]);
   if(out&&out.classList.contains('hc-out')){out.textContent=P[b][2];out.classList.add('on');}
 }
-document.addEventListener('pointerdown',hcScrub);
-document.addEventListener('pointermove',hcScrub);
+document.addEventListener('pointerdown',hcScrubQ);
+document.addEventListener('pointermove',hcScrubQ,{passive:true});
 function divBars(items,fmt){
   const mx=Math.max(1e-9,...items.map(i=>Math.abs(i.v)));
   return `<div class="dbars">${items.map(i=>{const w=Math.abs(i.v)/mx*50;
@@ -3029,7 +3047,7 @@ function observeAnim(){
   if(!('IntersectionObserver' in window))return;
   if(!ANIM_IO)ANIM_IO=new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('paused',!e.isIntersecting)),{rootMargin:'80px'});
   ANIM_IO.disconnect();
-  document.querySelectorAll('#view .hero,#view .card.sky,#view .ms-sky,#view svg.glass').forEach(el=>ANIM_IO.observe(el));
+  document.querySelectorAll('#view .hero,#view .card,#view .ms-sky,#view svg.glass').forEach(el=>ANIM_IO.observe(el));
 }
 document.addEventListener('visibilitychange',()=>document.documentElement.classList.toggle('bgpause',document.hidden));
 // Biến động tài sản ròng so với lần chụp gần nhất trước hôm nay (Lịch sử ghi 22h mỗi ngày; Kai 18/11/2026)
@@ -3582,6 +3600,11 @@ async function fetchSheet(ranges,id=SHEET_ID){
     fields:['sheets.properties.title','sheets.data.startRow','sheets.data.startColumn','sheets.data.rowData.values.effectiveValue']},{cache:false});
   return res.payload||res.structuredContent||JSON.parse(res.content[0].text);
 }
+// Tối ưu (Kai 19/11/2026): app tự đọc lại mỗi phút; số liệu y hệt lần trước thì chỉ đổi giờ đồng bộ, không vẽ lại cả trang
+// (vẽ lại làm giật khi đang cuộn, mất vạch dò đang kéo trên biểu đồ)
+let LAST_SIG='';
+function dataSig(j){const s=JSON.stringify(j);let h=0;for(let i=0;i<s.length;i+=7)h=(h*31+s.charCodeAt(i))|0;return s.length+':'+h;}
+function stampOnly(){const st=document.getElementById('stamp');if(st)st.innerHTML=`<span class="status"><i class="dotlive ok"></i>Đồng bộ ${fmtT(LIVE.at)} · ${fmtD(LIVE.at)}</span>`;}
 async function loadSheet(manual){
   if((!IS_WEB&&!mcp)||busy)return;
   if(IS_WEB&&!authOk()){LIVE.state='login';render();return;}
@@ -3589,15 +3612,20 @@ async function loadSheet(manual){
   if(manual){LIVE.state='load';render();}
   try{
     if(IS_WEB&&PW&&WEB_CFG.api){
-      const j=await fetchByPw(), main=parseSheet(j.main);
+      const j=await fetchByPw(), sig=dataSig(j);
+      if(!manual&&LIVE.state==='ok'&&sig===LAST_SIG){LIVE.at=Date.now();busy=false;stampOnly();return;}
+      LAST_SIG=sig;const main=parseSheet(j.main);
       if(j.hist)HIST=parseHist(j.hist);if(j.cf)CF=parseCF(j.cf);if(j.goals)GOALS=parseGoals(j.goals);if(j.loans)LOANS=parseLoans(j.loans);if(j.ms)MSD=parseMS(j.ms);if(j.mk)MK=parseMK(j.mk);
       if(j.kai&&j.kai.sheets){try{KAI=parseKai(j.kai);KAI_ERR='';}catch(e){KAI_ERR=e.message;}}else KAI_ERR=(j.kai&&j.kai.err)||'Không đọc được sheet Kai Café';
       applyData(main);LIVE.state='ok';LIVE.at=Date.now();LIVE.msg='';LIVE.pwErr=false;saveCache();busy=false;render();return;
     }
-    const main=parseSheet(await fetchSheet(RANGES));
+    const raw=await fetchSheet(RANGES), main=parseSheet(raw);
     // các sheet phụ đọc riêng: thiếu sheet nào thì giữ số cũ của sheet đó
     const extra=await Promise.allSettled([...[HIST_RANGE,CF_RANGE,GOAL_RANGE,LOAN_RANGE].map(r=>fetchSheet([r])),fetchSheet(KAI_RANGES,KAI_ID),fetchSheet([MS_RANGE]),fetchSheet([MK_RANGE])]);
     if(extra.some(x=>x.status==='rejected'&&x.reason&&x.reason.code==='needs_login'))throw extra.find(x=>x.reason&&x.reason.code==='needs_login').reason;
+    const sig=dataSig([raw,extra.map(x=>x.value||null)]);
+    if(!manual&&LIVE.state==='ok'&&sig===LAST_SIG){LIVE.at=Date.now();busy=false;stampOnly();return;}
+    LAST_SIG=sig;
     const ok=(i,f)=>{if(extra[i].status==='fulfilled')return f(extra[i].value);};
     ok(0,v=>HIST=parseHist(v));ok(1,v=>CF=parseCF(v));ok(2,v=>GOALS=parseGoals(v));ok(3,v=>LOANS=parseLoans(v));ok(4,v=>{try{KAI=parseKai(v);KAI_ERR='';}catch(e){KAI_ERR=e.message;}});ok(5,v=>MSD=parseMS(v));ok(6,v=>MK=parseMK(v));
     if(extra[4].status==='rejected')KAI_ERR=(extra[4].reason&&extra[4].reason.message)||'Không đọc được sheet Kai Café';
@@ -3623,7 +3651,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=74, SEEN_KEY='thaptaisan.seen';
+const APP_VER=75, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3645,6 +3673,7 @@ if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(()=>{if(!document.hidden)che
   window.addEventListener('focus',checkUpdate);window.addEventListener('online',checkUpdate);
   if(/[?&]v=\d+/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);}
 const CHANGES=[
+  [75,'19/11/2026',['Mượt hơn trên điện thoại: bỏ làm mờ nền ở thanh trên và thanh tab, tắt hiệu ứng viền chạy, vệt quét, vòng xoay (vẽ lại liên tục)','Tự làm mới mỗi phút: số không đổi thì không vẽ lại cả trang (hết giật định kỳ, không mất vạch dò đang kéo)','Chạm, kéo biểu đồ và tooltip nhẹ hơn; trên máy tính hiệu ứng viền thẻ dừng khi thẻ ngoài màn hình']],
   [74,'19/11/2026',['Tự do › Lộ trình: dự phóng dạng quạt có số trên đường giữa, chấm ▲ tháng vượt ngưỡng hoặc đạt mục tiêu, chạm hoặc kéo xem từng tháng','Tốc độ thật có biểu đồ: đường thật so với nét đứt dự báo, vạch cam các ngưỡng, chấm ▲ ngày vượt ngưỡng, ▼ ngày tụt dưới ngưỡng, nút 1T / 6T / 1N / Tất cả']],
   [73,'19/11/2026',['Tab Tài sản: thẻ mới <b>Từng tài sản theo thời gian</b>: chọn tài sản (hoặc chạm đường nhỏ ở danh sách), nút 1T / 6T / 1N / Tất cả, số trên đường, chấm ▲▼ ngày đổi mạnh, chạm hoặc kéo xem từng ngày, nút ⤢']],
   [72,'19/11/2026',['Mọi thẻ có biểu đồ đều có nút ⤢ phóng to (thác nước, Sankey, cơ cấu, lịch đáo hạn, 12 tháng tới, mất thu nhập, lịch nhiệt, lộ trình…): − / + để giãn, Vừa khung, Esc hoặc ⤡ để thu nhỏ']],
@@ -3884,15 +3913,15 @@ document.addEventListener('input',e=>{
 });
 // tooltip dùng chung cho mọi phần tử có data-tip
 const tip=document.getElementById('tip');
-document.addEventListener('pointermove',e=>{
+let tipEl=null, tipW=0, tipH=0, tipRaf=0, tipE=null;
+function tipMove(e){
   const t=e.target.closest&&e.target.closest('[data-tip]');
-  if(!t||!tip){if(tip)tip.hidden=true;return;}
-  tip.textContent=t.getAttribute('data-tip');tip.hidden=false;
-  const w=tip.offsetWidth,h=tip.offsetHeight;
-  tip.style.left=Math.max(8,Math.min(window.innerWidth-w-8,e.clientX+14))+'px';
-  tip.style.top=Math.max(8,e.clientY-h-12)+'px';
-});
-document.addEventListener('pointerleave',()=>{if(tip)tip.hidden=true;});
+  if(!t||!tip){if(tip&&!tip.hidden)tip.hidden=true;tipEl=null;return;}
+  if(t!==tipEl){tipEl=t;tip.textContent=t.getAttribute('data-tip');tip.hidden=false;tipW=tip.offsetWidth;tipH=tip.offsetHeight;}
+  tip.style.transform='translate('+Math.max(8,Math.min(window.innerWidth-tipW-8,e.clientX+14))+'px,'+Math.max(8,e.clientY-tipH-12)+'px)';
+}
+document.addEventListener('pointermove',e=>{tipE=e;if(!tipRaf)tipRaf=requestAnimationFrame(()=>{tipRaf=0;if(tipE)tipMove(tipE);});},{passive:true});
+document.addEventListener('pointerleave',()=>{if(tip)tip.hidden=true;tipEl=null;});
 document.addEventListener('scroll',()=>{if(tip)tip.hidden=true;},{passive:true});
 // kéo xuống ở đầu trang để làm mới
 let ptrY=null;const ptr=document.getElementById('ptr');
