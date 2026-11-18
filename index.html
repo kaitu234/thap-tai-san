@@ -1680,21 +1680,28 @@ function emergency(C){
 function projection(C){
   const net=INCOME-S.expense, step=net+C.interestMonthly, pts=[];
   for(let m=0;m<=12;m++)pts.push(C.nw+step*m);
-  const W=360,H=170,L=8,R=64,T=14,B=26, lo=Math.min(...pts), hi=Math.max(...pts), pad=(hi-lo)*.15||C.nw*.02||1;
+  // Kai 19/11/2026 (như Tài sản ròng theo thời gian): số trên đường, chạm/kéo xem từng tháng, chấm ▲ ở tháng vượt ngưỡng tài sản ròng (sheet Ngưỡng) hoặc tới hạn mục tiêu
+  const ev={}, add=(m,up,t)=>{ev[m]=ev[m]?{up:ev[m].up&&up,tip:ev[m].tip+' · '+t}:{up,tip:t};};
+  msList(C).forEach(x=>{const m=pts.findIndex(v=>v>=x.v);if(m>0&&pts[0]<x.v)add(m,true,`Sau ${m} tháng (${mLab(C,m)}) vượt ngưỡng ${x.name} ${msVal(x.v)}`);});
+  const today=serialOf(C.now);GOALS.filter(g=>g.due&&g.due>today&&g.due<=today+366&&g.need>0).forEach(g=>{const m=Math.max(1,Math.min(12,Math.round((g.due-today)/30.44)));
+    add(m,g.have>=g.need||pts[m]>=g.need,`Hạn mục tiêu ${g.name} (${sdate(g.due)}): cần ${tr(g.need)}, đang có ${tr(g.have)}`);});
+  const nev=Object.keys(ev).length;
+  const W=360,H=nev?206:186,L=8,R=64,T=nev?50:30,B=26, lo=Math.min(...pts), hi=Math.max(...pts), pad=(hi-lo)*.15||C.nw*.02||1;
   const y0=lo-pad, y1=hi+pad, x=m=>L+m/12*(W-L-R), y=v=>T+(1-(v-y0)/(y1-y0))*(H-T-B);
   const line=pts.map((v,m)=>`${m?'L':'M'}${x(m).toFixed(1)},${y(v).toFixed(1)}`).join('');
   const area=line+`L${x(12)},${H-B}L${x(0)},${H-B}Z`;
   const ticks=[y0+(y1-y0)*.15,y0+(y1-y0)*.5,y0+(y1-y0)*.85];
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Ước tính tài sản ròng 12 tháng">
+  const K=hcKit({S:pts.map((v,m)=>({d:m,v})),x,y,col:'var(--accent)',T,H,B,L,R,W,ev,info:pts.map((v,m)=>`${m===0?'Hôm nay':'Sau '+m+' tháng ('+mLab(C,m)+')'} · ${tr(v)}`+(m?' · '+trs(v-pts[0])+' so với hôm nay':'')+(ev[m]?' · '+ev[m].tip:''))});
+  return K.out+`<svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Ước tính tài sản ròng 12 tháng" data-pts='${K.pts}'>`+`
     ${ticks.map(t=>`<line x1="${L}" x2="${W-R+4}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${W-R+8}" y="${y(t)+4}">${trn(t)} Tr</text>`).join('')}
     <path d="${area}" fill="var(--accent)" fill-opacity=".12"/>
     <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
     <circle cx="${x(0)}" cy="${y(pts[0])}" r="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>
     <circle cx="${x(12)}" cy="${y(pts[12])}" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>
-    <text x="${x(12)}" y="${y(pts[12])-11}" text-anchor="end" class="v">${tr(pts[12])}</text>
     ${[0,3,6,9,12].map(m=>`<text x="${x(m)}" y="${H-8}" text-anchor="${m===0?'start':m===12?'end':'middle'}">${m===0?'Hôm nay':'+'+m+' th'}</text>`).join('')}
-    ${pts.map((v,m)=>`<rect x="${x(m)-12}" y="${T}" width="24" height="${H-T-B}" fill="transparent" data-tip="${m===0?'Hôm nay':'Sau '+m+' tháng'}: ${tr(v)}"/>`).join('')}
+    ${K.marks}
   </svg>
+  ${nev?'<div class="legend"><span><i class="tdot" style="background:var(--good)"></i>▲ Tháng vượt ngưỡng tài sản ròng hoặc kịp hạn mục tiêu</span>'+(Object.values(ev).some(e=>!e.up)?'<span><i class="tdot" style="background:var(--bad)"></i>▼ Hạn mục tiêu chưa đủ</span>':'')+'<span>Chạm hoặc kéo để xem từng tháng</span></div>':''}
   <p class="note">Giả định giữ mức dư ${trs(net)}/tháng và lãi tiết kiệm khoảng ${tr(C.interestMonthly)}/tháng. Không tính biến động giá cổ phiếu và khấu hao.</p>`;
 }
 // Tài sản ròng theo ngày: các điểm Apps Script đã chụp + điểm hôm nay tính trực tiếp
@@ -2208,21 +2215,26 @@ function runwayCurve(C){
   for(let m=0;m<=N;m++){st.push({...r});if(m===N)break;let need=E;
     for(const k of keys){const t=Math.min(r[k],need);r[k]-=t;need-=t;if(r[k]<=0.5&&out[k]==null&&C.L[k]>0)out[k]=m+1;}
     if(zero==null&&need>0.5)zero=m+1-need/E;}
-  const W=360,H=180,L=8,R=58,T=14,B=26, hi=C.L.total*1.05||1;
+  // Kai 19/11/2026: số tiền còn lại trên mép trên, chạm/kéo xem từng tháng, chấm ▼ ở tháng hết từng lớp (dùng ngay, sổ, cổ phiếu)
+  const LN={now:'Hết tiền dùng ngay (ví, tiền mặt)',soon:'Hết tiền rút sớm sổ tiết kiệm',market:'Hết cổ phiếu bán được'}, ev={};
+  keys.forEach(k=>{const m=out[k];if(m!=null&&m<=N)ev[m]={up:false,tip:(ev[m]?ev[m].tip+' · ':'')+`Tháng ${m}: ${LN[k]}`};});
+  const nev=Object.keys(ev).length;
+  const W=360,H=nev?230:210,L=8,R=58,T=nev?54:34,B=36, hi=C.L.total*1.05||1;
   const x=m=>L+m/N*(W-L-R), y=v=>T+(1-v/hi)*(H-T-B);
   const cum=s=>[0,s.now,s.now+s.soon,s.now+s.soon+s.market];
   const area=i=>{const top=st.map((s,m)=>`${m?'L':'M'}${x(m).toFixed(1)},${y(cum(s)[i+1]).toFixed(1)}`).join(''), bot=st.map((s,m)=>m).reverse().map(m=>`L${x(m).toFixed(1)},${y(cum(st[m])[i]).toFixed(1)}`).join('');return `<path d="${top}${bot}Z" fill="${LAYERS[i][2]}" fill-opacity=".55" stroke="${LAYERS[i][2]}" stroke-width="1"/>`;};
   const ok=zero==null||zero>=tm, tk=[...Array(N+1).keys()].filter(m=>m%(N>30?6:3)===0);
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Thanh khoản còn lại nếu mất thu nhập">
+  const tot=st.map(s=>s.now+s.soon+s.market), K=hcKit({S:tot.map((v,m)=>({d:m,v})),x,y,col:'var(--ink)',T,H,B,L,R,W,ev,
+    info:st.map((s,m)=>`Tháng ${m}: còn ${tr(tot[m])} (dùng ngay ${tr(s.now)}, sổ ${tr(s.soon)}, cổ phiếu ${tr(s.market)})`+(ev[m]?' · '+ev[m].tip.replace(/Tháng d+: /g,''):''))});
+  return K.out+`<svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Thanh khoản còn lại nếu mất thu nhập" data-pts='${K.pts}'>`+`
     ${[0,1,2].map(area).join('')}
     <line x1="${L}" x2="${W-R+4}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)"/>
     <line x1="${x(tm).toFixed(1)}" x2="${x(tm).toFixed(1)}" y1="${T}" y2="${H-B}" stroke="var(--ink)" stroke-dasharray="4 3" stroke-opacity=".7"/><text x="${(x(tm)-4).toFixed(1)}" y="${T+8}" text-anchor="end">mục tiêu ${tm} th</text>
     ${zero!=null?`<circle cx="${x(zero).toFixed(1)}" cy="${y(0).toFixed(1)}" r="5" fill="${ok?'var(--warn)':'var(--bad)'}" stroke="var(--surface)" stroke-width="2"/><text class="v" x="${x(zero).toFixed(1)}" y="${(y(0)-9).toFixed(1)}" text-anchor="middle">hết sau ${nf(zero,1)} th</text>`:''}
-    <text x="${W-R+8}" y="${(y(C.L.total)+4).toFixed(1)}">${trn(C.L.total)} Tr</text>
     ${tk.map(m=>`<text x="${x(m).toFixed(1)}" y="${H-8}" text-anchor="middle">${m}</text>`).join('')}
-    ${st.map((s,m)=>`<rect x="${(x(m)-5).toFixed(1)}" y="${T}" width="10" height="${H-T-B}" fill="transparent" data-tip="Tháng ${m}: còn ${tr(s.now+s.soon+s.market)} (dùng ngay ${tr(s.now)}, sổ ${tr(s.soon)}, cổ phiếu ${tr(s.market)})"/>`).join('')}
+    ${K.marks}
   </svg>
-  <div class="legend">${LAYERS.map(l=>C.L[l[0]]>0?`<span><i class="tdot" style="background:${l[2]}"></i>${l[1]}${out[l[0]]?' · hết tháng '+out[l[0]]:''}</span>`:'').join('')}<span>Trục ngang: số tháng không có thu nhập</span></div>
+  <div class="legend">${LAYERS.map(l=>C.L[l[0]]>0?`<span><i class="tdot" style="background:${l[2]}"></i>${l[1]}${out[l[0]]?' · hết tháng '+out[l[0]]:''}</span>`:'').join('')}<span>Trục ngang: số tháng không có thu nhập</span>${nev?'<span><i class="tdot" style="background:var(--bad)"></i>▼ Tháng hết một lớp, chạm để xem</span>':''}<span>Số trên mép trên: tổng còn lại; chạm hoặc kéo để xem từng tháng</span></div>
   <p class="note">Mỗi tháng tiêu ${tr2(E)} chi thiết yếu, lấy lần lượt ví và tiền mặt → rút sổ (chỉ tiền gốc) → bán cổ phiếu (× hệ số ${nf(DATA.cfg.haircut,1)}). ${ok?'Đủ qua mục tiêu '+tm+' tháng.':'<b class="neg">Không đủ mục tiêu '+tm+' tháng.</b>'} Chưa tính lãi và các khoản chờ nhận.</p>`;
 }
 // Thu chi theo tháng dạng đối xứng: thu lên (xanh lá), chi xuống (xám), đường tỷ lệ để dành (trục phải), chấm tô theo 20% / 0%
@@ -3536,7 +3548,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=69, SEEN_KEY='thaptaisan.seen';
+const APP_VER=70, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3558,6 +3570,7 @@ if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(()=>{if(!document.hidden)che
   window.addEventListener('focus',checkUpdate);window.addEventListener('online',checkUpdate);
   if(/[?&]v=\d+/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);}
 const CHANGES=[
+  [70,'19/11/2026',['Phân tích · Tài sản ròng 12 tháng tới: số trên đường, chấm ▲ tháng vượt ngưỡng hoặc tới hạn mục tiêu, chạm hoặc kéo xem từng tháng','Nếu mất thu nhập: số tiền còn lại trên mép trên, chấm ▼ tháng hết từng lớp thanh khoản, chạm hoặc kéo xem từng tháng']],
   [69,'19/11/2026',['Hiệu suất · Sụt so với đỉnh: nút 1T / 6T / 1N / Tất cả, số % trên đường, chấm ▲▼ ngày tài sản ròng đổi mạnh kèm tài sản kéo lên/xuống','Đường giá cổ phiếu có nút 1T / 6T / 1N / Tất cả']],
   [68,'19/11/2026',['Kai Café · Doanh thu theo ngày: nút 30N / 90N / Tất cả, số trên cột (cao nhất, thấp nhất, mới nhất), chấm ▲▼ ngày bán lệch ≥ 40% so với trung bình 7 ngày trước, chạm hoặc kéo để xem từng ngày, nút ⤢ phóng to']],
   [67,'19/11/2026',['12 tháng tới: chấm đánh số khớp danh sách, có nhãn ngày + số tiền, chạm để xem chi tiết','Các tầng theo thời gian: thêm nút 1T / 6T / 1N / Tất cả và chấm ▲▼ ngày tổng tăng/giảm mạnh','Biểu đồ giá vàng 24K, % so với thế giới, bạc Phú Quý, bạc thế giới, ETH, cổ phiếu: số trên đường, cao/thấp nhất, chấm ▲▼ ngày đổi mạnh, chạm hoặc kéo để xem từng ngày; Sụt so với đỉnh cũng kéo xem được']],
