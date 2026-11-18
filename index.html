@@ -147,6 +147,9 @@ main{padding-top:16px;display:grid;gap:16px}
 .chip-chg{display:inline-flex;align-items:center;gap:6px;font:700 13px var(--f-body);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.12);width:fit-content}
 .chg-row{display:flex;flex-wrap:wrap;gap:8px}
 .hc-bar{display:flex;flex-wrap:wrap;gap:0 8px}
+.rng.ah-pick{display:flex;flex-wrap:wrap;max-width:100%}
+.rng.ah-pick button{text-transform:none;letter-spacing:0;font-family:var(--f-body)}
+svg.aspark[data-ah]{cursor:pointer}
 /* tiêu điểm ngày giảm mạnh + thẻ phóng to ⤢ (Kai 18/11/2026) */
 #view svg.chart .hc-ev{cursor:help}
 #view svg.chart .hc-ev:hover circle{stroke:var(--ink);stroke-width:2}
@@ -2933,6 +2936,37 @@ function earnCard(C){
     <p class="note">Tính lãi đơn từ ngày gửi (sổ) hoặc ngày cập nhật số dư (ví) đến hôm nay.</p>`);
 }
 // Đường mini 90 ngày trên thẻ tài sản (từ sheet Lịch sử, cần ≥ 3 điểm)
+// Tab Tài sản (Kai 19/11/2026, như Tài sản ròng theo thời gian): giá trị một tài sản theo ngày từ cột J sheet Lịch sử + hôm nay.
+// Chọn tài sản bằng nút (S.ah) hoặc chạm đường nhỏ ở danh sách; 1T/6T/1N/Tất cả dùng chung S.hr; chấm ▲▼ ngày đổi ≥ 1% và lớn bất thường (pxEvents)
+function assetHist(C){
+  const today=serialOf(C.now), has=n=>HIST.some(h=>h.a&&h.a[n]!=null&&h.d<today);
+  const cand=C.inNW.filter(a=>!a.sim&&!a.receivable&&has(a.name)).sort((p,q)=>q.value-p.value);
+  if(!cand.length)return '';
+  const moves=a=>new Set(HIST.filter(h=>h.a&&h.a[a.name]!=null).map(h=>Math.round(h.a[a.name]/1e4))).size>1;
+  const sel=cand.find(a=>a.name===S.ah)||cand.find(moves)||cand[0], dl=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);};
+  const pick=`<div class="rng ah-pick">${cand.map(a=>`<button data-ah="${esc(a.name)}" aria-selected="${a===sel}">${esc(a.name)}</button>`).join('')}</div>`;
+  let pts=HIST.filter(h=>h.d<today&&h.a&&h.a[sel.name]!=null).map(h=>({d:h.d,v:+h.a[sel.name]||0})).sort((p,q)=>p.d-q.d);
+  pts.push({d:today,v:sel.value});pts=hrCut(pts,today);
+  const head=`<div class="hc-bar">${hrBtns()}</div>${pick}`;
+  if(pts.length<2)return head+`<p class="muted">Chưa đủ lịch sử cho ${esc(sel.name)} trong khoảng này.</p>`;
+  const ev=pxEvents(pts,.01,tr,dl), nev=Object.keys(ev).length, n=pts.length;
+  const W=360,H=nev?214:194,L=10,R=50,T=nev?44:26,B=26, d0=pts[0].d, d1=pts[n-1].d||d0+1;
+  const vs=pts.map(p=>p.v), lo=Math.min(...vs), hi=Math.max(...vs), pad=(hi-lo)*.2||hi*.01||1e5, y0=lo-pad, y1=hi+pad;
+  const x=d=>L+(d1===d0?1:(d-d0)/(d1-d0))*(W-L-R), y=v=>T+(1-(v-y0)/(y1-y0))*(H-T-B);
+  const col=sel.tier?tcol(sel.tier):'var(--accent)', line=pts.map((p,i)=>`${i?'L':'M'}${x(p.d).toFixed(1)},${y(p.v).toFixed(1)}`).join('');
+  const ticks=[y0+(y1-y0)*.1,y0+(y1-y0)*.5,y0+(y1-y0)*.9];
+  const K=hcKit({S:pts,x,y,col,T,H,B,L,R,W,ev,info:pts.map((p,i)=>`${i===n-1?'Hôm nay':dl(p.d)} · ${sel.name} ${tr(p.v)}`+(i?` · ${trs(p.v-pts[i-1].v)} so với ${dl(pts[i-1].d)}`:'')+(ev[i]?' · '+(ev[i].up?'▲ ':'▼ ')+ev[i].tip:''))});
+  return head+K.out+`<svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(sel.name)} theo ngày" data-pts='${K.pts}'>
+    ${ticks.map(t=>`<line x1="${L}" x2="${W-R+4}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${W-R+8}" y="${y(t)+4}">${PRIV?HIDE:nf(t/1e6,t<1e8?1:0)} Tr</text>`).join('')}
+    <path d="${line}L${x(pts[n-1].d)},${H-B}L${x(d0)},${H-B}Z" fill="${col}" fill-opacity=".12"/>
+    <path d="${line}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>
+    ${n<=90?pts.map(p=>`<circle cx="${x(p.d).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="2" fill="${col}"/>`).join(''):''}
+    <circle cx="${x(pts[n-1].d)}" cy="${y(pts[n-1].v)}" r="4.5" fill="${col}" stroke="var(--surface)" stroke-width="2"/>
+    <text x="${x(d0)}" y="${H-8}">${dl(d0)}</text><text x="${x(pts[n-1].d)}" y="${H-8}" text-anchor="end">Hôm nay</text>
+    ${K.marks}
+  </svg>
+  <div class="legend"><span><i class="tdot" style="background:${col}"></i>${esc(sel.name)} ${trs(pts[n-1].v-pts[0].v)} từ ${dl(d0)}</span><span><i class="tdot" style="background:var(--good)"></i>Cao nhất ${tr(hi)} (${dl(pts[K.iMax].d)})</span><span><i class="tdot" style="background:var(--bad)"></i>Thấp nhất ${tr(lo)} (${dl(pts[K.iMin].d)})</span>${nev?'<span>▲▼ ngày đổi mạnh (≥ 1%), rê chuột hoặc chạm để xem</span>':''}<span>Chạm hoặc kéo trên biểu đồ để xem từng ngày · chạm đường nhỏ ở Danh sách tài sản để chọn nhanh</span></div>`;
+}
 function assetSpark(a){
   if(a.sim||a.receivable)return '';
   const today=serialOf(Date.now()), pts=HIST.filter(h=>h.a&&h.a[a.name]!=null&&h.d>=today-90&&h.d<today).map(h=>h.a[a.name]);
@@ -2940,7 +2974,7 @@ function assetSpark(a){
   if(pts.length<3)return '';
   const lo=Math.min(...pts),hi=Math.max(...pts),W=64,H=20, x=i=>(i/(pts.length-1)*(W-4)+2).toFixed(1), y=v=>(H-3-(v-lo)/((hi-lo)||1)*(H-6)).toFixed(1);
   const up=pts[pts.length-1]>=pts[0], col=up?'var(--good)':'var(--bad)';
-  return `<svg class="aspark" viewBox="0 0 ${W} ${H}" aria-label="Giá trị ${pts.length} lần chụp gần nhất"><path d="${pts.map((v,i)=>(i?'L':'M')+x(i)+','+y(v)).join('')}" fill="none" stroke="${col}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${x(pts.length-1)}" cy="${y(pts[pts.length-1])}" r="2" fill="${col}"/></svg>`;
+  return `<svg class="aspark" data-ah="${esc(a.name)}" role="button" tabindex="0" viewBox="0 0 ${W} ${H}" aria-label="Giá trị ${pts.length} lần chụp gần nhất"><path d="${pts.map((v,i)=>(i?'L':'M')+x(i)+','+y(v)).join('')}" fill="none" stroke="${col}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${x(pts.length-1)}" cy="${y(pts[pts.length-1])}" r="2" fill="${col}"/></svg>`;
 }
 // Đồng hồ sức khỏe: 5 vòng cung phát sáng (mỗi tiêu chí một vòng, 270°), điểm ở giữa, vòng ngoài xoay
 function hudGauge(h){
@@ -3152,6 +3186,7 @@ function vAssets(C){
       ${flex.map(a=>`<tr><td><b>${esc(a.name)}</b></td><td>${tr2(a.principal)}</td><td>${nf(a.rate,2)}%</td><td>${fmtD(a.fx.start)}</td><td class="muted">Không kỳ hạn</td><td class="pos">${vnd(a.fx.accrued)}</td><td><b>${vnd(a.value)}</b></td></tr>`).join('')}
     </table></div>
     <p class="note">Lãi đơn cộng theo ngày: gốc × lãi suất × số ngày / 365. Ví không kỳ hạn tính lãi từ ngày bạn cập nhật số dư.</p>`):''}
+  ${(()=>{const b=assetHist(C);return b?`<div id="assetHist">${card('Từng tài sản theo thời gian','up',b,HIST.length?HIST.length+' ngày':'')}</div>`:'';})()}
   ${vSavingsPlan(C)}
   ${vLoans(C)}
   ${term.length?card('Lịch đáo hạn','calendar',savGantt(C,term),term.length+' sổ'):''}`;
@@ -3553,7 +3588,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=72, SEEN_KEY='thaptaisan.seen';
+const APP_VER=73, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3575,6 +3610,7 @@ if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(()=>{if(!document.hidden)che
   window.addEventListener('focus',checkUpdate);window.addEventListener('online',checkUpdate);
   if(/[?&]v=\d+/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);}
 const CHANGES=[
+  [73,'19/11/2026',['Tab Tài sản: thẻ mới <b>Từng tài sản theo thời gian</b>: chọn tài sản (hoặc chạm đường nhỏ ở danh sách), nút 1T / 6T / 1N / Tất cả, số trên đường, chấm ▲▼ ngày đổi mạnh, chạm hoặc kéo xem từng ngày, nút ⤢']],
   [72,'19/11/2026',['Mọi thẻ có biểu đồ đều có nút ⤢ phóng to (thác nước, Sankey, cơ cấu, lịch đáo hạn, 12 tháng tới, mất thu nhập, lịch nhiệt, lộ trình…): − / + để giãn, Vừa khung, Esc hoặc ⤡ để thu nhỏ']],
   [71,'19/11/2026',['Nút ⤢ phóng to trên các thẻ biểu đồ (tài sản ròng, các tầng, vàng, bạc, Kai Café) hiện rõ hơn: nền đặc, viền xanh, không còn lẫn vào hình trang trí góc thẻ']],
   [70,'19/11/2026',['Phân tích · Tài sản ròng 12 tháng tới: số trên đường, chấm ▲ tháng vượt ngưỡng hoặc tới hạn mục tiêu, chạm hoặc kéo xem từng tháng','Nếu mất thu nhập: số tiền còn lại trên mép trên, chấm ▼ tháng hết từng lớp thanh khoản, chạm hoặc kéo xem từng tháng']],
@@ -3756,6 +3792,9 @@ document.addEventListener('click',e=>{
   const grb=e.target.closest('[data-gr]');if(grb){FM.gr=grb.dataset.gr;saveFM();const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const krb=e.target.closest('[data-kr]');if(krb){S.kr=krb.dataset.kr;const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const hb=e.target.closest('[data-hr]');if(hb){S.hr=hb.dataset.hr;const y=window.scrollY;render();window.scrollTo(0,y);return;}
+  const ahb=e.target.closest('[data-ah]');if(ahb){S.ah=ahb.dataset.ah;render();
+    if(ahb.classList.contains('aspark')){const el=document.getElementById('assetHist');if(el)el.scrollIntoView({behavior:MOTION()?'smooth':'auto',block:'start'});}
+    else{const y=window.scrollY;window.scrollTo(0,y);}return;}
   const hk=e.target.closest('[data-hb]');if(hk){S.hb=hk.dataset.hb;const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const tb=e.target.closest('[data-tab]');if(tb){go(tb.dataset.tab);return;}
   if(e.target.closest('#privacy')){PRIV=!PRIV;try{localStorage.setItem(PRIV_KEY,PRIV?'1':'0');}catch(_){}render();return;}
