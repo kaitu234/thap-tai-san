@@ -461,6 +461,8 @@ b.amt.n{color:var(--ink);background:var(--surface2)}
 .tl-i{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:4px 8px;align-items:center;font-size:12.5px;padding:6px 0;border-top:1px solid var(--line)}
 .tl-d{color:var(--muted);font-size:12px} .tl-t{min-width:0} .tl-v{text-align:right;font-weight:600}
 .tl-i .chip{grid-column:3/5;justify-self:start}
+.tl-n{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;font:700 10.5px var(--f-tech);color:#fff;font-style:normal}
+svg.chart text.tl-lb{font-size:9.5px;font-weight:700;paint-order:stroke;stroke:var(--surface);stroke-width:3px}
 @media (min-width:560px){.tl-i{grid-template-columns:auto 5.5em minmax(0,1fr) auto auto}.tl-i .chip{grid-column:auto}}
 /* thước giá cổ phiếu */
 .pg-wrap+.pg-wrap{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
@@ -1464,7 +1466,7 @@ const tierName=t=>t===0?'Ngoài tháp':'T'+t+' '+((TIERS0[t-1]||{}).short||'');
 const SKY_CARDS=/^(Tiền tự sinh ra|Nếu mất thu nhập|Sụt so với đỉnh|Tiền đi đâu mỗi tháng|Các tầng theo thời gian|Sức khỏe tài chính|12 tháng tới|Cơ cấu tài sản|30 ngày qua|Tài sản ròng theo thời gian|Cổ phiếu|Tháp so với mục tiêu|Lộ trình \d+ ngưỡng|Dự báo bằng lãi kép)/;
 // thẻ thu gọn được (Kai 12/11/2026: tab Phân tích quá dài trên điện thoại): bấm tiêu đề để mở; hint hiện khi đang gọn
 const foldCard=(title,icon,body,aside='',hint='')=>`<details class="card fold"><summary><div class="card-h"><span class="ico">${ic(icon)}</span><h2>${title}</h2>${aside?`<span class="aside">${aside}</span>`:''}<span class="fold-i" aria-hidden="true"><svg class="i sm" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></div>${hint?`<p class="fold-hint">${hint}</p>`:''}</summary>${body}</details>`;
-const FOCUS_CARDS=/^(Tài sản ròng theo thời gian|Các tầng theo thời gian)$/;
+const FOCUS_CARDS=/^(Tài sản ròng theo thời gian|Các tầng theo thời gian|Giá 24K hai nhà theo ngày|Ethereum và bạc thế giới|Bạc Phú Quý)$/;
 const focBtns=title=>{if(!FOCUS_CARDS.test(title))return '';const on=S.focus===title, fz=S.fz||1;
   return `<span class="cbtns">${on?`<span class="zctl"><button class="cbtn" data-fz="-1" title="Thu nhỏ"${fz<=1?' disabled':''}>−</button><span class="zpct">${Math.round(fz*100)}%</span><button class="cbtn" data-fz="1" title="Phóng to"${fz>=4?' disabled':''}>+</button><button class="cbtn wide" data-fz="0" title="Về cỡ mặc định">Vừa khung</button></span>`:''}<button class="cbtn" data-foc="${esc(title)}" title="${on?'Thu nhỏ · Esc':'Phóng to thẻ · Esc để đóng'}" aria-pressed="${on}">${on?'⤡':'⤢'}</button></span>`;};
 const card=(title,icon,body,aside='',extra='')=>{const foc=S.focus===title&&FOCUS_CARDS.test(title);
@@ -1731,10 +1733,7 @@ function histChart(C){
     <text x="${x(first.d)}" y="${H-8}">${dl(first.d)}</text><text x="${x(last.d)}" y="${H-8}" text-anchor="end">Hôm nay</text>
     <g class="hc-g" visibility="hidden"><line y1="${T-6}" y2="${H-B}" stroke="var(--ink)" stroke-opacity=".5" stroke-dasharray="3 3"/><circle r="5" fill="${col}" stroke="var(--ink)" stroke-width="2"/></g>
     <rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>
-    ${(()=>{const lastX=[-99,-99];return Object.keys(ev).map(i=>{const p=pts[i], xv=x(p.d), xx=xv.toFixed(1), e=ev[i], ec=e.up?'var(--good)':'var(--bad)';
-      // chấm sát nhau (< 15 px) thì xuống hàng thứ hai cho khỏi chồng
-      const row=xv-lastX[0]>=15?0:xv-lastX[1]>=15?1:0;lastX[row]=xv;const cy=row?26:11;
-      return `<g class="hc-ev" data-tip="${esc(e.tip)}"><line x1="${xx}" x2="${xx}" y1="${cy+7}" y2="${y(p[hb]).toFixed(1)}" stroke="${ec}" stroke-opacity=".45" stroke-dasharray="2 3"/><circle cx="${xx}" cy="${cy}" r="6.5" fill="${ec}" stroke="var(--surface)" stroke-width="1.5"/><text x="${xx}" y="${cy+3}" text-anchor="middle" class="hc-evt">${e.up?'▲':'▼'}</text></g>`;}).join('');})()}
+    ${evDots(ev,pts.map(p=>x(p.d)),pts.map(p=>y(p[hb])))}
   </svg>
   <div class="legend"><span><i class="tdot" style="background:${col}"></i>${hb==='nw'?'Tài sản ròng':'Khả dụng (trừ khoản chờ nhận)'} ${trs(last[hb]-first[hb])} từ ${dl(first.d)}</span><span><i class="tdot" style="background:var(--good)"></i>Cao nhất ${tr(hi)} (${dl(pts[iMax].d)})</span><span><i class="tdot" style="background:var(--bad)"></i>Thấp nhất ${tr(lo)} (${dl(pts[iMin].d)})</span>${Object.values(ev).some(e=>e.up)?`<span><i class="tdot" style="background:var(--good)"></i>▲ Ngày tăng mạnh</span>`:''}${Object.values(ev).some(e=>!e.up)?`<span><i class="tdot" style="background:var(--bad)"></i>▼ Ngày giảm mạnh</span>`:''}${Object.keys(ev).length?`<span>Chấm: thay đổi ≥ 0,5% so với lần ghi trước, rê chuột hoặc chạm để xem vì sao</span>`:''}<span>Chạm hoặc kéo trên biểu đồ để xem từng ngày</span></div>`;
 }
@@ -1758,15 +1757,45 @@ function hcPick(xs,vs){
   const dx=n>1?(xs[n-1]-xs[0])/(n-1):99, every=Math.max(2,Math.ceil(34/(dx||1))), lab=[];
   const fits=i=>lab.every(j=>Math.abs(xs[j]-xs[i])>=30);
   [n-1,iMax,iMin,0].forEach(i=>{if(!lab.includes(i)&&(fits(i)||i===iMax||i===iMin||i===n-1))lab.push(i);});
-  for(let i=n-1-every;i>0;i-=every)if(fits(i))lab.push(i);
+  // nhãn ngày đầu/cuối canh lề vào trong nên chiếm ~44 px phía trong: điểm giữa không ghi sát chúng
+  for(let i=n-1-every;i>0;i-=every)if(fits(i)&&xs[i]-xs[0]>=44&&xs[n-1]-xs[i]>=44)lab.push(i);
   return {lab,iMax,iMin};
 }
-function hcLabel(i,xs,vs,y,iMax,iMin,xMin,xMax){
+function hcLabel(i,xs,vs,y,iMax,iMin,xMin,xMax,fmt){
   const v=vs[i], hi=vs[iMax], prev=vs[i-1]??v, next=vs[i+1]??v, below=i===iMin||(i!==iMax&&v<=prev&&v<=next&&v<hi);
   const yy=y(v)+(below?15:-8), cl=i===iMax?'hc-hi':i===iMin?'hc-lo':i===vs.length-1?'v':'';
   // sát mép thì canh lề về phía trong, không đè lên nhãn trục / nhãn tầng bên phải
   const [xx,an]=xs[i]>xMax-16?[xMax,'end']:xs[i]<xMin+16?[xMin,'start']:[xs[i],'middle'];
-  return `<text x="${xx.toFixed(1)}" y="${yy.toFixed(1)}" text-anchor="${an}" class="hc-n ${cl}">${PRIV?HIDE:nf(v/1e6,1)}</text>`;
+  return `<text x="${xx.toFixed(1)}" y="${yy.toFixed(1)}" text-anchor="${an}" class="hc-n ${cl}">${fmt?fmt(v):PRIV?HIDE:nf(v/1e6,1)}</text>`;
+}
+// Chấm sự kiện ▲▼ (dùng chung histChart, tierArea, biểu đồ giá): ev={chỉ số: {up, tip}}, xs/ys toạ độ điểm trên đường;
+// chấm sát nhau (< 15 px) xuống hàng thứ hai cho khỏi chồng
+function evDots(ev,xs,ys,top=11){
+  const lastX=[-99,-99];
+  return Object.keys(ev).map(Number).sort((a,b)=>a-b).map(i=>{const xv=xs[i], xx=xv.toFixed(1), e=ev[i], ec=e.up?'var(--good)':'var(--bad)';
+    const row=xv-lastX[0]>=15?0:xv-lastX[1]>=15?1:0;lastX[row]=xv;const cy=top+(row?15:0);
+    return `<g class="hc-ev" data-tip="${esc(e.tip)}"><line x1="${xx}" x2="${xx}" y1="${cy+7}" y2="${ys[i].toFixed(1)}" stroke="${ec}" stroke-opacity=".45" stroke-dasharray="2 3"/><circle cx="${xx}" cy="${cy}" r="6.5" fill="${ec}" stroke="var(--surface)" stroke-width="1.5"/><text x="${xx}" y="${cy+3}" text-anchor="middle" class="hc-evt">${e.up?'▲':'▼'}</text></g>`;}).join('');
+}
+// Ngày giá đổi mạnh (biểu đồ giá thị trường, cổ phiếu): |thay đổi so với điểm trước| ≥ max(mn, 2 × lệch chuẩn thay đổi từng ngày); tối đa 8 điểm lớn nhất
+function pxEvents(S,mn,f,dl){
+  const r=S.slice(1).map((p,k)=>p.v/S[k].v-1);if(r.length<3)return {};
+  const m=r.reduce((a,b)=>a+b,0)/r.length, sd=Math.sqrt(r.reduce((a,b)=>a+(b-m)**2,0)/r.length), th=Math.max(mn,2*sd), ev={};
+  r.map((v,k)=>({v,i:k+1})).filter(o=>Math.abs(o.v)>=th).sort((a,b)=>Math.abs(b.v)-Math.abs(a.v)).slice(0,8).forEach(o=>{const p=S[o.i], q=S[o.i-1];
+    ev[o.i]={up:o.v>0,tip:`${o.v>0?'Tăng':'Giảm'} mạnh ${dl(q.d)} → ${dl(p.d)}: ${f(q.v)} → ${f(p.v)} (${pctS(o.v,2)})`};});
+  return ev;
+}
+// Khung "biến động" dùng chung (Kai 19/11/2026, như Tài sản ròng theo thời gian): số trên đường (cao nhất, thấp nhất, mới nhất, cách 2–3 điểm),
+// chấm xanh lá/đỏ ở cao/thấp nhất, chấm ▲▼ ngày đổi mạnh, vạch dò chạm/kéo (hcScrub đọc data-pts, dòng chữ ở .hc-out ngay trước svg).
+// o: {S:[{d,v}], x, y, f (cách hiện số), col, T, H, B, L, R, info:[chuỗi từng điểm], ev, W}
+function hcKit(o){
+  const xs=o.S.map(p=>o.x(p.d)), vs=o.S.map(p=>p.v), ys=vs.map(o.y), {lab,iMax,iMin}=hcPick(xs,vs);
+  return {xs,ys,iMax,iMin,
+    out:`<div class="hc-out" aria-live="polite">${esc(o.info[o.info.length-1])}</div>`,
+    pts:esc(JSON.stringify(o.info.map((t,i)=>[+xs[i].toFixed(1),+ys[i].toFixed(1),t]))),
+    marks:`<circle cx="${xs[iMax].toFixed(1)}" cy="${ys[iMax].toFixed(1)}" r="3.5" fill="var(--good)"/><circle cx="${xs[iMin].toFixed(1)}" cy="${ys[iMin].toFixed(1)}" r="3.5" fill="var(--bad)"/>`+
+      lab.map(i=>hcLabel(i,xs,vs,o.y,iMax,iMin,o.L,o.W-o.R,o.f)).join('')+
+      `<g class="hc-g" visibility="hidden"><line y1="${o.T-6}" y2="${o.H-o.B}" stroke="var(--ink)" stroke-opacity=".5" stroke-dasharray="3 3"/><circle r="5" fill="${o.col}" stroke="var(--ink)" stroke-width="2"/></g>`+
+      `<rect x="0" y="0" width="${o.W}" height="${o.H}" fill="transparent"/>`+(o.ev?evDots(o.ev,xs,ys):'')};
 }
 // vạch dò cho histChart: chạm/kéo ngang, hiện số ngày gần nhất ở dòng phía trên biểu đồ
 function hcScrub(e){
@@ -2015,11 +2044,15 @@ function cfSankey(){
 // Vùng xếp chồng T1–T4 theo ngày (sheet Lịch sử cột D–G) + hôm nay; nút đổi giữa giá trị và tỷ trọng %, nét đứt là ranh giới mục tiêu
 function tierArea(C){
   const today=serialOf(C.now), mode=S.ta||'abs', ids=[1,2,3,4];
-  const pts=HIST.filter(h=>h.d<today&&h.t&&sum(h.t,x=>x)>0).map(h=>({d:h.d,t:h.t.slice(0,4)}));
-  pts.push({d:today,t:ids.map(id=>{const r=C.rows.find(x=>x.id===id);return r?r.value:0;})});
-  const seg=`<div class="rng">${[['abs','Giá trị'],['pct','Tỷ trọng %']].map(([k,l])=>`<button data-ta="${k}" aria-selected="${mode===k}">${l}</button>`).join('')}</div>`;
+  const pts=HIST.filter(h=>h.d<today&&h.t&&sum(h.t,x=>x)>0).map(h=>({d:h.d,t:h.t.slice(0,4),a:h.a}));
+  pts.push({d:today,t:ids.map(id=>{const r=C.rows.find(x=>x.id===id);return r?r.value:0;}),a:Object.fromEntries(C.inNW.filter(a=>!a.sim).map(a=>[a.name,a.value]))});
+  // Kai 19/11/2026 (như Tài sản ròng theo thời gian): nút 1T/6T/1N/Tất cả (dùng chung S.hr) + chấm ▲▼ ngày tổng các tầng đổi mạnh
+  const HR=[['30','1T'],['180','6T'],['365','1N'],['all','Tất cả']], hr=S.hr||'all';
+  if(hr!=='all'){const lim=today-(+hr);for(let i=pts.length-2;i>=0;i--)if(pts[i].d<lim)pts.splice(i,1);}
+  const seg=`<div class="hc-bar"><div class="rng">${HR.map(([k,l])=>`<button data-hr="${k}" aria-selected="${hr===k}">${l}</button>`).join('')}</div><div class="rng">${[['abs','Giá trị'],['pct','Tỷ trọng %']].map(([k,l])=>`<button data-ta="${k}" aria-selected="${mode===k}">${l}</button>`).join('')}</div></div>`;
   if(pts.length<2)return seg+`<div class="empty">${ic('calendar','lg')}<div><b>Đang chờ dữ liệu lịch sử</b><p>Sheet Lịch sử ghi giá trị từng tầng mỗi tối lúc 22 giờ. Biểu đồ hiện từ ngày thứ hai.</p></div></div>`;
-  const W=360,H=200,L=8,R=58,T=mode==='abs'?26:12,B=24, d0=pts[0].d, d1=pts[pts.length-1].d;
+  const tp=pts.map(p=>({d:p.d,tot:sum(p.t,v=>v),a:p.a})), tev=mode==='abs'?hcEvents(tp,'tot'):{}, nev=Object.keys(tev).length;
+  const W=360,H=200+(nev?14:0),L=8,R=58,T=mode==='abs'?(nev?44:26):12,B=24, d0=pts[0].d, d1=pts[pts.length-1].d;
   const rows=pts.map(p=>{const tot=sum(p.t,x=>x)||1, v=mode==='pct'?p.t.map(x=>x/tot):p.t;let c=0;return {d:p.d,raw:p.t,tot,cum:[0,...v.map(x=>c+=x)]};});
   const hi=mode==='pct'?1:Math.max(...rows.map(r=>r.cum[4]))*1.08;
   const x=d=>L+(d1===d0?1:(d-d0)/(d1-d0))*(W-L-R), y=v=>T+(1-v/hi)*(H-T-B);
@@ -2034,7 +2067,7 @@ function tierArea(C){
   const xs=rows.map(r=>x(r.d)), tots=rows.map(r=>r.tot), pk=mode==='abs'?hcPick(xs,tots):null;
   const nums=pk?pk.lab.map(i=>hcLabel(i,xs,tots,y,pk.iMax,pk.iMin,L,W-R)).join(''):'';
   const info=rows.map((r,i)=>{const dv=i?r.tot-rows[i-1].tot:null;
-    return [+xs[i].toFixed(1),+y(r.cum[4]).toFixed(1),`${i===n-1?'Hôm nay':dl(r.d)} · `+(mode==='abs'?`tổng ${tr(r.tot)}${dv==null?'':' ('+trs(dv)+')'} · `:'')+ids.map((id,k)=>'T'+id+' '+(mode==='pct'?pct(r.raw[k]/r.tot,0):tr(r.raw[k]))).join(' · ')];});
+    return [+xs[i].toFixed(1),+y(r.cum[4]).toFixed(1),`${i===n-1?'Hôm nay':dl(r.d)} · `+(mode==='abs'?`tổng ${tr(r.tot)}${dv==null?'':' ('+trs(dv)+')'} · `:'')+ids.map((id,k)=>'T'+id+' '+(mode==='pct'?pct(r.raw[k]/r.tot,0):tr(r.raw[k]))).join(' · ')+(tev[i]?' · '+(tev[i].up?'▲ ':'▼ ')+tev[i].why:'')];});
   return seg+`<div class="hc-out" aria-live="polite">${esc(info[n-1][2])}</div><svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Giá trị từng tầng theo thời gian" data-pts='${esc(JSON.stringify(info))}'>
     ${[0,1,2,3].map(area).join('')}${tgt}
     <line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" stroke="var(--line)"/>
@@ -2042,8 +2075,9 @@ function tierArea(C){
     <text x="${L}" y="${H-8}">${dl(d0)}</text><text x="${W-R}" y="${H-8}" text-anchor="end">Hôm nay</text>
     <g class="hc-g" visibility="hidden"><line y1="${T-6}" y2="${H-B}" stroke="var(--ink)" stroke-opacity=".6" stroke-dasharray="3 3"/><circle r="5" fill="var(--ink)" stroke="var(--surface)" stroke-width="2"/></g>
     <rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>
+    ${nev?evDots(tev,xs,tots.map(y)):''}
   </svg>
-  <div class="legend">${C.rows.map(r=>`<span><i class="tdot" style="background:${tcol(r.id)}"></i>T${r.id} ${esc(r.name)}</span>`).join('')}${mode==='pct'?'<span>Nét đứt: ranh giới theo mục tiêu</span>':''}</div>
+  <div class="legend">${C.rows.map(r=>`<span><i class="tdot" style="background:${tcol(r.id)}"></i>T${r.id} ${esc(r.name)}</span>`).join('')}${Object.values(tev).some(e=>e.up)?'<span><i class="tdot" style="background:var(--good)"></i>▲ Ngày tăng mạnh</span>':''}${Object.values(tev).some(e=>!e.up)?'<span><i class="tdot" style="background:var(--bad)"></i>▼ Ngày giảm mạnh</span>':''}${nev?'<span>Chấm: tổng các tầng đổi ≥ 0,5% so với lần ghi trước, rê chuột hoặc chạm để xem vì sao</span>':''}${mode==='pct'?'<span>Nét đứt: ranh giới theo mục tiêu</span>':''}</div>
   <p class="note">${pts.length-1} ngày ở sheet Lịch sử + hôm nay. ${mode==='pct'?'Nét đứt là ranh giới mục tiêu giữa hai tầng (từ dưới lên T1|T2, T2|T3, T3|T4); mép màu thấp hơn nét đứt nghĩa là các tầng bên dưới đang thiếu so với mục tiêu.':'Số trên mép trên là tổng các tầng (xanh lá cao nhất, đỏ thấp nhất). Chuyển sang Tỷ trọng % để so với mục tiêu.'} Chạm hoặc kéo trên biểu đồ để xem từng tầng mỗi ngày.</p>`;
 }
 // Fan chart: đường giữa = kịch bản như trung bình gần đây; dải 68% và 95% theo độ lệch dư hằng tháng thật (sheet Dòng tiền, cần ≥ 3 tháng), giả định các tháng độc lập
@@ -2144,13 +2178,16 @@ function drawdown(C){
   const path=dd.map((p,i)=>`${i?'L':'M'}${x(p.d).toFixed(1)},${y(p.x).toFixed(1)}`).join('');
   const dl=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);}, step=Math.max(1,Math.ceil(dd.length/60));
   const ticks=[lo/2,lo].map(v=>`<line x1="${L}" x2="${W-R+4}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${W-R+8}" y="${(y(v)+4).toFixed(1)}">${pcts(v,1)}</text>`).join('');
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Mức sụt so với đỉnh">${ticks}
+  // Kai 19/11/2026: vạch dò chạm/kéo như Tài sản ròng theo thời gian (không ghi số trên đường vì ngày ở đỉnh đều là 0%)
+  const info=dd.map(p=>[+x(p.d).toFixed(1),+y(p.x).toFixed(1),`${p===cur?'Hôm nay':dl(p.d)} · ${tr(p.v)} · ${p.x<-0.00005?pcts(p.x,2)+' so với đỉnh '+tr(p.pk)+' ('+dl(p.pkD)+')':'đang ở đỉnh'}`]);
+  return `<div class="hc-out" aria-live="polite">${esc(info[info.length-1][2])}</div><svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Mức sụt so với đỉnh" data-pts='${esc(JSON.stringify(info))}'>${ticks}
     <line x1="${L}" x2="${W-R+4}" y1="${T}" y2="${T}" stroke="var(--ink)" stroke-opacity=".5"/><text x="${W-R+8}" y="${T+4}">Đỉnh</text>
     <path d="${path}L${x(d1).toFixed(1)},${T}L${x(d0).toFixed(1)},${T}Z" fill="${tone(worst.x)}" fill-opacity=".25"/>
     <path d="${path}" fill="none" stroke="${tone(worst.x)}" stroke-width="2" stroke-linejoin="round"/>
     ${worst.x<0?`<circle cx="${x(worst.d).toFixed(1)}" cy="${y(worst.x).toFixed(1)}" r="4.5" fill="${tone(worst.x)}" stroke="var(--surface)" stroke-width="2"/>`:''}
     <text x="${L}" y="${H-8}">${dl(d0)}</text><text x="${x(d1).toFixed(1)}" y="${H-8}" text-anchor="end">Hôm nay</text>
-    ${dd.filter((_,i)=>i%step===0||i===dd.length-1).map(p=>`<rect x="${(x(p.d)-6).toFixed(1)}" y="${T}" width="12" height="${H-T-B}" fill="transparent" data-tip="${dl(p.d)}: ${tr(p.v)} · ${p.x<-0.00005?pcts(p.x,2)+' so với đỉnh '+dl(p.pkD):'đang ở đỉnh'}"/>`).join('')}
+    <g class="hc-g" visibility="hidden"><line y1="${T-6}" y2="${H-B}" stroke="var(--ink)" stroke-opacity=".5" stroke-dasharray="3 3"/><circle r="5" fill="${tone(worst.x)}" stroke="var(--ink)" stroke-width="2"/></g>
+    <rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>
   </svg>
   <div class="kpis" style="margin-top:10px"><div class="kpi"><div class="label">Sụt sâu nhất</div><div class="v" style="color:${tone(worst.x)}">${worst.x<0?pcts(worst.x,1):'0%'}</div><div class="s">${worst.x<0?trs(worst.v-worst.pk)+' · '+dl(worst.d):'chưa sụt lần nào'}</div></div>
     <div class="kpi"><div class="label">Hiện tại</div><div class="v" style="color:${tone(cur.x)}">${cur.x<-0.00005?pcts(cur.x,1):'Ở đỉnh'}</div><div class="s">${cur.x<-0.00005?'đỉnh '+tr(cur.pk)+' ngày '+dl(cur.pkD):'cao nhất từ trước tới nay'}</div></div>
@@ -2261,17 +2298,29 @@ function timeline(C){
   const a=C.acc;if(a&&!a.ready&&a.months&&a.months<=12)ev.push({d:today+Math.round(a.months*30.44),t:a.w.name+' đủ '+tr(a.goal)+', mở sổ mới',v:null,ty:'acc',est:true});
   if(!ev.length)return '';
   ev.sort((x,y)=>x.d-y.d);
-  const W=360,H=58,L=10,R=10,Y=30, x=d=>L+Math.max(0,Math.min(1,(d-today)/365))*(W-L-R), seen={};
+  // Kai 19/11/2026 (như chấm sự kiện ở Tài sản ròng theo thời gian): chấm đánh số khớp danh sách bên dưới, nhãn ngày + số tiền phía trên
+  // nối nét đứt xuống trục; nhãn sát nhau xếp so le 3 hàng; rê chuột hoặc chạm chấm để xem chi tiết
+  const W=360,H=96,L=12,R=12,Y=70, x=d=>L+Math.max(0,Math.min(1,(d-today)/365))*(W-L-R);
   const months=Array.from({length:13},(_,i)=>{const t=new Date(C.now+7*36e5);t.setUTCDate(1);t.setUTCMonth(t.getUTCMonth()+i);return {d:Math.floor(t/DAY)+25569,m:t.getUTCMonth()+1,y:t.getUTCFullYear()};}).filter(m=>m.d>today&&m.d<=end);
-  const dots=ev.map(e=>{const k=Math.round(x(e.d)/9);const n=seen[k]=(seen[k]||0)+1;return `<circle cx="${x(e.d)}" cy="${Y-(n-1)*11}" r="5.5" fill="${TL[e.ty][0]}" stroke="var(--surface)" stroke-width="2"${e.est?' fill-opacity=".55"':''}><title>${esc(sdate(e.d))}: ${esc(e.t)}</title></circle>`;}).join('');
+  const dm=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);};
+  const short=e=>e.v?(e.v>0?'+':'−')+(PRIV?HIDE:nf(Math.abs(e.v)/1e6,0))+' Tr':e.ty==='acc'?'mở sổ':e.ty==='goal'?'hạn':'';
+  const lastX=[-99,-99,-99], seen={};
+  const dots=ev.map((e,k)=>{const xv=x(e.d), col=TL[e.ty][0], lb=(e.est?'~':'')+dm(e.d)+' '+short(e), lw=lb.length*5.2+6;
+    let row=lastX.findIndex(v=>xv-v>=lw);if(row<0)row=lastX.indexOf(Math.min(...lastX));lastX[row]=xv;
+    const ly=14+row*15, sk=Math.round(xv/12), n=seen[sk]=(seen[sk]||0)+1, cy=Y-(n-1)*15, tx=Math.max(L+lw/2,Math.min(W-R-lw/2,xv)), dd=e.d-today;
+    return `<g class="hc-ev" data-tip="${esc(`${e.est?'~':''}${sdate(e.d)}: ${e.t}${e.v?' · '+(PRIV?HIDE:trs(e.v)):''} · ${dd<0?'quá '+(-dd)+' ngày':dd===0?'hôm nay':'còn '+dd+' ngày'}`)}">
+      <line x1="${xv.toFixed(1)}" x2="${xv.toFixed(1)}" y1="${ly+4}" y2="${cy-8}" stroke="${col}" stroke-opacity=".5" stroke-dasharray="2 3"/>
+      <text x="${tx.toFixed(1)}" y="${ly}" text-anchor="middle" class="tl-lb" style="fill:${col}">${esc(lb)}</text>
+      <circle cx="${xv.toFixed(1)}" cy="${cy}" r="7.5" fill="${col}" stroke="var(--surface)" stroke-width="1.5"${e.est?' fill-opacity=".6" stroke-dasharray="2 2"':''}/>
+      <text x="${xv.toFixed(1)}" y="${cy+3.5}" text-anchor="middle" class="hc-evt" style="font-size:10px">${k+1}</text></g>`;}).join('');
   const svg=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Các mốc 12 tháng tới">
     <line x1="${L}" x2="${W-R}" y1="${Y}" y2="${Y}" stroke="var(--line)" stroke-width="2"/>
-    ${months.map(m=>`<line x1="${x(m.d)}" x2="${x(m.d)}" y1="${Y-4}" y2="${Y+4}" stroke="var(--line)"/>${m.m%2||x(m.d)<34?'':`<text x="${x(m.d)}" y="${H-6}" text-anchor="middle">${m.m===1?'1/'+String(m.y).slice(2):m.m}</text>`}`).join('')}
-    <text x="${L}" y="${H-6}">Nay</text>${dots}</svg>`;
-  const list=ev.map(e=>{const dd=e.d-today;return `<div class="tl-i"><i class="tdot" style="background:${TL[e.ty][0]}"></i><span class="tl-d num">${e.est?'~':''}${sdate(Math.max(e.d,0))}</span>
+    ${months.map(m=>`<line x1="${x(m.d)}" x2="${x(m.d)}" y1="${Y-4}" y2="${Y+4}" stroke="var(--line)"/>${m.m%2||x(m.d)<34?'':`<text x="${x(m.d)}" y="${H-4}" text-anchor="middle">${m.m===1?'1/'+String(m.y).slice(2):m.m}</text>`}`).join('')}
+    <text x="${L}" y="${H-4}">Nay</text>${dots}</svg>`;
+  const list=ev.map((e,k)=>{const dd=e.d-today;return `<div class="tl-i"><i class="tl-n" style="background:${TL[e.ty][0]}">${k+1}</i><span class="tl-d num">${e.est?'~':''}${sdate(Math.max(e.d,0))}</span>
     <span class="tl-t">${esc(e.t)}</span><span class="tl-v num ${e.v?cls(e.v):''}">${e.v?trs(e.v):''}</span><span class="chip ${dd<0?'bad':dd<=14?'warn':''}">${dd<0?'quá '+(-dd)+' ngày':dd===0?'hôm nay':'còn '+dd+' ngày'}</span></div>`;}).join('');
   const used=[...new Set(ev.map(e=>e.ty))];
-  return card('12 tháng tới','calendar',svg+`<div class="legend">${used.map(t=>`<span><i class="tdot" style="background:${TL[t][0]}"></i>${TL[t][1]}</span>`).join('')}</div><div class="tl">${list}</div>
+  return card('12 tháng tới','calendar',svg+`<div class="legend">${used.map(t=>`<span><i class="tdot" style="background:${TL[t][0]}"></i>${TL[t][1]}</span>`).join('')}<span>Số trên chấm khớp danh sách dưới, rê chuột hoặc chạm để xem chi tiết</span></div><div class="tl">${list}</div>
     ${ev.some(e=>e.est)?'<p class="note">Dấu ~ là ước tính theo mức dư tháng gần nhất.</p>':''}`,ev.length+' mốc');
 }
 // Thước giá cổ phiếu: giá vốn, giá hiện tại, giá cân nhắc bán; thêm đường giá theo ngày khi có từ 3 lần chụp
@@ -2284,13 +2333,15 @@ function stockCard(C){
     const up=cost&&price>=cost;
     const hist=HIST.filter(h=>h.a&&h.a[a.name]!=null&&h.d<serialOf(C.now)).map(h=>({d:h.d,v:h.a[a.name]/a.qty}));hist.push({d:serialOf(C.now),v:price});
     let line='';
-    if(hist.length>=3){const W=360,H=120,T=10,B=22,Lx=6,Rx=56, vs=[...hist.map(h=>h.v),...vals], l=Math.min(...vs)*.98, h2=Math.max(...vs)*1.02, d0=hist[0].d, d1=hist[hist.length-1].d;
+    if(hist.length>=3){const dl0=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);}, sev=pxEvents(hist,.03,v=>nf(v,0)+'đ',dl0), nev=Object.keys(sev).length;
+      const W=360,H=nev?172:150,T=nev?44:26,B=22,Lx=6,Rx=56, vs=[...hist.map(h=>h.v),...vals], l=Math.min(...vs)*.98, h2=Math.max(...vs)*1.02, d0=hist[0].d, d1=hist[hist.length-1].d;
       const x=d=>Lx+(d-d0)/((d1-d0)||1)*(W-Lx-Rx), y=v=>T+(1-(v-l)/(h2-l))*(H-T-B);
       const ref=(v,c,t)=>v?`<line x1="${Lx}" x2="${W-Rx+4}" y1="${y(v)}" y2="${y(v)}" stroke="${c}" stroke-dasharray="4 4"/><text x="${W-Rx+8}" y="${y(v)+4}">${t}</text>`:'';
-      line=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Giá ${esc(a.sym)} theo ngày" style="margin-top:10px">${ref(cost,'var(--muted)','Vốn')}${ref(sell,'var(--good)','Bán')}
+      const K=hcKit({S:hist,x,y,f:v=>PRIV?HIDE:nf(v/1000,1),col:'var(--c3)',T,H,B,L:Lx,R:Rx,W,ev:sev,info:hist.map((q,i)=>`${i===hist.length-1?'Hôm nay':sdate(q.d)} · ${PRIV?HIDE:nf(q.v,0)+'đ'}`+(i?' · '+pctS(q.v/hist[i-1].v-1,2):'')+(cost?' · '+pctS(q.v/cost-1,1)+' so với vốn':'')+(sev[i]?' · '+(sev[i].up?'▲ tăng mạnh':'▼ giảm mạnh'):''))});
+      line=`<div style="height:10px"></div>${K.out}<svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Giá ${esc(a.sym)} theo ngày" data-pts='${K.pts}'>${ref(cost,'var(--muted)','Vốn')}${ref(sell,'var(--good)','Bán')}
         <path d="${hist.map((q,i)=>(i?'L':'M')+x(q.d).toFixed(1)+','+y(q.v).toFixed(1)).join('')}" fill="none" stroke="var(--c3)" stroke-width="2" stroke-linejoin="round"/>
         <circle cx="${x(d1)}" cy="${y(price)}" r="4" fill="var(--c3)" stroke="var(--surface)" stroke-width="2"/>
-        ${hist.map(q=>`<rect x="${x(q.d)-5}" y="${T}" width="10" height="${H-T-B}" fill="transparent" data-tip="${sdate(q.d)}: ${nf(q.v,0)}đ"/>`).join('')}</svg>`;}
+        ${K.marks}</svg>`;}
     return `<div class="pg-wrap">
       <div class="pg-h">${logo(a)}<div style="min-width:0"><div class="nm">${esc(a.sym)} <span class="num">${PRIV?HIDE:nf(price,0)+'đ'}</span></div>
         <div class="sb">${nf(a.qty,0)} cp · giá trị ${tr(a.value)}${cost?` · <span class="${up?'pos':'neg'}">${pcts(price/cost-1)} so với vốn</span>`:''}</div></div></div>
@@ -2638,7 +2689,10 @@ function goldChart(){
   if(R.length<2){const T=mkTrend();
     return rng+`<div class="empty">${ic('calendar','lg')}<div><b>Đang tích lũy giá từng ngày</b><p>Sheet Thị trường mới ghi giá vàng 24K từ ${R.length?sdate(R[0].d):'hôm nay'}; biểu đồ hiện từ ngày thứ hai.</p></div></div>`+
       (T?`<div class="label" style="margin:12px 0 6px">Diễn biến Kim Gia Bảo theo Bảo Tín Mạnh Hải</div><div class="dbars">${[['d1','Hôm nay'],['d30','30 ngày'],['m6','6 tháng'],['y1','1 năm'],['y5','5 năm']].filter(([k])=>T[k]!=null).map(([k,l])=>`<div class="kh-r"><span style="width:auto">${l}</span><i><u style="width:${Math.min(100,Math.abs(T[k])/Math.max(...Object.values(T).map(Math.abs))*100).toFixed(1)}%;background:${T[k]>=0?'var(--good)':'var(--bad)'}"></u></i><b class="num ${clsR(T[k])}">${pctS(T[k]/100)}</b></div>`).join('')}</div>`:'');}
-  const W=360,H=210,L=8,Rt=64,T=12,B=24, d0=R[0].d, d1=R[R.length-1].d;
+  // Kai 19/11/2026 (như Tài sản ròng theo thời gian): số, cao/thấp nhất, chấm ▲▼ và vạch dò trên đường bán ra của nhà chính (Kim Gia Bảo, thiếu thì Huy Thanh)
+  const ms=GSHOP.find(s=>R.filter(r=>r.v[s.sell]>0).length>=2)||GSHOP[0], MR=R.filter(r=>r.v[ms.sell]>0), MS=MR.map(r=>({d:r.d,v:r.v[ms.sell]}));
+  const dl0=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);}, gf=v=>nf(v/1e6,2), gev=MS.length>=4?pxEvents(MS,.01,v=>gf(v)+' Tr',dl0):{}, nev=Object.keys(gev).length;
+  const W=360,H=nev?250:232,L=8,Rt=64,T=nev?44:28,B=24, d0=R[0].d, d1=R[R.length-1].d;
   const vals=R.flatMap(r=>[...GSHOP.flatMap(s=>[r.v[s.buy],r.v[s.sell]]),worldChi(r)]).filter(v=>v>0), lo=Math.min(...vals), hi=Math.max(...vals), pad=(hi-lo)*.1||hi*.01;
   const x=d=>L+(d1===d0?1:(d-d0)/(d1-d0))*(W-L-Rt), y=v=>T+(1-(v-lo+pad)/(hi-lo+2*pad))*(H-T-B);
   const ser=c=>R.filter(r=>r.v[c]>0);
@@ -2649,25 +2703,28 @@ function goldChart(){
     .map(o=>`<text x="${W-Rt+6}" y="${o.yy.toFixed(1)}" style="fill:${o.s.col};font-weight:600">${nf(o.v/1e6,2)} Tr</text>`).join('');
   const ticks=[lo,(lo+hi)/2,hi].map(v=>`<line x1="${L}" x2="${W-Rt+2}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--line)" stroke-dasharray="2 4"/>`).join('');
   const dl=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);}, step=Math.max(1,Math.ceil(R.length/60));
-  const tip=r=>dl(r.d)+': '+GSHOP.filter(s=>r.v[s.sell]>0).map(s=>`${s.k==='kgb'?'KGB':'HT'} bán ${nf(r.v[s.sell]/1e6,2)} mua ${nf(r.v[s.buy]/1e6,2)}`).join(' · ')+(worldChi(r)?` · thế giới ${nf(worldChi(r)/1e6,2)}`:'')+' (Tr/chỉ)';
-  return rng+`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Giá vàng 24K hai cửa hàng theo ngày">${ticks}
+  const tip=r=>dl(r.d)+': '+GSHOP.filter(s=>r.v[s.sell]>0).map(s=>`${s.k==='kgb'?'KGB':'HT'} bán ${nf(r.v[s.sell]/1e6,2)} mua ${r.v[s.buy]>0?nf(r.v[s.buy]/1e6,2):'—'}`).join(' · ')+(worldChi(r)?` · thế giới ${nf(worldChi(r)/1e6,2)}`:'')+' (Tr/chỉ)';
+  const K=MS.length>=2?hcKit({S:MS,x,y,f:gf,col:ms.col,T,H,B,L,R:Rt,W,ev:gev,info:MR.map((r,i)=>tip(r)+(i?' · '+(ms.k==='kgb'?'KGB':'HT')+' '+pctS(r.v[ms.sell]/MR[i-1].v[ms.sell]-1,2):'')+(gev[i]?' · '+(gev[i].up?'▲ tăng mạnh':'▼ giảm mạnh'):''))}):null;
+  return rng+(K?K.out:'')+`<svg class="chart${K?' hc':''}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Giá vàng 24K hai cửa hàng theo ngày"${K?` data-pts='${K.pts}'`:''}>${ticks}
     ${GSHOP.map(band).join('')}${wl}${GSHOP.map(s=>line(s.buy,s.col,'2 3',1.2)+line(s.sell,s.col,'',2.2)).join('')}${labs}
     <text x="${L}" y="${H-8}">${dl(d0)}</text><text x="${W-Rt}" y="${H-8}" text-anchor="end">${dl(d1)}</text>
-    ${R.filter((_,i)=>i%step===0||i===R.length-1).map(r=>`<rect x="${(x(r.d)-6).toFixed(1)}" y="${T}" width="12" height="${H-T-B}" fill="transparent" data-tip="${tip(r)}"/>`).join('')}
+    ${K?K.marks:''}
   </svg>
-  <div class="legend">${GSHOP.map(s=>`<span><i class="tdot" style="background:${s.col}"></i>${bLogo(s.k)}${s.n} (${s.b})</span>`).join('')}<span><i class="tdot" style="background:var(--info)"></i>${bLogo('au')}Thế giới quy đổi</span><span>Nét liền: giá bán ra (bạn mua) · nét đứt: giá mua vào (bạn bán) · dải màu: chênh mua – bán</span></div>`;
+  <div class="legend">${GSHOP.map(s=>`<span><i class="tdot" style="background:${s.col}"></i>${bLogo(s.k)}${s.n} (${s.b})</span>`).join('')}<span><i class="tdot" style="background:var(--info)"></i>${bLogo('au')}Thế giới quy đổi</span><span>Nét liền: giá bán ra (bạn mua) · nét đứt: giá mua vào (bạn bán) · dải màu: chênh mua – bán</span>${K?`<span>Số trên đường: giá bán ra ${ms.k==='kgb'?'Kim Gia Bảo':'Huy Thanh'} (xanh lá cao nhất, đỏ thấp nhất)${nev?', chấm ▲▼: ngày đổi mạnh (≥ 1% và gấp đôi dao động thường ngày)':''}</span><span>Chạm hoặc kéo trên biểu đồ để xem từng ngày</span>`:''}</div>`;
 }
 // % cao hơn thế giới theo ngày cho từng nhà (giá bán ra so với thế giới quy đổi)
 function goldPremium(){
   const R=goldRows(FM.gr||'90').filter(r=>worldChi(r));if(R.length<2)return '';
-  const W=360,H=130,L=8,Rt=50,T=10,B=22, d0=R[0].d, d1=R[R.length-1].d;
+  const W=360,H=150,L=8,Rt=50,T=26,B=22, d0=R[0].d, d1=R[R.length-1].d;
   const pv=(r,s)=>r.v[s.sell]>0?r.v[s.sell]/worldChi(r)-1:null, vals=R.flatMap(r=>GSHOP.map(s=>pv(r,s))).filter(v=>v!=null), lo=Math.min(0,...vals), hi=Math.max(...vals)*1.1||0.01;
   const x=d=>L+(d1===d0?1:(d-d0)/(d1-d0))*(W-L-Rt), y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B);
   const dl=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);};
-  return `<div class="label" style="margin:16px 0 6px">Cao hơn thế giới bao nhiêu %</div><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Chênh với giá thế giới">
+  const ms=GSHOP.find(s=>R.filter(r=>pv(r,s)!=null).length>=2), MR=ms?R.filter(r=>pv(r,ms)!=null):[];
+  const K=ms?hcKit({S:MR.map(r=>({d:r.d,v:pv(r,ms)})),x,y,f:v=>pctS(v,1),col:ms.col,T,H,B,L,R:Rt,W,info:MR.map(r=>dl(r.d)+' · cao hơn thế giới: '+GSHOP.filter(s=>pv(r,s)!=null).map(s=>(s.k==='kgb'?'KGB ':'HT ')+pctS(pv(r,s),1)).join(' · '))}):null;
+  return `<div class="label" style="margin:16px 0 6px">Cao hơn thế giới bao nhiêu %</div>${K?K.out:''}<svg class="chart${K?' hc':''}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Chênh với giá thế giới"${K?` data-pts='${K.pts}'`:''}>
     <line x1="${L}" x2="${W-Rt}" y1="${y(0).toFixed(1)}" y2="${y(0).toFixed(1)}" stroke="var(--line)"/><text x="${W-Rt+6}" y="${(y(0)+4).toFixed(1)}">0%</text>
     ${GSHOP.map(s=>{const r=R.filter(q=>pv(q,s)!=null);if(!r.length)return '';const l=r[r.length-1];return `<path d="${r.map((q,i)=>`${i?'L':'M'}${x(q.d).toFixed(1)},${y(pv(q,s)).toFixed(1)}`).join('')}" fill="none" stroke="${s.col}" stroke-width="2"/><text x="${W-Rt+6}" y="${(y(pv(l,s))+4).toFixed(1)}" style="fill:${s.col};font-weight:600">${pctS(pv(l,s),1)}</text>`;}).join('')}
-    <text x="${L}" y="${H-6}">${dl(d0)}</text><text x="${W-Rt}" y="${H-6}" text-anchor="end">${dl(d1)}</text></svg>
+    <text x="${L}" y="${H-6}">${dl(d0)}</text><text x="${W-Rt}" y="${H-6}" text-anchor="end">${dl(d1)}</text>${K?K.marks:''}</svg>
   <p class="note">Khoảng cao hơn thế giới có thể thu hẹp khi nguồn cung tăng; mua lúc khoảng này đang rộng thì rủi ro cao hơn.</p>`;
 }
 // Mua ở đâu, bán ở đâu: mua theo giá bán ra của nhà A, bán lại theo giá mua vào của nhà B
@@ -2724,7 +2781,9 @@ function silverRows(days){
 function silverChart(){
   const sr=FM.sr||'90', R=silverRows(sr), rng=`<div class="rng">${[['30','30N'],['90','90N'],['365','1N'],['all','Tất cả']].map(([k,l])=>`<button data-sr="${k}" aria-selected="${sr===k}">${l}</button>`).join('')}</div>`;
   if(R.filter(r=>r.sell||r.w).length<2)return rng+'<p class="muted">Cần ít nhất 2 ngày giá để vẽ biểu đồ.</p>';
-  const W=360,H=190,L=8,Rt=74,T=12,B=24, d0=R[0].d, d1=R[R.length-1].d;
+  const mk=R.filter(r=>r.sell).length>=3?'sell':'w', MR=R.filter(r=>r[mk]), MS=MR.map(r=>({d:r.d,v:r[mk]})), sf=v=>nf(v/1e6,3);
+  const dl0=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);}, sev=MS.length>=4?pxEvents(MS,.02,v=>sf(v)+' Tr',dl0):{}, nev=Object.keys(sev).length;
+  const W=360,H=nev?226:208,L=8,Rt=74,T=nev?44:28,B=24, d0=R[0].d, d1=R[R.length-1].d;
   const vals=R.flatMap(r=>[r.sell,r.buy,r.w]).filter(v=>v>0), lo=Math.min(...vals), hi=Math.max(...vals), pad=(hi-lo)*.08||hi*.01;
   const x=d=>L+(d1===d0?1:(d-d0)/(d1-d0))*(W-L-Rt), y=v=>T+(1-(v-lo+pad)/(hi-lo+2*pad))*(H-T-B);
   const path=(k)=>{const q=R.filter(r=>r[k]);return q.map((r,i)=>`${i?'L':'M'}${x(r.d).toFixed(1)},${y(r[k]).toFixed(1)}`).join('');};
@@ -2734,37 +2793,39 @@ function silverChart(){
   for(let i=1;i<labs.length;i++)if(labs[i].yy<labs[i-1].yy+13)labs[i].yy=labs[i-1].yy+13;
   const dl=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);}, step=Math.max(1,Math.ceil(R.length/60));
   const ticks=[lo,(lo+hi)/2,hi].map(v=>`<line x1="${L}" x2="${W-Rt+2}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--line)" stroke-dasharray="2 4"/>`).join('');
-  return rng+`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Giá bạc Phú Quý theo ngày">${ticks}${band}
+  const stip=r=>`${dl(r.d)}: ${r.sell?'Phú Quý bán '+nf(r.sell,0)+'đ, mua '+nf(r.buy||0,0)+'đ · ':''}${r.w?'thế giới quy đổi '+nf(r.w,0)+'đ':''} (1 lượng)`;
+  const K=MS.length>=2?hcKit({S:MS,x,y,f:sf,col:mk==='sell'?'var(--c3)':'var(--info)',T,H,B,L,R:Rt,W,ev:sev,info:MR.map((r,i)=>stip(r)+(i?' · '+pctS(r[mk]/MR[i-1][mk]-1,2):'')+(sev[i]?' · '+(sev[i].up?'▲ tăng mạnh':'▼ giảm mạnh'):''))}):null;
+  return rng+(K?K.out:'')+`<svg class="chart${K?' hc':''}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Giá bạc Phú Quý theo ngày"${K?` data-pts='${K.pts}'`:''}>${ticks}${band}
     <path d="${path('w')}" fill="none" stroke="var(--info)" stroke-width="1.4" stroke-dasharray="3 3"/>
     <path d="${path('buy')}" fill="none" stroke="var(--c3)" stroke-width="1.2" stroke-dasharray="2 3"/>
     <path d="${path('sell')}" fill="none" stroke="var(--c3)" stroke-width="2.4" stroke-linejoin="round"/>
     ${ls?`<circle cx="${x(ls.d).toFixed(1)}" cy="${y(ls.sell).toFixed(1)}" r="4" fill="var(--c3)" stroke="var(--surface)" stroke-width="2"/>`:''}
     ${labs.map(o=>`<text x="${W-Rt+6}" y="${o.yy.toFixed(1)}" style="fill:${o.c};font-weight:600">${o.t}</text>`).join('')}
     <text x="${L}" y="${H-8}">${dl(d0)}</text><text x="${W-Rt}" y="${H-8}" text-anchor="end">${dl(d1)}</text>
-    ${R.filter((_,i)=>i%step===0||i===R.length-1).map(r=>`<rect x="${(x(r.d)-6).toFixed(1)}" y="${T}" width="12" height="${H-T-B}" fill="transparent" data-tip="${dl(r.d)}: ${r.sell?'Phú Quý bán '+nf(r.sell,0)+'đ, mua '+nf(r.buy||0,0)+'đ · ':''}${r.w?'thế giới quy đổi '+nf(r.w,0)+'đ':''} (1 lượng)"/>`).join('')}
+    ${K?K.marks:''}
   </svg>
-  <div class="legend"><span><i class="tdot" style="background:var(--c3)"></i>Phú Quý bạc miếng 1 lượng: nét liền bán ra, nét đứt mua vào, dải là chênh</span><span><i class="tdot" style="background:var(--info)"></i>Thế giới quy đổi đ/lượng</span></div>
+  <div class="legend"><span><i class="tdot" style="background:var(--c3)"></i>Phú Quý bạc miếng 1 lượng: nét liền bán ra, nét đứt mua vào, dải là chênh</span><span><i class="tdot" style="background:var(--info)"></i>Thế giới quy đổi đ/lượng</span>${K?`<span>Số trên đường (Tr/lượng): ${mk==='sell'?'giá bán ra Phú Quý':'thế giới quy đổi'}${nev?', chấm ▲▼: ngày đổi mạnh':''}; chạm hoặc kéo để xem từng ngày</span>`:''}</div>
   ${one?'<p class="note">Giá Phú Quý mới có từ 13/11/2026 nên hiện là một điểm; đường thế giới quy đổi có lịch sử 1 năm (ngày chưa có tỷ giá VCB dùng tỷ giá gần nhất).</p>':''}`;
 }
 // đường giá một cột sheet Thị trường trong khoảng FM.lr; col màu, f cách hiện số
 function mkLine(c,name,col,f,b){
   const lr=FM.lr||'90', S=mkSer(c,lr==='all'?null:+lr);
   if(S.length<2)return `<div class="mkl"><div class="mkl-h"><b class="mk-bn">${bLogo(b)}${name}</b></div><p class="muted">Chưa đủ số liệu.</p></div>`;
-  const W=360,H=150,L=6,Rt=62,T=10,B=22, d0=S[0].d, d1=S[S.length-1].d, vs=S.map(p=>p.v), lo=Math.min(...vs), hi=Math.max(...vs), pad=(hi-lo)*.08||hi*.01;
+  const dl0=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);}, ev=pxEvents(S,c===25?.05:.02,f,dl0), nev=Object.keys(ev).length;
+  const W=360,H=nev?196:176,L=6,Rt=62,T=nev?44:26,B=22, d0=S[0].d, d1=S[S.length-1].d, vs=S.map(p=>p.v), lo=Math.min(...vs), hi=Math.max(...vs), pad=(hi-lo)*.08||hi*.01;
   const x=d=>L+(d1===d0?1:(d-d0)/(d1-d0))*(W-L-Rt), y=v=>T+(1-(v-lo+pad)/(hi-lo+2*pad))*(H-T-B);
   const p=S.map((q,i)=>`${i?'L':'M'}${x(q.d).toFixed(1)},${y(q.v).toFixed(1)}`).join(''), last=S[S.length-1], first=S[0], ch=last.v/first.v-1;
   let pk=0,dd=0;S.forEach(q=>{pk=Math.max(pk,q.v);dd=Math.min(dd,q.v/pk-1);});
   const iHi=vs.indexOf(hi), iLo=vs.indexOf(lo), dl=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1)+(lr==='all'||+lr>=365?'/'+String(t.getUTCFullYear()).slice(2):'');}, step=Math.max(1,Math.ceil(S.length/60));
-  const gid='mkg'+c;
+  const gid='mkg'+c, K=hcKit({S,x,y,f,col,T,H,B,L,R:Rt,W,ev,info:S.map((q,i)=>`${dl(q.d)} · ${f(q.v)}`+(i?` · ${pctS(q.v/S[i-1].v-1,2)} so với ${dl(S[i-1].d)}`:'')+(ev[i]?' · '+(ev[i].up?'▲ tăng mạnh':'▼ giảm mạnh'):''))});
   return `<div class="mkl"><div class="mkl-h"><b class="mk-bn">${bLogo(b)}${name}</b><span class="num">${f(last.v)}</span>${chip(pctS(ch,1),tone4(ch,0,-.05,-.15))}<span class="muted">so với ${dl(first.d)}</span></div>
-  <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${name} theo ngày"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".35"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
-    ${[lo,(lo+hi)/2,hi].map(v=>`<line x1="${L}" x2="${W-Rt+2}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${W-Rt+6}" y="${(y(v)+4).toFixed(1)}">${f(v)}</text>`).join('')}
+  ${K.out}<svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="${name} theo ngày" data-pts='${K.pts}'><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".35"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+    ${[lo,(lo+hi)/2,hi].map((v,k)=>`<line x1="${L}" x2="${W-Rt+2}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--line)" stroke-dasharray="2 4"/>${k===1?`<text x="${W-Rt+6}" y="${(y(v)+4).toFixed(1)}">${f(v)}</text>`:''}`).join('')}
     <path d="${p}L${x(d1).toFixed(1)},${H-B}L${x(d0).toFixed(1)},${H-B}Z" fill="url(#${gid})"/>
     <path d="${p}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>
-    <circle cx="${x(S[iHi].d).toFixed(1)}" cy="${y(hi).toFixed(1)}" r="3" fill="var(--good)"/><circle cx="${x(S[iLo].d).toFixed(1)}" cy="${y(lo).toFixed(1)}" r="3" fill="var(--bad)"/>
     <circle cx="${x(d1).toFixed(1)}" cy="${y(last.v).toFixed(1)}" r="4" fill="${col}" stroke="var(--surface)" stroke-width="2"/>
     <text x="${L}" y="${H-6}">${dl(d0)}</text><text x="${W-Rt}" y="${H-6}" text-anchor="end">${dl(d1)}</text>
-    ${S.filter((_,i)=>i%step===0||i===S.length-1).map(q=>`<rect x="${(x(q.d)-5).toFixed(1)}" y="${T}" width="10" height="${H-T-B}" fill="transparent" data-tip="${dl(q.d)}: ${f(q.v)}"/>`).join('')}
+    ${K.marks}
   </svg>
   <div class="mkl-s">Cao nhất ${chip(f(hi),'g')} ${dl(S[iHi].d)} · thấp nhất ${chip(f(lo),'r')} ${dl(S[iLo].d)} · sụt sâu nhất từ đỉnh ${chip(pct(-dd,0),tone4(dd,-.05,-.15,-.3))}</div></div>`;
 }
@@ -2774,7 +2835,7 @@ function ethSilverCard(){
   return card('Ethereum và bạc thế giới','chart',`<div class="rng">${[['30','30N'],['90','90N'],['365','1N'],['all','Tất cả']].map(([k,l])=>`<button data-lr="${k}" aria-selected="${lr===k}">${l}</button>`).join('')}</div>
     ${mkLine(26,'Bạc thế giới (USD/oz)','var(--c3)',v=>'$'+nf(v,2),'ag')}
     ${mkLine(25,'Ethereum (USD)','var(--c1)',v=>'$'+nf(v,0),'eth')}
-    <p class="note">Nguồn Yahoo Finance, giá đóng cửa mỗi ngày (bạc chỉ có ngày giao dịch). Chấm xanh lá là cao nhất, chấm đỏ là thấp nhất trong khoảng chọn. Ethereum biến động rất mạnh: chỉ để theo dõi, không phải gợi ý mua.</p>`,mkStamp(),'sky');
+    <p class="note">Nguồn Yahoo Finance, giá đóng cửa mỗi ngày (bạc chỉ có ngày giao dịch). Số trên đường là giá cao nhất (xanh lá), thấp nhất (đỏ), mới nhất và cách vài ngày; chấm ▲▼ là ngày tăng/giảm mạnh bất thường (từ 2% với bạc, 5% với ETH và gấp đôi dao động thường ngày), chạm hoặc kéo trên biểu đồ để xem từng ngày. Ethereum biến động rất mạnh: chỉ để theo dõi, không phải gợi ý mua.</p>`,mkStamp(),'sky');
 }
 function silverCard(){
   const m=mkLast(28), mb=mkLast(27), k=mkLast(30), kb=mkLast(29), xs=mkLast(26), u=mkLast(14)||mkLast(13);
@@ -3458,7 +3519,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=66, SEEN_KEY='thaptaisan.seen';
+const APP_VER=67, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3480,6 +3541,7 @@ if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(()=>{if(!document.hidden)che
   window.addEventListener('focus',checkUpdate);window.addEventListener('online',checkUpdate);
   if(/[?&]v=\d+/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);}
 const CHANGES=[
+  [67,'19/11/2026',['12 tháng tới: chấm đánh số khớp danh sách, có nhãn ngày + số tiền, chạm để xem chi tiết','Các tầng theo thời gian: thêm nút 1T / 6T / 1N / Tất cả và chấm ▲▼ ngày tổng tăng/giảm mạnh','Biểu đồ giá vàng 24K, % so với thế giới, bạc Phú Quý, bạc thế giới, ETH, cổ phiếu: số trên đường, cao/thấp nhất, chấm ▲▼ ngày đổi mạnh, chạm hoặc kéo để xem từng ngày; Sụt so với đỉnh cũng kéo xem được']],
   [66,'18/11/2026',['Biểu đồ tài sản ròng có thêm chấm xanh ▲ ở ngày tăng mạnh (≥ 0,5%), kèm tài sản kéo lên; chấm sát nhau xếp so le hai hàng']],
   [65,'18/11/2026',['Biểu đồ tài sản ròng: chấm đỏ ▼ ở ngày giảm mạnh (≥ 0,5%), rê chuột hoặc chạm để xem tài sản nào kéo xuống','Nút ⤢ phóng to thẻ biểu đồ tài sản ròng và các tầng: − / + để giãn, Vừa khung, Esc hoặc ⤡ để thu nhỏ']],
   [64,'18/11/2026',['Biểu đồ các tầng theo thời gian: có số tổng trên mép trên (cao nhất, thấp nhất, cách 2–3 ngày), chạm hoặc kéo để xem từng tầng mỗi ngày','Báo bản mới nhanh hơn: kiểm mỗi 2 phút và khi quay lại cửa sổ; bấm tải lại luôn ra bản mới']],
