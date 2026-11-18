@@ -1466,7 +1466,7 @@ const tierName=t=>t===0?'Ngoài tháp':'T'+t+' '+((TIERS0[t-1]||{}).short||'');
 const SKY_CARDS=/^(Tiền tự sinh ra|Nếu mất thu nhập|Sụt so với đỉnh|Tiền đi đâu mỗi tháng|Các tầng theo thời gian|Sức khỏe tài chính|12 tháng tới|Cơ cấu tài sản|30 ngày qua|Tài sản ròng theo thời gian|Cổ phiếu|Tháp so với mục tiêu|Lộ trình \d+ ngưỡng|Dự báo bằng lãi kép)/;
 // thẻ thu gọn được (Kai 12/11/2026: tab Phân tích quá dài trên điện thoại): bấm tiêu đề để mở; hint hiện khi đang gọn
 const foldCard=(title,icon,body,aside='',hint='')=>`<details class="card fold"><summary><div class="card-h"><span class="ico">${ic(icon)}</span><h2>${title}</h2>${aside?`<span class="aside">${aside}</span>`:''}<span class="fold-i" aria-hidden="true"><svg class="i sm" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></div>${hint?`<p class="fold-hint">${hint}</p>`:''}</summary>${body}</details>`;
-const FOCUS_CARDS=/^(Tài sản ròng theo thời gian|Các tầng theo thời gian|Giá 24K hai nhà theo ngày|Ethereum và bạc thế giới|Bạc Phú Quý)$/;
+const FOCUS_CARDS=/^(Tài sản ròng theo thời gian|Các tầng theo thời gian|Giá 24K hai nhà theo ngày|Ethereum và bạc thế giới|Bạc Phú Quý|Doanh thu theo ngày)$/;
 const focBtns=title=>{if(!FOCUS_CARDS.test(title))return '';const on=S.focus===title, fz=S.fz||1;
   return `<span class="cbtns">${on?`<span class="zctl"><button class="cbtn" data-fz="-1" title="Thu nhỏ"${fz<=1?' disabled':''}>−</button><span class="zpct">${Math.round(fz*100)}%</span><button class="cbtn" data-fz="1" title="Phóng to"${fz>=4?' disabled':''}>+</button><button class="cbtn wide" data-fz="0" title="Về cỡ mặc định">Vừa khung</button></span>`:''}<button class="cbtn" data-foc="${esc(title)}" title="${on?'Thu nhỏ · Esc':'Phóng to thẻ · Esc để đóng'}" aria-pressed="${on}">${on?'⤡':'⤢'}</button></span>`;};
 const card=(title,icon,body,aside='',extra='')=>{const foc=S.focus===title&&FOCUS_CARDS.test(title);
@@ -3133,19 +3133,29 @@ function vAssets(C){
   ${term.length?card('Lịch đáo hạn','calendar',savGantt(C,term),term.length+' sổ'):''}`;
 }
 const kd=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);};
+// Kai 19/11/2026 (như Tài sản ròng theo thời gian): nút 30N/90N/Tất cả (S.kr), số trên cột (cao nhất, thấp nhất, mới nhất, cách vài ngày),
+// chấm ▲▼ ngày bán lệch ≥ 40% so với trung bình 7 ngày trước đó (tối đa 8 ngày lệch nhiều nhất), chạm/kéo xem từng ngày
 function kaiDays(k){
-  const ds=k.days.slice(-30);
-  if(ds.length<2)return '<p class="muted">Chưa đủ dữ liệu doanh thu theo ngày.</p>';
-  const W=360,H=160,L=4,R=46,T=12,B=24, mx=Math.max(...ds.map(x=>x.rev))*1.12||1, slot=(W-L-R)/ds.length, bw=Math.max(3,slot*.62);
-  const y=v=>T+(1-v/mx)*(H-T-B), avg=sum(ds,'rev')/ds.length;
-  const ma=ds.map((_,i)=>{const w=ds.slice(Math.max(0,i-6),i+1);return sum(w,'rev')/w.length;});
-  const line=ma.map((v,i)=>`${i?'L':'M'}${(L+slot*(i+.5)).toFixed(1)},${y(v).toFixed(1)}`).join('');
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Doanh thu theo ngày">
+  const kr=S.kr||'30', rng=`<div class="rng">${[['30','30N'],['90','90N'],['all','Tất cả']].map(([v,l])=>`<button data-kr="${v}" aria-selected="${kr===v}">${l}</button>`).join('')}</div>`;
+  const all=k.days, from=kr==='all'?0:Math.max(0,all.length-(+kr)), ds=all.slice(from);
+  if(ds.length<2)return rng+'<p class="muted">Chưa đủ dữ liệu doanh thu theo ngày.</p>';
+  const prev7=j=>{const w=all.slice(Math.max(0,j-7),j).filter(x=>x.rev>0);return w.length>=3?sum(w,'rev')/w.length:null;};
+  const ev={};ds.map((x,i)=>{const b=prev7(from+i);return {i,b,dv:b?x.rev/b-1:0};}).filter(o=>o.b&&Math.abs(o.dv)>=.4).sort((p,q)=>Math.abs(q.dv)-Math.abs(p.dv)).slice(0,8)
+    .forEach(o=>{const x=ds[o.i];ev[o.i]={up:o.dv>0,tip:`${kd(x.d)}: bán ${vnd(x.rev)}, ${o.dv>0?'cao':'thấp'} hơn ${pct(Math.abs(o.dv),0)} so với trung bình 7 ngày trước (${vnd(o.b)}/ngày)`};});
+  const nev=Object.keys(ev).length;
+  const W=360,H=nev?212:192,L=4,R=46,T=nev?44:28,B=24, mx=Math.max(...ds.map(x=>x.rev))*1.06||1, slot=(W-L-R)/ds.length, bw=Math.max(1.5,slot*.62);
+  const y=v=>T+(1-v/mx)*(H-T-B), avg=sum(ds,'rev')/ds.length, cx=i=>L+slot*(i+.5);
+  const ma=ds.map((_,i)=>{const w=all.slice(Math.max(0,from+i-6),from+i+1);return sum(w,'rev')/w.length;});
+  const line=ma.map((v,i)=>`${i?'L':'M'}${cx(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
+  const K=hcKit({S:ds.map((x,i)=>({d:i,v:x.rev})),x:cx,y,f:v=>PRIV?HIDE:nf(v/1e3,0)+'k',col:'var(--accent)',T,H,B,L,R,W,ev,
+    info:ds.map((x,i)=>`${kd(x.d)} · bán ${vnd(x.rev)} · TB 7 ngày ${vnd(ma[i])}`+(i?` · ${trs(x.rev-ds[i-1].rev)} so với hôm trước`:'')+(ev[i]?' · '+(ev[i].up?'▲ bán đột biến':'▼ bán thấp bất thường'):''))});
+  return rng+K.out+`<svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Doanh thu theo ngày" data-pts='${K.pts}'>
     <line x1="${L}" x2="${W-R+2}" y1="${y(avg)}" y2="${y(avg)}" stroke="var(--muted)" stroke-dasharray="3 4"/><text x="${W-R+6}" y="${y(avg)+4}">TB ${PRIV?HIDE:nf(avg/1e3,0)+'k'}</text>
-    ${ds.map((x,i)=>`<rect x="${L+slot*i+(slot-bw)/2}" y="${y(x.rev)}" width="${bw}" height="${H-B-y(x.rev)}" rx="2" fill="var(--accent)" data-tip="${kd(x.d)}: ${vnd(x.rev)}"/>`).join('')}
+    ${ds.map((x,i)=>`<rect x="${(cx(i)-bw/2).toFixed(1)}" y="${y(x.rev).toFixed(1)}" width="${bw.toFixed(1)}" height="${(H-B-y(x.rev)).toFixed(1)}" rx="${bw>4?2:0}" fill="${ev[i]?(ev[i].up?'var(--good)':'var(--bad)'):'var(--accent)'}" fill-opacity="${ev[i]?.9:.75}"/>`).join('')}
     <path d="${line}" fill="none" stroke="var(--caramel)" stroke-width="2.5" stroke-linejoin="round"/>
     <text x="${L}" y="${H-8}">${kd(ds[0].d)}</text><text x="${W-R}" y="${H-8}" text-anchor="end">${kd(ds[ds.length-1].d)}</text>
-  </svg><div class="legend"><span><i class="tdot" style="background:var(--accent)"></i>Doanh thu thực thu</span><span><i class="tdot" style="background:var(--caramel)"></i>Trung bình 7 ngày</span></div>`;
+    ${K.marks}
+  </svg><div class="legend"><span><i class="tdot" style="background:var(--accent)"></i>Doanh thu thực thu</span><span><i class="tdot" style="background:var(--caramel)"></i>Trung bình 7 ngày</span><span>Số trên cột: cao nhất (xanh lá), thấp nhất (đỏ), mới nhất và cách vài ngày</span>${nev?'<span>Cột xanh lá ▲ / đỏ ▼: ngày bán lệch ≥ 40% so với trung bình 7 ngày trước</span>':''}<span>Chạm hoặc kéo trên biểu đồ để xem từng ngày</span></div>`;
 }
 function kaiInsights(k){
   const L=[], ds=k.days;
@@ -3197,7 +3207,7 @@ function vKai(C){
     ${me?`<div class="kpi"><div class="label">Phần của bạn</div><div class="v">${tr(me.cap+me.share*k.op)}</div><div class="s">Vốn góp ${tr(me.cap)} (${pct(me.share,0)}) ${k.op<0?'−':'+'} ${pct(me.share,0)} lãi HĐ · đã đưa vào T4</div></div>`:''}
   </div></section>
   <div class="grid2">
-    ${card('Doanh thu theo ngày','chart',kaiDays(k),k.days.length?'30 ngày gần nhất':'')}
+    ${card('Doanh thu theo ngày','chart',kaiDays(k),k.days.length?k.days.length+' ngày':'')}
     ${card('Doanh thu theo thứ trong tuần','calendar',kaiHeat(k))}
     ${card('Cần chú ý','alert',`<div class="insights">${ins.map(insCard).join('')}</div>`)}
   </div>
@@ -3519,7 +3529,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=67, SEEN_KEY='thaptaisan.seen';
+const APP_VER=68, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3541,6 +3551,7 @@ if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(()=>{if(!document.hidden)che
   window.addEventListener('focus',checkUpdate);window.addEventListener('online',checkUpdate);
   if(/[?&]v=\d+/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);}
 const CHANGES=[
+  [68,'19/11/2026',['Kai Café · Doanh thu theo ngày: nút 30N / 90N / Tất cả, số trên cột (cao nhất, thấp nhất, mới nhất), chấm ▲▼ ngày bán lệch ≥ 40% so với trung bình 7 ngày trước, chạm hoặc kéo để xem từng ngày, nút ⤢ phóng to']],
   [67,'19/11/2026',['12 tháng tới: chấm đánh số khớp danh sách, có nhãn ngày + số tiền, chạm để xem chi tiết','Các tầng theo thời gian: thêm nút 1T / 6T / 1N / Tất cả và chấm ▲▼ ngày tổng tăng/giảm mạnh','Biểu đồ giá vàng 24K, % so với thế giới, bạc Phú Quý, bạc thế giới, ETH, cổ phiếu: số trên đường, cao/thấp nhất, chấm ▲▼ ngày đổi mạnh, chạm hoặc kéo để xem từng ngày; Sụt so với đỉnh cũng kéo xem được']],
   [66,'18/11/2026',['Biểu đồ tài sản ròng có thêm chấm xanh ▲ ở ngày tăng mạnh (≥ 0,5%), kèm tài sản kéo lên; chấm sát nhau xếp so le hai hàng']],
   [65,'18/11/2026',['Biểu đồ tài sản ròng: chấm đỏ ▼ ở ngày giảm mạnh (≥ 0,5%), rê chuột hoặc chạm để xem tài sản nào kéo xuống','Nút ⤢ phóng to thẻ biểu đồ tài sản ròng và các tầng: − / + để giãn, Vừa khung, Esc hoặc ⤡ để thu nhỏ']],
@@ -3714,6 +3725,7 @@ document.addEventListener('click',e=>{
   const lrb=e.target.closest('[data-lr]');if(lrb){FM.lr=lrb.dataset.lr;saveFM();const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const srb=e.target.closest('[data-sr]');if(srb){FM.sr=srb.dataset.sr;saveFM();const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const grb=e.target.closest('[data-gr]');if(grb){FM.gr=grb.dataset.gr;saveFM();const y=window.scrollY;render();window.scrollTo(0,y);return;}
+  const krb=e.target.closest('[data-kr]');if(krb){S.kr=krb.dataset.kr;const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const hb=e.target.closest('[data-hr]');if(hb){S.hr=hb.dataset.hr;const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const hk=e.target.closest('[data-hb]');if(hk){S.hb=hk.dataset.hb;const y=window.scrollY;render();window.scrollTo(0,y);return;}
   const tb=e.target.closest('[data-tab]');if(tb){go(tb.dataset.tab);return;}
