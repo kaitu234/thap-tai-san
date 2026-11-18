@@ -950,6 +950,11 @@ b.amt.v{color:#C9AEFF;background:rgba(176,140,255,.17);box-shadow:none}
 :is(b,span).pos:not(.v):not(.v *):not(.big *):not(.chip):not(.amt):not(svg *){color:var(--good);background:var(--good-soft)}
 :is(b,span).neg:not(.v):not(.v *):not(.big *):not(.chip):not(.amt):not(svg *){color:var(--bad);background:var(--bad-soft)}
 .kpi .v b.amt{font-size:inherit;padding:0 8px}
+/* chip tím có lớp "v" trùng .v (ô số lớn): trong dòng phụ giữ cỡ chữ dòng phụ */
+:is(.kpi,.stat) .s b.amt{font-size:inherit;font-family:inherit;line-height:1.45}
+/* số lớn có dấu (Kai Café lãi/lỗ HĐ): bỏ chữ gradient, tô xanh lá / đỏ */
+.hero .big.up,.hero .big.dn{background:none;-webkit-text-fill-color:currentColor}
+.hero .big.up{color:var(--good)} .hero .big.dn{color:var(--bad)}
 .part .row b.amt{font-size:12px}
 /* ETH + bạc thế giới theo ngày (13/11/2026) */
 .mkl{margin-top:12px}
@@ -1035,6 +1040,14 @@ body::after{transform:translateZ(0)}
   .card::before,.hero::after,.card.sky::after,.card.sky .card-h .ico,.hg-o{animation:none!important}
   .card,.hero{transition:none!important}
 }
+/* ==== Kịch bản phòng thủ ở thẻ Cổ phiếu (Kai 19/11/2026) + vạch giá cắt lỗ (Giá CP cột H) ==== */
+.pg-t em.stop{background:var(--bad);width:3px} .pg-l span.stop{color:var(--bad);font-weight:600}
+.dfs-i{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.dfs-n{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--surface2);color:var(--muted)}
+.dfs-t{min-width:0} .dfs-t b{display:block;font-weight:600;font-size:13px;line-height:1.3}
+.dfs-t span{display:block;font-size:12px;color:var(--muted);line-height:1.35;margin-top:2px}
+.dfs-v{text-align:right;white-space:nowrap}
+@media (max-width:420px){.dfs-i{grid-template-columns:28px minmax(0,1fr)}.dfs-v{grid-column:2;text-align:left}.dfs-v:empty{display:none}}
 /* ==== Bố cục điện thoại (Kai 19/11/2026: "một số tab bố cục hơi gò bó") ====
    - lề trang 16 → 12px; ô số (kpi) lẻ cuối hàng thì trải hết hàng thay vì để trống nửa hàng
    - danh sách tài sản / sổ nợ: số tiền xuống dòng dưới tên (một hàng ngang), không chiếm cột trái làm hẹp chữ
@@ -1932,6 +1945,9 @@ function insights(C){
       a:sur.length?`Nếu muốn theo đúng mục tiêu đã đặt, chuyển dần từ ${sur.map(r=>'T'+r.id).join(', ')} sang ${def.map(r=>'T'+r.id).join(', ')}, chia thành nhiều đợt.`:'Dồn tiền mới vào tầng thiếu trước.'});}
   else L.push({sev:'good',prio:22,icon:'tower',t:'Tháp gần đúng mục tiêu',d:'Không tầng nào lệch quá 2% giá trị tháp.'});
 
+  for(const a of C.inNW.filter(a=>a.kind==='stock'&&a.sym)){const p=(DATA.prices||{})[a.sym.toUpperCase()];if(!p||!p.price||!p.stop)continue;
+    if(p.price<=p.stop) L.push({sev:'warn',prio:2,icon:'down',t:`${esc(a.sym)} còn ${nf(p.price,0)}đ, chạm giá cắt lỗ ${nf(p.stop,0)}đ`,d:`Giá trị hiện tại ${tr(a.value)}, ${a.cost>0?pcts((a.value-a.cost)/a.cost)+' so với vốn':''}.`,a:'Theo kế hoạch của bạn: cân nhắc cắt lỗ. Quyết định là của bạn; đổi mức giá ở sheet Giá CP cột H.'});
+    else L.push({sev:'info',prio:9,icon:'shield',t:`${esc(a.sym)} ${nf(p.price,0)}đ, còn cách giá cắt lỗ ${nf(p.stop,0)}đ ${pct(1-p.stop/p.price,1)}`,d:'App và email sẽ báo khi giá xuống tới mức này (sheet Giá CP cột H).'});}
   for(const a of C.inNW.filter(a=>a.kind==='stock'&&a.sym)){const p=(DATA.prices||{})[a.sym.toUpperCase()];if(!p||!p.sell||!p.price)continue;
     if(p.price>=p.sell) L.push({sev:'warn',prio:2,icon:'up',t:`${esc(a.sym)} đạt ${nf(p.price,0)}đ, chạm giá cân nhắc bán ${nf(p.sell,0)}đ`,d:`Giá trị hiện tại ${tr(a.value)}, ${a.cost>0?pcts((a.value-a.cost)/a.cost)+' so với vốn':''}.`,a:'Theo kế hoạch của bạn: cân nhắc bán. Quyết định là của bạn; đổi mức giá ở sheet Giá CP cột G.'});
     else L.push({sev:'info',prio:9,icon:'target',t:`${esc(a.sym)} ${nf(p.price,0)}đ, còn ${pct(p.sell/p.price-1,1)} tới giá cân nhắc bán ${nf(p.sell,0)}đ`,d:'App và email sẽ báo khi giá chạm mức này (sheet Giá CP cột G).'});}
@@ -2425,8 +2441,8 @@ function stockCard(C){
   const st=C.inNW.filter(a=>a.kind==='stock'&&a.sym&&a.qty>0);if(!st.length)return '';
   const K=v=>PRIV?HIDE:nf(v/1000,1)+'K';
   return card('Cổ phiếu','chart',st.map(a=>{
-    const P=(DATA.prices||{})[a.sym.toUpperCase()]||{}, price=a.value/a.qty, cost=a.cost>0?a.cost/a.qty:null, sell=P.sell||null;
-    const vals=[price,cost,sell].filter(Boolean), lo=Math.min(...vals)*.95, hi=Math.max(...vals)*1.04, X=v=>(v-lo)/(hi-lo)*100;
+    const P=(DATA.prices||{})[a.sym.toUpperCase()]||{}, price=a.value/a.qty, cost=a.cost>0?a.cost/a.qty:null, sell=P.sell||null, stop=P.stop||null;
+    const vals=[price,cost,sell,stop].filter(Boolean), lo=Math.min(...vals)*.95, hi=Math.max(...vals)*1.04, X=v=>(v-lo)/(hi-lo)*100;
     const up=cost&&price>=cost;
     let hist=HIST.filter(h=>h.a&&h.a[a.name]!=null&&h.d<serialOf(C.now)).map(h=>({d:h.d,v:h.a[a.name]/a.qty}));hist.push({d:serialOf(C.now),v:price});hist=hrCut(hist,serialOf(C.now));
     let line='';
@@ -2435,7 +2451,7 @@ function stockCard(C){
       const x=d=>Lx+(d-d0)/((d1-d0)||1)*(W-Lx-Rx), y=v=>T+(1-(v-l)/(h2-l))*(H-T-B);
       const ref=(v,c,t)=>v?`<line x1="${Lx}" x2="${W-Rx+4}" y1="${y(v)}" y2="${y(v)}" stroke="${c}" stroke-dasharray="4 4"/><text x="${W-Rx+8}" y="${y(v)+4}">${t}</text>`:'';
       const K=hcKit({S:hist,x,y,f:v=>PRIV?HIDE:nf(v/1000,1),col:'var(--c3)',T,H,B,L:Lx,R:Rx,W,ev:sev,info:hist.map((q,i)=>`${i===hist.length-1?'Hôm nay':sdate(q.d)} · ${PRIV?HIDE:nf(q.v,0)+'đ'}`+(i?' · '+pctS(q.v/hist[i-1].v-1,2):'')+(cost?' · '+pctS(q.v/cost-1,1)+' so với vốn':'')+(sev[i]?' · '+(sev[i].up?'▲ tăng mạnh':'▼ giảm mạnh'):''))});
-      line=`<div style="height:10px"></div>${hrBtns()}${K.out}<svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Giá ${esc(a.sym)} theo ngày" data-pts='${K.pts}'>${ref(cost,'var(--muted)','Vốn')}${ref(sell,'var(--good)','Bán')}
+      line=`<div style="height:10px"></div>${hrBtns()}${K.out}<svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Giá ${esc(a.sym)} theo ngày" data-pts='${K.pts}'>${ref(cost,'var(--muted)','Vốn')}${ref(sell,'var(--good)','Bán')}${ref(stop,'var(--bad)','Cắt lỗ')}
         <path d="${hist.map((q,i)=>(i?'L':'M')+x(q.d).toFixed(1)+','+y(q.v).toFixed(1)).join('')}" fill="none" stroke="var(--c3)" stroke-width="2" stroke-linejoin="round"/>
         <circle cx="${x(d1)}" cy="${y(price)}" r="4" fill="var(--c3)" stroke="var(--surface)" stroke-width="2"/>
         ${K.marks}</svg>`;}
@@ -2444,10 +2460,43 @@ function stockCard(C){
         <div class="sb">${nf(a.qty,0)} cp · giá trị ${tr(a.value)}${cost?` · <span class="${up?'pos':'neg'}">${pcts(price/cost-1)} so với vốn</span>`:''}</div></div></div>
       <div class="pg"><div class="pg-now"><span style="left:${Math.max(8,Math.min(92,X(price)))}%">Nay ${K(price)}</span></div><div class="pg-t">
         ${cost?`<i class="${up?'up':'dn'}" style="left:${X(Math.min(cost,price))}%;width:${Math.abs(X(price)-X(cost))}%"></i><em style="left:${X(cost)}%" title="Giá vốn"></em>`:''}
-        ${sell?`<em class="sell" style="left:${X(sell)}%" title="Giá cân nhắc bán"></em>`:''}<b style="left:${X(price)}%"></b></div>
-        <div class="pg-l">${cost?`<span style="left:${X(cost)}%">Vốn ${K(cost)}</span>`:''}${sell?`<span class="sell" style="left:${X(sell)}%">Bán ${K(sell)}</span>`:''}</div></div>
+        ${sell?`<em class="sell" style="left:${X(sell)}%" title="Giá cân nhắc bán"></em>`:''}${stop?`<em class="stop" style="left:${X(stop)}%" title="Giá cắt lỗ"></em>`:''}<b style="left:${X(price)}%"></b></div>
+        <div class="pg-l">${cost?`<span style="left:${X(cost)}%">Vốn ${K(cost)}</span>`:''}${sell?`<span class="sell" style="left:${X(sell)}%">Bán ${K(sell)}</span>`:''}${stop?`<span class="stop" style="left:${X(stop)}%">Cắt lỗ ${K(stop)}</span>`:''}</div></div>
       ${line}
-      <p class="note">${sell?(price>=sell?'Đã chạm giá cân nhắc bán.':'Còn '+pct(sell/price-1,1)+' tới giá cân nhắc bán.')+(cost&&sell<cost?` Lưu ý: giá này thấp hơn giá vốn ${K(cost)}, bán ở đó vẫn lỗ khoảng ${tr((cost-sell)*a.qty)}.`:''):'Đặt giá cân nhắc bán ở sheet Giá CP cột G.'} Giá cập nhật mỗi giờ trong phiên.</p></div>`;}).join('')+riskBar(C));
+      <p class="note">${sell?(price>=sell?'Đã chạm giá cân nhắc bán.':'Còn '+pct(sell/price-1,1)+' tới giá cân nhắc bán.')+(cost&&sell<cost?` Lưu ý: giá này thấp hơn giá vốn ${K(cost)}, bán ở đó vẫn lỗ khoảng ${tr((cost-sell)*a.qty)}.`:''):'Đặt giá cân nhắc bán ở sheet Giá CP cột G.'} Giá cập nhật mỗi giờ trong phiên.</p>${defenseBlock(a,C,price,cost,sell,stop)}</div>`;}).join('')+riskBar(C));
+}
+// Kịch bản phòng thủ (Kai 19/11/2026): chỉ bày hệ quả của từng lựa chọn theo quy tắc Kai tự đặt (trần B19, mục tiêu tầng, giá G/H ở Giá CP),
+// không khuyên mua bán. Thuế bán cổ phiếu 0,1% giá bán, chưa trừ phí môi giới. Tiền bán coi như về ví: thanh khoản tính đủ (không còn hệ số B13).
+const SELL_TAX=0.001;
+function defenseBlock(a,C,price,cost,sell,stop){
+  const cfg=DATA.cfg, qty=a.qty, tw=C.tw||1, tier=C.rows.find(r=>r.id===a.tier), K=v=>PRIV?HIDE:nf(v,0)+'đ';
+  const sv=C.inNW.filter(x=>x.kind==='savings'&&x.rate>0), rate=(sv.length?sum(sv,'rate')/sv.length:8)/100;
+  const sim=(s,px=price)=>{const net=s*px*(1-SELL_TAX);return {s,net,pnl:cost?net-s*cost:null,share:tier?(tier.value-s*price)/tw:null,run:(C.liquid+net-s*price*cfg.haircut)/C.essential};};
+  const pl=v=>v==null?'':chip((v>=0?'lãi ':'lỗ ')+tr(Math.abs(v)),v>=0?'g':'r');
+  const t3=x=>tier&&x.share!=null?` · T${tier.id} còn ${pct(x.share,1)} (mục tiêu ${tier.target}%)`:'';
+  const row=(ic0,t,main,sub)=>`<div class="dfs-i"><span class="dfs-n">${ic(ic0,'sm')}</span><div class="dfs-t"><b>${t}</b><span>${sub}</span></div><div class="dfs-v">${main}</div></div>`;
+  const out=[];
+  // 1. về dưới trần cổ phiếu + crypto (bán theo lô 100 cp)
+  const over=C.risky-cfg.riskCap*C.nw;
+  if(over>0){const s=Math.min(qty,Math.ceil(over/price/100)*100), x=sim(s);
+    out.push(row('shield',`Về dưới trần ${pct(cfg.riskCap,0)} (Cấu hình B19)`,pl(x.pnl),`Bán khoảng ${nf(s,0)} cp, về ví ${tr(x.net)}${t3(x)}`));}
+  else out.push(row('shield',`Trần ${pct(cfg.riskCap,0)} (Cấu hình B19)`,chip(pct(C.riskShare,1),C.riskShare>cfg.riskCap*0.9?'o':'g'),`Cổ phiếu + crypto đang dưới trần, còn cách ${tr(-over)}; không cần bán để về trần`));
+  // 2. bán một nửa / bán hết
+  const half=Math.floor(qty/200)*100, H=sim(half), F=sim(qty);
+  if(half>0&&half<qty)out.push(row('coins',`Bán khoảng một nửa (${nf(half,0)} cp, lô 100)`,pl(H.pnl),`Về ví ${tr(H.net)}${t3(H)} · thanh khoản đủ ${nf(H.run,1)} tháng (nay ${nf(C.runway,1)})`));
+  out.push(row('coins',`Bán hết (${nf(qty,0)} cp)`,pl(F.pnl),`Về ví ${tr(F.net)}${t3(F)} · thanh khoản đủ ${nf(F.run,1)} tháng (nay ${nf(C.runway,1)})`));
+  // 3. tiền bán gửi sổ
+  const mo=F.net*rate/12;
+  out.push(row('bank',`Bán hết rồi gửi sổ ${nf(rate*100,2)}%/năm`,chip('+'+tr(mo)+'/tháng','b'),
+    F.pnl!=null&&F.pnl<0?`Lãi sổ bù được khoản lỗ ${tr(-F.pnl)} sau khoảng ${nf(Math.ceil(-F.pnl/mo),0)} tháng (lãi suất trung bình các sổ đang có)`:'Bán hết không lỗ, không cần bù'));
+  // 4. chờ giá cân nhắc bán
+  if(sell){const x=sim(qty,sell);out.push(row('up',`Chờ giá ${K(sell)} (cột G)`,pl(x.pnl),price>=sell?'Đã chạm giá cân nhắc bán':`Giá cần tăng thêm ${pct(sell/price-1,1)}; bán hết ở đó về ví ${tr(x.net)}`));}
+  else out.push(row('up','Giá cân nhắc bán (cột G)','','Chưa đặt. Điền ở sheet Giá CP cột G'));
+  // 5. giá cắt lỗ
+  if(stop){const x=sim(qty,stop);out.push(row('down',`Cắt lỗ ở ${K(stop)} (cột H)`,pl(x.pnl),price<=stop?'Giá đã xuống tới mức cắt lỗ bạn đặt':`Giá còn cách ${pct(1-stop/price,1)}; bán hết ở đó về ví ${tr(x.net)}. App và email nhắc khi chạm`));}
+  else out.push(row('down','Giá cắt lỗ (cột H)','','Chưa đặt. Điền giá ở sheet Giá CP cột H, app và email sẽ nhắc khi giá xuống tới mức đó'));
+  return `<div class="dfs"><div class="label" style="margin:14px 0 6px">Kịch bản phòng thủ · ${esc(a.sym)}</div>${out.join('')}
+    <p class="note">Chỉ tính theo quy tắc và mức giá bạn đặt trong sheet, giá hiện tại ${K(price)}. Đã trừ thuế bán 0,1%, chưa trừ phí môi giới. Không phải lời khuyên mua bán; quyết định là của bạn.</p></div>`;
 }
 // Thanh so với trần Kai đặt (cổ phiếu + crypto, cho vay, Kai Café): vạch đậm là trần, vượt thì đỏ
 function capBar(label,v,cap,shown,tip,note){
@@ -3359,25 +3408,31 @@ function vKai(C){
   const top=[...k.cats].filter(c=>c.grp!=='Đầu tư').sort((a,b)=>b.tot-a.tot).slice(0,8), topMax=top.length?top[0].tot:1;
   const inTower=C.inNW.find(a=>a.kind==='biz'&&/kai/i.test(a.name));
   const ins=kaiInsights(k);
+  // Chip số (Kai 19/11/2026): số trong ghi chú sheet thành chip; % theo hàm tông pt (nhận tỷ lệ), số tiền dạng 10.792.998 đổi sang Tr
+  const hiNote=(s,pt)=>esc(s).replace(/\d{1,3}(?:\.\d{3}){2,}(?:\s?đ)?|-?\d+(?:[.,]\d+)?\s?%/g,m=>/%/.test(m)?chip(m,pt?pt(parseFloat(m.replace(',','.'))/100):'b'):chip(tr(+m.replace(/\D/g,'')),'b'));
+  const pm=String(k.period||'').match(/(\d{1,2})\/(\d{4})/), el=pm?Math.min(1,Math.max(0,(Date.now()-new Date(+pm[2],+pm[1]-1,1))/(365*864e5))):0;
+  const revTone=el>0?r=>tone4(r/el,1,.7,.4):null;            // so với phần năm đã qua
+  const costTone=r=>r<=.35?'g':r<=.45?'o':r<=.6?'r':'rr';   // giá vốn / doanh thu, càng thấp càng tốt
+  const cashTone=k.cash>=(k.payable||0)?'g':k.cash>=(k.payable||0)*.5?'o':'r';
   return `
   <section class="hero">
     <div class="l">
-      <div><div class="label">Kai Café · kỳ ${esc(k.period||'hiện tại')}</div><div class="big ${k.op<0?'':''}">${trs(k.op)}</div>
-        <div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:6px">Lãi hoạt động · biên ${pcts(margin,1)}</div></div>
+      <div><div class="label">Kai Café · kỳ ${esc(k.period||'hiện tại')}</div><div class="big ${k.op<0?'dn':'up'}">${trs(k.op)}</div>
+        <div class="s" style="color:var(--hero-mute);font-size:12.5px;margin-top:6px">Lãi hoạt động · biên ${chip(pcts(margin,1),tone4(margin,.1,0,-.15))}</div></div>
       <div class="stats">
-        <div class="stat"><div class="label">Doanh thu</div><div class="v">${tr(k.rev)}</div><div class="s">${esc(k.revNote)}</div></div>
-        <div class="stat"><div class="label">Tiền còn lại</div><div class="v">${tr(k.cash)}</div><div class="s">Mặt ${tr(k.cashM||0)} · CK ${tr(k.cashCK||0)}</div></div>
+        <div class="stat"><div class="label">Doanh thu</div><div class="v">${chip(tr(k.rev),'b')}</div><div class="s">${hiNote(k.revNote,revTone)}</div></div>
+        <div class="stat"><div class="label">Tiền còn lại</div><div class="v">${chip(tr(k.cash),cashTone)}</div><div class="s">Mặt ${chip(tr(k.cashM||0),'y')} · CK ${chip(tr(k.cashCK||0),'v')}</div></div>
       </div>
     </div>
     <div style="display:grid;place-items:center">${donut(segs,trn(totCat),'triệu đã chi')}<div class="legend" style="justify-content:center;color:var(--hero-mute)">${segs.map(s=>`<span><i class="tdot" style="background:${s.col}"></i>${esc(s.label)}</span>`).join('')}</div></div>
   </section>
   <section class="card"><div class="kpis">
-    <div class="kpi"><div class="label">Chi hoạt động</div><div class="v">${tr(k.opex)}</div><div class="s">${esc(k.opexNote)}</div></div>
-    <div class="kpi"><div class="label">Chi đầu tư</div><div class="v">${tr(k.inv)}</div><div class="s">Nhượng quyền, cọc, thiết bị</div></div>
-    <div class="kpi"><div class="label">Thu hồi vốn</div><div class="v">${k.payback!=null?pct(k.payback,1):'–'}</div><div class="s">trên ${tr(k.inv)} đầu tư</div></div>
-    <div class="kpi"><div class="label">Công nợ chưa trả</div><div class="v ${k.payable>k.cash?'neg':''}">${tr(k.payable||0)}</div><div class="s">So với tiền còn ${tr(k.cash)}</div></div>
-    ${k.cupCost?`<div class="kpi"><div class="label">Giá vốn / ly</div><div class="v">${PRIV?HIDE:nf(k.cupCost,0)+'đ'}</div><div class="s">Bình quân cả kỳ</div></div>`:''}
-    ${me?`<div class="kpi"><div class="label">Phần của bạn</div><div class="v">${tr(me.cap+me.share*k.op)}</div><div class="s">Vốn góp ${tr(me.cap)} (${pct(me.share,0)}) ${k.op<0?'−':'+'} ${pct(me.share,0)} lãi HĐ · đã đưa vào T4</div></div>`:''}
+    <div class="kpi"><div class="label">Chi hoạt động</div><div class="v">${chip(tr(k.opex),k.rev?tone4(k.rev/(k.opex||1),1.2,1,.8):'o')}</div><div class="s">${hiNote(k.opexNote,costTone)}</div></div>
+    <div class="kpi"><div class="label">Chi đầu tư</div><div class="v">${chip(tr(k.inv),'v')}</div><div class="s">Nhượng quyền, cọc, thiết bị</div></div>
+    <div class="kpi"><div class="label">Thu hồi vốn</div><div class="v">${k.payback!=null?chip(pct(k.payback,1),'b'):'–'}</div><div class="s">trên ${chip(tr(k.inv),'v')} đầu tư</div></div>
+    <div class="kpi"><div class="label">Công nợ chưa trả</div><div class="v">${chip(tr(k.payable||0),!k.payable?'g':k.payable>k.cash?'r':'o')}</div><div class="s">So với tiền còn ${chip(tr(k.cash),cashTone)}</div></div>
+    ${k.cupCost?`<div class="kpi"><div class="label">Giá vốn / ly</div><div class="v">${chip(PRIV?HIDE:nf(k.cupCost,0)+'đ','y')}</div><div class="s">Bình quân cả kỳ</div></div>`:''}
+    ${me?`<div class="kpi"><div class="label">Phần của bạn</div><div class="v">${chip(tr(me.cap+me.share*k.op),me.cap?tone4((me.cap+me.share*k.op)/me.cap,1,.9,.75):'b')}</div><div class="s">Vốn góp ${chip(tr(me.cap),'b')} (${pct(me.share,0)}) ${k.op<0?'−':'+'} ${pct(me.share,0)} lãi HĐ ${chip(trs(me.share*k.op),k.op<0?'r':'g')} · đã đưa vào T4</div></div>`:''}
   </div></section>
   <div class="grid2">
     ${card('Doanh thu theo ngày','chart',kaiDays(k),k.days.length?k.days.length+' ngày':'')}
@@ -3541,13 +3596,13 @@ function parseSheet(res){
   const tiers=[];for(let r=2;r<6;r++){if(T[r+',0']===undefined)continue;tiers.push({id:n(T[r+',0']),name:String(T[r+',1']||''),def:String(T[r+',2']||''),target:Math.round(n(T[r+',3'])*100)});}
   const types=[];for(let r=9;r<19;r++){if(!T[r+',0'])continue;types.push({name:String(T[r+',0']),tier:n(T[r+',1']),liq:T[r+',2']==='Có'});}
   if(tiers.length!==4) throw new Error('Sheet Tầng cần đủ 4 tầng');
-  // Giá CP: E giá đang dùng, G giá cân nhắc bán (Kai đặt)
+  // Giá CP: E giá đang dùng, G giá cân nhắc bán, H giá cắt lỗ (Kai đặt; H thêm 19/11/2026)
   const P=M['Giá CP']||{}, prices={};
-  for(let r=2;r<12;r++){const sym=P[r+',0'];if(sym)prices[String(sym).trim().toUpperCase()]={price:n(P[r+',4']),sell:n(P[r+',6'])};}
+  for(let r=2;r<12;r++){const sym=P[r+',0'];if(sym)prices[String(sym).trim().toUpperCase()]={price:n(P[r+',4']),sell:n(P[r+',6']),stop:n(P[r+',7'])};}
   return {rows,cfg,tiers,types,prices};
 }
 // Hai nguồn dữ liệu: artifact trên claude.ai đọc qua connector; bản website đọc Sheets API bằng token đăng nhập Google (chỉ đọc)
-const RANGES=["'Tài sản'!A5:O54","'Tài sản'!S5:V54","'Cấu hình'!A3:B29","'Tầng'!A3:D6","'Tầng'!A10:C19","'Giá CP'!A3:G12"];
+const RANGES=["'Tài sản'!A5:O54","'Tài sản'!S5:V54","'Cấu hình'!A3:B29","'Tầng'!A3:D6","'Tầng'!A10:C19","'Giá CP'!A3:H12"];
 const MS_RANGE="'Ngưỡng'!A3:G22", HIST_RANGE="'Lịch sử'!A2:J2000", CF_RANGE="'Dòng tiền'!A3:L62", GOAL_RANGE="'Mục tiêu'!A3:F22", LOAN_RANGE="'Sổ nợ'!A3:J40";
 function rowsOf(res,title,r0,r1,read){const M=cellMap(res)[title]||{},out=[];for(let r=r0;r<r1;r++){const g=c=>M[r+','+c];const x=read(g);if(x)out.push(x);}return out;}
 const num=v=>typeof v==='number'?v:0;
@@ -3713,7 +3768,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=77, SEEN_KEY='thaptaisan.seen';
+const APP_VER=79, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3735,6 +3790,8 @@ if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(()=>{if(!document.hidden)che
   window.addEventListener('focus',checkUpdate);window.addEventListener('online',checkUpdate);
   if(/[?&]v=\d+/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);}
 const CHANGES=[
+  [79,'19/11/2026',['Hiệu suất › Cổ phiếu: khối <b>Kịch bản phòng thủ</b> — về dưới trần 15%, bán khoảng một nửa / bán hết (tiền về ví, lãi/lỗ chốt, tầng còn bao nhiêu %, thanh khoản), gửi sổ bao lâu bù lỗ, chờ giá cân nhắc bán, giá cắt lỗ. Chỉ tính theo quy tắc bạn đặt, không phải lời khuyên mua bán','Sheet Giá CP có cột H <b>Giá cắt lỗ</b>: điền giá thì thước giá và biểu đồ có vạch đỏ, app báo khi chạm (email nhắc khi Apps Script được triển khai bản mới)']],
+  [78,'19/11/2026',['Kai Café: số nổi bật thành chip màu — lãi/lỗ, biên, doanh thu so với phần năm đã qua, tiền còn lại so với công nợ, giá vốn % doanh thu, phần của bạn so với vốn góp','Ghi chú từ sheet (giá vốn 10.792.998…) đổi sang Tr và ẩn được khi bật ẩn số tiền']],
   [77,'19/11/2026',['Kai Café trên điện thoại: bảng Kết quả theo tháng chỉ hiện tháng đã có số (bỏ các tháng chưa tới toàn số 0)','Lịch nhiệt theo thứ nằm cạnh cột trung bình từng thứ, chữ vừa cỡ','Bảng xếp khối: số góc phải có nhãn cột (Tiền cuối, Hiện tại, Phần tiền còn lại…)']],
   [76,'19/11/2026',['Điện thoại: bố cục thoáng hơn — lề trang hẹp lại cho nội dung rộng hơn, ô số lẻ cuối hàng trải hết hàng','Danh sách tài sản, sổ nợ: số tiền nằm dưới tên, chữ không bị ép hẹp','Kế hoạch sổ mỗi sổ một hàng; lịch đáo hạn tên sổ nằm trên thanh','Bảng rộng (sổ tiết kiệm, Kai Café theo tháng, kịch bản…) tự xếp thành khối, không phải kéo ngang']],
   [75,'19/11/2026',['Mượt hơn trên điện thoại: bỏ làm mờ nền ở thanh trên và thanh tab, tắt hiệu ứng viền chạy, vệt quét, vòng xoay (vẽ lại liên tục)','Tự làm mới mỗi phút: số không đổi thì không vẽ lại cả trang (hết giật định kỳ, không mất vạch dò đang kéo)','Chạm, kéo biểu đồ và tooltip nhẹ hơn; trên máy tính hiệu ứng viền thẻ dừng khi thẻ ngoài màn hình']],
