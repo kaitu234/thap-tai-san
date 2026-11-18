@@ -2102,14 +2102,21 @@ function fanChart(C,R){
   const at=(m,z)=>C.nw+base.step*m+z*sd*Math.sqrt(m), hit=z=>{for(let m=0;m<=240;m++)if(at(m,z)>=g.need)return m;return null;};
   const eMid=hit(0), eLo=hit(-1), eHi=hit(1);
   const N=Math.min(120,Math.max(months,eMid!=null?Math.min(eMid+2,months*2):months));
-  const W=360,H=200,L=8,Rt=70,T=14,B=26, ms=[...Array(N+1).keys()];
+  // Kai 19/11/2026 (như Tài sản ròng theo thời gian): số trên đường giữa, chấm ▲ tháng đường giữa vượt từng ngưỡng Tự do và tới mục tiêu, chạm/kéo xem từng tháng
+  const ev={};msList(C).forEach(t=>{if(C.nw>=t.v)return;for(let m=1;m<=N;m++)if(at(m,0)>=t.v){ev[m]={up:true,tip:(ev[m]?ev[m].tip+' · ':'')+'vượt ngưỡng '+t.name+' '+msVal(t.v)};break;}});
+  if(eMid!=null&&eMid>0&&eMid<=N)ev[eMid]={up:true,tip:(ev[eMid]?ev[eMid].tip+' · ':'')+'đạt '+g.name+' '+tr(g.need)};
+  const nev=Object.keys(ev).length;
+  const W=360,H=nev?218:200,L=8,Rt=70,T=nev?44:26,B=26, ms=[...Array(N+1).keys()];
   const vals=[...ms.flatMap(m=>[at(m,-2),at(m,2)]),...sc.map(s=>C.nw+s.step*N),g.need,0], hi=Math.max(...vals)*1.04, lo=Math.min(...vals);
   const x=m=>L+m/N*(W-L-Rt), y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B);
   const poly=z=>ms.map(m=>`${m?'L':'M'}${x(m).toFixed(1)},${y(at(m,z)).toFixed(1)}`).join('')+[...ms].reverse().map(m=>`L${x(m).toFixed(1)},${y(at(m,-z)).toFixed(1)}`).join('')+'Z';
   const line=(f,col,dash,w)=>`<path d="${ms.map(m=>`${m?'L':'M'}${x(m).toFixed(1)},${y(f(m)).toFixed(1)}`).join('')}" fill="none" stroke="${col}" stroke-width="${w}"${dash?` stroke-dasharray="${dash}"`:''} stroke-linejoin="round"/>`;
   const dl=m=>{const t=new Date(C.now+7*36e5);t.setUTCMonth(t.getUTCMonth()+m);return (t.getUTCMonth()+1)+'/'+String(t.getUTCFullYear()).slice(2);};
-  const tone=eMid!=null&&eMid<=months?'var(--good)':eMid!=null?'var(--warn)':'var(--bad)', stepTip=Math.max(1,Math.ceil(N/40));
-  const svg=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Dự phóng dạng quạt tới mục tiêu">
+  const tone=eMid!=null&&eMid<=months?'var(--good)':eMid!=null?'var(--warn)':'var(--bad)';
+  Object.values(ev).forEach(e=>e.tip=e.tip.replace(/^ · /,''));
+  const K=hcKit({S:ms.map(m=>({d:m,v:at(m,0)})),x,y,col:tone,T,H,B,L,R:Rt,W,ev:Object.fromEntries(Object.entries(ev).map(([m,e])=>[m,{up:true,tip:dl(+m)+': '+e.tip}])),
+    info:ms.map(m=>`${m?dl(m)+' (sau '+m+' tháng)':'Hôm nay'} · giữa ${tr(at(m,0))}`+(m?` · 68% trong ${tr(at(m,-1))}–${tr(at(m,1))}`:'')+sc.slice(1).map(s2=>` · ${s2.n} ${tr(C.nw+s2.step*m)}`).join('')+(ev[m]?' · ▲ '+ev[m].tip:''))});
+  const svg=K.out+`<svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Dự phóng dạng quạt tới mục tiêu" data-pts='${K.pts}'>
     <path d="${poly(2)}" fill="var(--info)" fill-opacity=".16"/><path d="${poly(1)}" fill="var(--info)" fill-opacity=".32"/>
     ${lo<0?`<line x1="${L}" x2="${W-Rt+4}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)"/>`:''}
     <line x1="${L}" x2="${W-Rt+4}" y1="${y(g.need).toFixed(1)}" y2="${y(g.need).toFixed(1)}" stroke="var(--ink)" stroke-dasharray="4 4" stroke-opacity=".7"/>
@@ -2120,10 +2127,10 @@ function fanChart(C,R){
     ${eMid!=null&&eMid<=N?`<circle cx="${x(eMid).toFixed(1)}" cy="${y(g.need).toFixed(1)}" r="5" fill="${tone}" stroke="var(--surface)" stroke-width="2"/>`:''}
     <text x="${W-Rt+8}" y="${(y(at(N,0))+4).toFixed(1)}">${trn(at(N,0))} Tr</text>
     <text x="${L}" y="${H-8}">Hôm nay</text><text x="${x(N/2).toFixed(1)}" y="${H-8}" text-anchor="middle">${dl(Math.round(N/2))}</text><text x="${x(N).toFixed(1)}" y="${H-8}" text-anchor="end">${dl(N)}</text>
-    ${ms.filter(m=>m%stepTip===0||m===N).map(m=>`<rect x="${(x(m)-5).toFixed(1)}" y="${T}" width="10" height="${H-T-B}" fill="transparent" data-tip="${dl(m)}: giữa ${tr(at(m,0))} · 68% trong ${tr(at(m,-1))}–${tr(at(m,1))}"/>`).join('')}
+    ${K.marks}
   </svg>`;
   const e=v=>v==null?'chưa tới trong 20 năm':mLab(C,v);
-  return svg+`<div class="legend"><span><i class="tdot" style="background:${tone}"></i>Đường giữa: như trung bình gần đây</span><span><i class="tdot" style="background:var(--info);opacity:.5"></i>Dải đậm 68%, nhạt 95%</span>${sc.slice(1).map(s=>`<span><i class="tdot" style="background:${s.col}"></i>${s.n}</span>`).join('')}</div>
+  return svg+`<div class="legend"><span><i class="tdot" style="background:${tone}"></i>Đường giữa: như trung bình gần đây</span><span><i class="tdot" style="background:var(--info);opacity:.5"></i>Dải đậm 68%, nhạt 95%</span>${sc.slice(1).map(s=>`<span><i class="tdot" style="background:${s.col}"></i>${s.n}</span>`).join('')}${nev?'<span><i class="tdot" style="background:var(--good)"></i>▲ tháng vượt ngưỡng Tự do / đạt mục tiêu</span>':''}<span>Chạm hoặc kéo để xem từng tháng</span></div>
   <div class="kpis" style="margin-top:10px"><div class="kpi"><div class="label">Sớm (dải trên)</div><div class="v">${e(eHi)}</div></div><div class="kpi"><div class="label">Giữa</div><div class="v" style="color:${tone}">${e(eMid)}</div></div><div class="kpi"><div class="label">Muộn (dải dưới)</div><div class="v">${e(eLo)}</div></div></div>
   <p class="note">${real?`Độ rộng dải theo dư hằng tháng thật trong ${n} tháng ở sheet Dòng tiền (lệch chuẩn ${tr(sd)}).`:`Chưa đủ 3 tháng ở sheet Dòng tiền nên độ rộng dải là giả định ±${tr(sd)}/tháng.`} Giả định các tháng độc lập, chưa tính biến động giá cổ phiếu. Là ước tính, không phải dự báo chắc chắn.</p>`;
 }
@@ -2552,12 +2559,40 @@ function vRoad(C){
       <label><span>Ngưỡng muốn tới</span><select id="fmTgt">${M.rows.map((x,i)=>`<option value="${i}"${i===(FM.tgt!=null?+FM.tgt:nextIdx)?' selected':''}>${i+1} · ${esc(x.name)} · ${msVal(x.v)}</option>`).join('')}</select></label>
       <label><span>Vào tháng</span><input id="fmDate" type="month" value="${dv}"></label></div>
     <div id="fmRev">${msRev(C)}</div>`)}
-  ${card('Tốc độ thật','pulse',Hs.vel==null?`<p class="note" style="margin:0">Cần ít nhất 30 ngày trong sheet Lịch sử để tính tốc độ thật (hiện có ${Hs.span} ngày${Hs.from?', từ '+sdate(Hs.from):''}). App chụp số liệu mỗi tối 22h.</p>`:
+  ${card('Tốc độ thật','pulse',Hs.vel==null?`<p class="note" style="margin:0">Cần ít nhất 30 ngày trong sheet Lịch sử để tính tốc độ thật (hiện có ${Hs.span} ngày${Hs.from?', từ '+sdate(Hs.from):''}). App chụp số liệu mỗi tối 22h.</p>${speedChart(C,M,Hs,tModel)}`:
     `<div class="ms-x"><div class="kpi"><div class="label">Tăng thật mỗi tháng</div><div class="v ${cls(Hs.vel)}">${trs(Hs.vel)}</div><div class="s">theo Lịch sử ${Hs.span} ngày, từ ${sdate(Hs.from)}</div></div>
       <div class="kpi"><div class="label">Dự báo đang giả định</div><div class="v">${trs(tModel)}</div><div class="s">để dành + lãi mỗi tháng</div></div></div>
+    ${speedChart(C,M,Hs,tModel)}
     <p class="note">${Hs.vel>=tModel?'Bạn đang đi nhanh hơn dự báo.':'Tốc độ thật chậm hơn dự báo: dự báo có thể quá lạc quan.'} Tốc độ thật gồm cả biến động giá cổ phiếu, khấu hao, góp vốn.</p>`)}
   ${vnRefCard(C,M)}
   <p class="note" style="text-align:center">Các ngưỡng để tham khảo động lực; quy tắc rút 4%/năm là quy ước tham khảo. Không phải tư vấn đầu tư.</p>`;
+}
+// Tốc độ thật dạng biểu đồ (Kai 19/11/2026, như Tài sản ròng theo thời gian): đường thật theo ngày (tài sản ròng hoặc khả dụng theo nút ở thẻ đầu),
+// nét đứt = dự báo đang giả định (để dành + lãi mỗi tháng) tính từ ngày đầu, chấm ▲ ngày vượt từng ngưỡng, ▼ ngày tụt xuống dưới ngưỡng đã qua; chạm/kéo xem từng ngày
+function speedChart(C,M,Hs,tModel){
+  const today=serialOf(C.now), val=h=>M.base==='avail'?h.avail:h.nw;
+  let pts=HIST.filter(h=>h.d&&h.d<today).sort((a,b)=>a.d-b.d).map(h=>({d:h.d,v:val(h)}));pts.push({d:today,v:M.P});pts=hrCut(pts,today);
+  if(pts.length<2)return '';
+  const n=pts.length, d0=pts[0].d, d1=pts[n-1].d||d0+1, mdl=d=>pts[0].v+tModel*(d-d0)/30.4, dl=s=>{const t=new Date((s-25569)*DAY);return t.getUTCDate()+'/'+(t.getUTCMonth()+1);};
+  const ev={};for(let i=1;i<n;i++)M.rows.forEach(t=>{const a=pts[i-1].v, b=pts[i].v;
+    if(a<t.v&&b>=t.v)ev[i]={up:true,tip:(ev[i]?ev[i].tip+' · ':dl(pts[i].d)+': ')+'vượt ngưỡng '+t.name+' '+msVal(t.v)};
+    else if(a>=t.v&&b<t.v)ev[i]={up:false,tip:(ev[i]?ev[i].tip+' · ':dl(pts[i].d)+': ')+'tụt dưới ngưỡng '+t.name+' '+msVal(t.v)};});
+  const nev=Object.keys(ev).length, vs=[...pts.map(p=>p.v),mdl(d1)], lo=Math.min(...vs), hi=Math.max(...vs), pad=(hi-lo)*.2||hi*.01||1;
+  const W=360,H=nev?212:194,L=10,R=50,T=nev?44:26,B=26, y0=lo-pad, y1=hi+pad;
+  const x=d=>L+(d1===d0?1:(d-d0)/(d1-d0))*(W-L-R), y=v=>T+(1-(v-y0)/(y1-y0))*(H-T-B);
+  const near=M.rows.filter(t=>t.v>=y0&&t.v<=y1);
+  const line=pts.map((p,i)=>(i?'L':'M')+x(p.d).toFixed(1)+','+y(p.v).toFixed(1)).join('');
+  const K=hcKit({S:pts,x,y,col:'var(--accent)',T,H,B,L,R,W,ev,info:pts.map((p,i)=>(i===n-1?'Hôm nay':dl(p.d))+' · thật '+tr(p.v)+' · dự báo '+tr(mdl(p.d))+' ('+trs(p.v-mdl(p.d))+')'+(ev[i]?' · '+(ev[i].up?'▲ ':'▼ ')+ev[i].tip.replace(/^[^:]+: /,''):''))});
+  return `<div class="hc-bar" style="margin-top:12px">${hrBtns()}</div>${K.out}<svg class="chart hc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tốc độ thật so với dự báo" data-pts='${K.pts}'>
+    ${near.map(t=>`<line x1="${L}" x2="${W-R+4}" y1="${y(t.v).toFixed(1)}" y2="${y(t.v).toFixed(1)}" stroke="var(--warn)" stroke-dasharray="4 3" stroke-opacity=".7"/><text x="${W-R+8}" y="${(y(t.v)+4).toFixed(1)}">${msVal(t.v)}</text>`).join('')}
+    <line x1="${x(d0).toFixed(1)}" y1="${y(pts[0].v).toFixed(1)}" x2="${x(d1).toFixed(1)}" y2="${y(mdl(d1)).toFixed(1)}" stroke="var(--ink)" stroke-opacity=".55" stroke-dasharray="5 4" stroke-width="1.5"/>
+    <path d="${line}L${x(d1)},${H-B}L${x(d0)},${H-B}Z" fill="var(--accent)" fill-opacity=".10"/>
+    <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="${x(d1)}" cy="${y(pts[n-1].v)}" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>
+    <text x="${x(d0)}" y="${H-8}">${dl(d0)}</text><text x="${x(d1)}" y="${H-8}" text-anchor="end">Hôm nay</text>
+    ${K.marks}
+  </svg>
+  <div class="legend"><span><i class="tdot" style="background:var(--accent)"></i>${M.base==='avail'?'Khả dụng':'Tài sản ròng'} thật</span><span><i class="tdot" style="background:var(--ink);opacity:.55"></i>Nét đứt: dự báo ${trs(tModel)}/tháng từ ${dl(d0)}</span>${near.length?'<span><i class="tdot" style="background:var(--warn)"></i>Vạch cam: ngưỡng Tự do</span>':''}${nev?'<span>▲ vượt ngưỡng · ▼ tụt dưới ngưỡng</span>':''}<span>Chạm hoặc kéo để xem từng ngày</span></div>`;
 }
 // Khối tham khảo (Kai 08/11/2026): mốc theo số liệu kinh tế Việt Nam. Chỉ hiển thị, KHÔNG dùng trong bất kỳ phép tính nào.
 // Số liệu tra 08/11/2026, cập nhật tay khi có số mới.
@@ -3588,7 +3623,7 @@ if(IS_WEB){
 }else (async()=>{try{const c=window.claude&&await window.claude.use('mcp');if(c){mcp=c;loadSheet(false);}}catch(_){}})();
 // ---- Có gì mới + Cách dùng: bảng trượt lên từ nút ngôi sao; tự mở một lần khi có bản mới.
 // Mỗi lần đăng bản mới: tăng APP_VER (cùng số với cache trong src/web/sw.js) và thêm một dòng vào đầu CHANGES.
-const APP_VER=73, SEEN_KEY='thaptaisan.seen';
+const APP_VER=74, SEEN_KEY='thaptaisan.seen';
 // Báo bản mới (Kai 12/11/2026): website so APP_VER với version.json trên GitHub Pages (build.sh ghi); bản mới hơn thì hiện
 // "Có bản mới vXX — bấm để tải lại". Kiểm khi mở app, mỗi 15 phút và mỗi lần quay lại tab.
 let updShown=false;
@@ -3610,6 +3645,7 @@ if(IS_WEB){setTimeout(checkUpdate,4000);setInterval(()=>{if(!document.hidden)che
   window.addEventListener('focus',checkUpdate);window.addEventListener('online',checkUpdate);
   if(/[?&]v=\d+/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);}
 const CHANGES=[
+  [74,'19/11/2026',['Tự do › Lộ trình: dự phóng dạng quạt có số trên đường giữa, chấm ▲ tháng vượt ngưỡng hoặc đạt mục tiêu, chạm hoặc kéo xem từng tháng','Tốc độ thật có biểu đồ: đường thật so với nét đứt dự báo, vạch cam các ngưỡng, chấm ▲ ngày vượt ngưỡng, ▼ ngày tụt dưới ngưỡng, nút 1T / 6T / 1N / Tất cả']],
   [73,'19/11/2026',['Tab Tài sản: thẻ mới <b>Từng tài sản theo thời gian</b>: chọn tài sản (hoặc chạm đường nhỏ ở danh sách), nút 1T / 6T / 1N / Tất cả, số trên đường, chấm ▲▼ ngày đổi mạnh, chạm hoặc kéo xem từng ngày, nút ⤢']],
   [72,'19/11/2026',['Mọi thẻ có biểu đồ đều có nút ⤢ phóng to (thác nước, Sankey, cơ cấu, lịch đáo hạn, 12 tháng tới, mất thu nhập, lịch nhiệt, lộ trình…): − / + để giãn, Vừa khung, Esc hoặc ⤡ để thu nhỏ']],
   [71,'19/11/2026',['Nút ⤢ phóng to trên các thẻ biểu đồ (tài sản ròng, các tầng, vàng, bạc, Kai Café) hiện rõ hơn: nền đặc, viền xanh, không còn lẫn vào hình trang trí góc thẻ']],
